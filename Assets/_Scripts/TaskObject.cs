@@ -19,6 +19,7 @@ public class TaskObject : MonoBehaviour
     private void BeginTask()
     {
         // TODO Player Loses Control Untill succes or fail
+        taskSystem.StartTask(task, Vector2.zero);
         // TODO Choose Task Type to Do
     }
 

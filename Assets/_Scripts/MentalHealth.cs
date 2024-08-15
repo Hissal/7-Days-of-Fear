@@ -19,4 +19,11 @@ public class MentalHealth : MonoBehaviour
             onMentalHealthDrained.Invoke();
         }
     }
+
+    public void IncreaseMentalHealth(int amount)
+    {
+        currentMentalHealth += amount;
+
+        if (currentMentalHealth > maxMentalhealth) currentMentalHealth = maxMentalhealth;
+    }
 }

@@ -9,23 +9,41 @@ public class TaskSystem : MonoBehaviour
     private int completedTasks;
     private int failedTasks;
 
+    [SerializeField] private Transform canvas;
     [SerializeField] private GameObject QTEPrefab;
     [SerializeField] private GameObject ButtonSpamPrefab;
     [SerializeField] private GameObject PrecicionBarPrefab;
 
+    
 
-    private void StartTask(Task task, Vector2 positionOnScreen)
+    public void StartTask(Task task, Vector2 positionOnScreen)
     {
         playerController.canMove = false;
 
         switch (task.type)
         {
             case Task.TaskType.QTE:
-
+                ShowTask(task, QTEPrefab, positionOnScreen);
                 break;
+
+            case Task.TaskType.ButtonSpam:
+                ShowTask(task, ButtonSpamPrefab, positionOnScreen);
+                break;
+
+            case Task.TaskType.PrecicionBar:
+                ShowTask(task, PrecicionBarPrefab, positionOnScreen);
+                break;
+
             default:
                 break;
         }
+    }
+
+    private void ShowTask(Task task, GameObject taskPrefab, Vector2 positionOnScreen)
+    {
+        TaskAction taskAction = Instantiate(taskPrefab, positionOnScreen, Quaternion.identity, canvas).GetComponent<TaskAction>();
+        taskAction.task = task;
+        taskAction.onSuccess += TaskSuccess;
     }
 
     public void TaskSuccess(Task task)
