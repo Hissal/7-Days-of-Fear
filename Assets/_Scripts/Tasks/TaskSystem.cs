@@ -5,6 +5,7 @@ using UnityEngine;
 public class TaskSystem : MonoBehaviour
 {
     [SerializeField] private FirstPersonController playerController;
+    private InteractionHandler playerInteractionHandler;
 
     private int completedTasks;
     private int failedTasks;
@@ -27,11 +28,14 @@ public class TaskSystem : MonoBehaviour
             Debug.LogWarning("Canvas on TaskSystem is null... Calling FindObjectOfType");
             canvas = FindObjectOfType<Canvas>().transform;
         }
+
+        playerInteractionHandler = playerController.GetComponent<InteractionHandler>();
     }
 
     public void StartTask(Task task, Vector2 positionOnScreen)
     {
         playerController.canMove = false;
+        playerInteractionHandler.canInteract = false;
 
         switch (task.type)
         {
@@ -58,6 +62,7 @@ public class TaskSystem : MonoBehaviour
         taskAction.transform.localPosition = positionOnScreen;
         taskAction.task = task;
         task.OnSuccess += TaskSuccess;
+        task.OnFail += TaskFail;
     }
 
     public void TaskSuccess(Task task)
@@ -75,6 +80,7 @@ public class TaskSystem : MonoBehaviour
     private void TaskDone(Task task)
     {
         playerController.canMove = true;
+        playerInteractionHandler.canInteract = true;
     }
 
     public static TaskSystem Instance;
