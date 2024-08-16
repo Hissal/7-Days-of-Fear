@@ -79,6 +79,9 @@ public class TaskSystem : MonoBehaviour
 
     private void TaskDone(Task task)
     {
+        task.OnSuccess -= TaskSuccess;
+        task.OnFail -= TaskFail;
+
         playerController.canMove = true;
         playerInteractionHandler.canInteract = true;
     }
