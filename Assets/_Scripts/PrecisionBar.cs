@@ -2,24 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
 
 public class PrecisionBar : TaskAction
 {
     [SerializeField] int barWidth;
+    [SerializeField] private RectTransform pointer;
     [SerializeField] float pointerSpeed;
-    private float currentMove;
+    [SerializeField] private GameObject green;
 
+    private float pointerDirection;
 
-    public RectTransform pointer;
-    public GameObject green;
-    Rect greenRect;
-    public bool col;
+    private Rect greenRect;
+    private bool onGreen;
+
+    private float referenceResolutionWidth;
 
     // Start is called before the first frame update
     void Start()
     {
+        referenceResolutionWidth = transform.parent.GetComponent<CanvasScaler>().referenceResolution.x;
+
         greenRect = green.transform.GetComponent<RectTransform>().rect;
-        currentMove = pointerSpeed;
+        pointerDirection = 1;
     }
     // Update is called once per frame
     void Update()
@@ -28,31 +33,31 @@ public class PrecisionBar : TaskAction
 
         if (pointer.localPosition.x < greenRect.x + greenRect.width && pointer.localPosition.x > greenRect.x - greenRect.width)
         {
-            col = true;
+            onGreen = true;
         }
         else
         {
-            col = false;
+            onGreen = false;
         }
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (col == true)
+            if (onGreen == true)
             {
                 TaskSuccess();
-                
             }
             else
             {
                 TaskFail();
-
             }
         }
     }
 
     private void MovePointer()
     {
-        pointer.position = new Vector2(pointer.position.x + currentMove, pointer.position.y);
+        float moveAmount = referenceResolutionWidth / (10 / pointerSpeed) * Time.deltaTime;
+
+        pointer.position = new Vector2(pointer.position.x + moveAmount * pointerDirection, pointer.position.y);
         if (pointer.localPosition.x > barWidth * 0.5f || pointer.localPosition.x < -barWidth * 0.5f)
         {
             ChangePointerDirection();
@@ -61,6 +66,6 @@ public class PrecisionBar : TaskAction
 
     private void ChangePointerDirection()
     {
-        currentMove *= -1;
+        pointerDirection *= -1;
     }
 }

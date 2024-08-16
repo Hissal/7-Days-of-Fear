@@ -6,14 +6,22 @@ public class TaskObject : MonoBehaviour
 {
     [SerializeField] private Task task;
 
-    TaskSystem taskSystem;
+    private TaskSystem taskSystem;
 
     private void Start()
     {
         taskSystem = TaskSystem.Instance;
 
-        task.onSucces += SucceedTask;
-        task.onFail += FailTask;
+        task.OnSuccess += SucceedTask;
+        task.OnFail += FailTask;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            BeginTask();
+        }
     }
 
     private void BeginTask()
@@ -23,13 +31,13 @@ public class TaskObject : MonoBehaviour
         // TODO Choose Task Type to Do
     }
 
-    private void SucceedTask()
+    private void SucceedTask(Task task)
     {
-        taskSystem.TaskSuccess(task);
+        
     }
 
-    private void FailTask()
+    private void FailTask(Task task)
     {
-        taskSystem.TaskFail(task);
+        
     }
 }

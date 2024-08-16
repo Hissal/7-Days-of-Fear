@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+[System.Serializable]
 public class Task
 {
     public enum TaskType
@@ -13,19 +14,21 @@ public class Task
     }
     public TaskType type;
 
-    public event Action onSucces;
-    public event Action onFail;
+    public event Action<Task> OnSuccess = delegate { };
+    public event Action<Task> OnFail = delegate { };
 
     public virtual void BeginTask()
     {
 
     }
-}
 
-public class PrecicionBarTask : Task
-{
-    public override void BeginTask()
+    public void TaskSuccess()
     {
-        base.BeginTask();
+        OnSuccess.Invoke(this);
+    }
+
+    public void TaskFail()
+    {
+        OnFail.Invoke(this);
     }
 }

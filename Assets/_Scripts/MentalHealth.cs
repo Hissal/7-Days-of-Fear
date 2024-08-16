@@ -8,7 +8,7 @@ public class MentalHealth : MonoBehaviour
     [SerializeField] private int maxMentalhealth;
     public int currentMentalHealth { get; private set;}
 
-    public event Action onMentalHealthDrained;
+    public event Action OnMentalHealthDrained = delegate { };
 
     public void DrainMentalHealth(int amount)
     {
@@ -16,7 +16,7 @@ public class MentalHealth : MonoBehaviour
 
         if (currentMentalHealth <= 0)
         {
-            onMentalHealthDrained.Invoke();
+            OnMentalHealthDrained.Invoke();
         }
     }
 

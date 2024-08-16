@@ -7,18 +7,24 @@ public abstract class TaskAction : MonoBehaviour
 {
     public Task task;
 
-    public event Action<Task> onSuccess;
-    public event Action<Task> onFail;
-
     protected virtual void TaskSuccess()
     {
-        onSuccess(task);
+        task.TaskSuccess();
         print("TaskSuccess");
+
+        DestroyTask();
     }
 
     protected virtual void TaskFail()
     {
-        onFail(task);
+        task.TaskFail();
         print("TaskFail");
+
+        DestroyTask();
+    }
+
+    private void DestroyTask()
+    {
+        Destroy(gameObject);
     }
 }

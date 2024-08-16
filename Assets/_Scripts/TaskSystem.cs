@@ -14,7 +14,20 @@ public class TaskSystem : MonoBehaviour
     [SerializeField] private GameObject ButtonSpamPrefab;
     [SerializeField] private GameObject PrecicionBarPrefab;
 
-    
+    private void Start()
+    {
+        if (playerController == null)
+        {
+            Debug.LogWarning("PlayerController on TaskSystem is null... Calling FindObjectOfType");
+            playerController = FindObjectOfType<FirstPersonController>();
+        }
+
+        if (canvas == null)
+        {
+            Debug.LogWarning("Canvas on TaskSystem is null... Calling FindObjectOfType");
+            canvas = FindObjectOfType<Canvas>().transform;
+        }
+    }
 
     public void StartTask(Task task, Vector2 positionOnScreen)
     {
@@ -42,8 +55,9 @@ public class TaskSystem : MonoBehaviour
     private void ShowTask(Task task, GameObject taskPrefab, Vector2 positionOnScreen)
     {
         TaskAction taskAction = Instantiate(taskPrefab, positionOnScreen, Quaternion.identity, canvas).GetComponent<TaskAction>();
+        taskAction.transform.localPosition = positionOnScreen;
         taskAction.task = task;
-        taskAction.onSuccess += TaskSuccess;
+        task.OnSuccess += TaskSuccess;
     }
 
     public void TaskSuccess(Task task)
@@ -62,7 +76,6 @@ public class TaskSystem : MonoBehaviour
     {
         playerController.canMove = true;
     }
-
 
     public static TaskSystem Instance;
 
