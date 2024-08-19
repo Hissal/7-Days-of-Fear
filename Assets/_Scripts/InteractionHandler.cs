@@ -45,6 +45,11 @@ public class InteractionHandler : MonoBehaviour
                     Debug.LogWarning("Trying to set a non interactable as currentInteractable... " + hit.collider.gameObject);
                 }
             }
+            else if (hit.collider.gameObject.layer != 9 && currentInteractable)
+            {
+                currentInteractable.OnLoseFocus();
+                currentInteractable = null;
+            }
         }
         else if (currentInteractable)
         {
