@@ -20,9 +20,9 @@ public abstract class Interactable : MonoBehaviour
         outline.enabled = false;
     }
 
-    public virtual void OnFocus() { outline.enabled = true; }
+    public virtual void OnFocus() { outline.enabled = true; Reticle.Focus_Static(); }
 
-    public virtual void OnLoseFocus() { outline.enabled = false; }
+    public virtual void OnLoseFocus() { outline.enabled = false; Reticle.UnFocus_Static(); }
 
     public virtual void OnInteract() { }
 

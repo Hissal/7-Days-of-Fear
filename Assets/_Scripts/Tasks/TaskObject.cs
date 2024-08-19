@@ -27,7 +27,7 @@ public class TaskObject : Interactable
     {
         canBeInteractedWith = false;
 
-        outline.enabled = false;
+        base.OnLoseFocus();
     }
 
     private void FailTask(Task task)
