@@ -37,6 +37,7 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance.paused) return;
 
         #region Handles Movment
 

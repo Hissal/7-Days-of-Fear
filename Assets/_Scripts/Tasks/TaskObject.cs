@@ -26,28 +26,31 @@ public class TaskObject : Interactable
     private void SucceedTask(Task task)
     {
         canBeInteractedWith = false;
-        OnLoseFocus();
+
+        outline.enabled = false;
     }
 
     private void FailTask(Task task)
     {
-        
+
     }
 
     public override void OnFocus()
     {
         if (!canBeInteractedWith) return;
 
-        GetComponent<Renderer>().material.color = Color.white;
-        print("Looking at" + gameObject.name);
+        base.OnFocus();
+
+        //GetComponent<Renderer>().material.color = Color.white;
     }
 
     public override void OnLoseFocus()
     {
         if (!canBeInteractedWith) return;
 
-        GetComponent<Renderer>().material.color = Color.gray;
-        print("No longer looking at " + gameObject.name);
+        base.OnLoseFocus();
+
+        //GetComponent<Renderer>().material.color = Color.gray;
     }
 
     public override void OnInteract()
@@ -55,6 +58,5 @@ public class TaskObject : Interactable
         if (!canBeInteractedWith) return;
 
         BeginTask();
-        print("Interacted with " + gameObject.name);
     }
 }

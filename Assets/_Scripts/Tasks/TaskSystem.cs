@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class TaskSystem : MonoBehaviour
 {
-    [SerializeField] private FirstPersonController playerController;
-    private InteractionHandler playerInteractionHandler;
-
     private int completedTasks;
     private int failedTasks;
 
@@ -17,25 +14,16 @@ public class TaskSystem : MonoBehaviour
 
     private void Start()
     {
-        if (playerController == null)
-        {
-            Debug.LogWarning("PlayerController on TaskSystem is null... Calling FindObjectOfType");
-            playerController = FindObjectOfType<FirstPersonController>();
-        }
-
         if (canvas == null)
         {
             Debug.LogWarning("Canvas on TaskSystem is null... Calling FindObjectOfType");
             canvas = FindObjectOfType<Canvas>().transform;
         }
-
-        playerInteractionHandler = playerController.GetComponent<InteractionHandler>();
     }
 
     public void StartTask(Task task, Vector2 positionOnScreen)
     {
-        playerController.canMove = false;
-        playerInteractionHandler.canInteract = false;
+        GameManager.Instance.TakeAwayPlayerControl();
 
         switch (task.type)
         {
@@ -82,8 +70,7 @@ public class TaskSystem : MonoBehaviour
         task.OnSuccess -= TaskSuccess;
         task.OnFail -= TaskFail;
 
-        playerController.canMove = true;
-        playerInteractionHandler.canInteract = true;
+        GameManager.Instance.GivePlayerControlBack();
     }
 
     public static TaskSystem Instance;
