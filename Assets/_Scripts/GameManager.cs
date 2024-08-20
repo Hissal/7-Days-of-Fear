@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [field: SerializeField] public Transform playerTransform { get; private set; }
     [SerializeField] private FirstPersonController playerController;
     [SerializeField] private InteractionHandler playerInteractionHandler;
 

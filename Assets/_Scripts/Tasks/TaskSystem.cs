@@ -73,6 +73,19 @@ public class TaskSystem : MonoBehaviour
         GameManager.Instance.GivePlayerControlBack();
     }
 
+    public void EnableBreathHolding()
+    {
+        // Breath Holding ui appears and sends message to enemy to walk to hiding spot and play minigame if enemy is close enough on entry
+
+        // TODO on success make enemy walk to another room
+        // TODO on fail Kill player
+    }
+
+    public void DisableBreathHolding()
+    {
+        // Disable breath holding
+    }
+
     public static TaskSystem Instance;
 
     private void Awake()

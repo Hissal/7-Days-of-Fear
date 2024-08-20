@@ -35,6 +35,7 @@ public class DoorHandler : MonoBehaviour
         {
             Reticle.UnFocus_Static();
             doorToBeSelected = null;
+            joint = null;
         }
 
         if (Input.GetMouseButtonDown(0) && doorToBeSelected)
