@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 97732542}
   - component: {fileID: 97732543}
   - component: {fileID: 97732544}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BreathHoldTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -851,6 +851,7 @@ MonoBehaviour:
   pauseScreen: {fileID: 1410453409}
   hidingSpots:
   - {fileID: 97732544}
+  breathHoldingMinigame: {fileID: 1235088045}
 --- !u!1 &537660534
 GameObject:
   m_ObjectHideFlags: 0
@@ -2613,9 +2614,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 2025541051}
   sightRange: 5
+  killRadius: 1
   seenLayers:
     serializedVersion: 2
     m_Bits: 1719
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!195 &2025541051
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2794,6 +2799,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2144504233 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 152391642233529445, guid: 149f61a9807f645c7834f51e3e113a1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 581389072767762956}
+  m_PrefabAsset: {fileID: 0}
+--- !u!59 &2144504236 stripped
+HingeJoint:
+  m_CorrespondingSourceObject: {fileID: 2870441884282229852, guid: 149f61a9807f645c7834f51e3e113a1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 581389072767762956}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2144504238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144504233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eb4b1081398c469fac8da2b0ce5f51c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  joint: {fileID: 2144504236}
+  doorSideSwitch: 0
 --- !u!1001 &78702519826513233
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2992,7 +3023,11 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 97732542}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 152391642233529445, guid: 149f61a9807f645c7834f51e3e113a1d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2144504238}
   m_SourcePrefab: {fileID: 100100000, guid: 149f61a9807f645c7834f51e3e113a1d, type: 3}
 --- !u!1001 &943446386115923372
 PrefabInstance:

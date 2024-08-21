@@ -41,6 +41,7 @@ public class DoorHandler : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && doorToBeSelected)
         {
             selectedDoor = doorToBeSelected;
+            selectedDoor.GetComponent<DoorOpener>().PlayerMovingDoor();
         }
 
         if (selectedDoor != null)
@@ -100,6 +101,8 @@ public class DoorHandler : MonoBehaviour
 
             if (Input.GetMouseButtonUp(0))
             {
+                selectedDoor.GetComponent<DoorOpener>().PlayerNoLongerMovingDoor();
+
                 doorToBeSelected = null;
                 selectedDoor = null;
                 motor.targetVelocity = 0;
