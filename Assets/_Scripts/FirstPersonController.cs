@@ -8,7 +8,7 @@ public class FirstPersonController : MonoBehaviour
     public Camera playerCamera;
     [SerializeField] private float walkSpeed = 6f;
     [SerializeField] private float runSpeed = 12f;
-    [SerializeField] private float jumpPower = 7f;
+    //[SerializeField] private float jumpPower = 7f;
     [SerializeField] private float gravity = 10f;
 
 
