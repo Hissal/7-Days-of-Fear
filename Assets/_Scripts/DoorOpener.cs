@@ -104,7 +104,7 @@ public class DoorOpener : MonoBehaviour
                 {
                     motor.targetVelocity = speed * Time.deltaTime;
 
-                    print("1 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Max = " + joint.limits.max + " Target = " + targetAngle);
+                    print("1 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Min = " + joint.limits.min + " Target = " + targetAngle);
 
                     joint.motor = motor;
                 }
@@ -112,10 +112,12 @@ public class DoorOpener : MonoBehaviour
                 {
                     motor.targetVelocity = -speed * Time.deltaTime;
 
-                    print("2 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Max = " + joint.limits.max + " Target = " + targetAngle);
+                    print("2 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Min = " + joint.limits.min + " Target = " + targetAngle);
 
                     joint.motor = motor;
                 }
+
+                if (Mathf.Approximately(Mathf.Abs(joint.angle), targetAngle)) print("Approx");
 
                 yield return null;
             }

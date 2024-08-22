@@ -17,7 +17,6 @@ public class DoorHandler : MonoBehaviour
         //Raycast
         RaycastHit hit;
 
-
         if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, 3, doorLayer) && !selectedDoor)
         {
             if (doorToBeSelected == null || hit.collider.gameObject.GetInstanceID() != doorToBeSelected.gameObject.GetInstanceID())
@@ -75,7 +74,10 @@ public class DoorHandler : MonoBehaviour
 
             //Applying velocity to door motor
             float speedMultiplier = 60000;
-            if (Mathf.Abs(selectedDoor.parent.forward.z) > 0.5f)
+
+            print(selectedDoor.parent.forward.z + " leftdoor: " + leftDoor);
+
+            if (selectedDoor.parent.forward.z > 0.5f)
             {
                 if (dragPointGameobject.transform.position.x > selectedDoor.position.x)
                 {
@@ -86,7 +88,29 @@ public class DoorHandler : MonoBehaviour
                     motor.targetVelocity = delta * speedMultiplier * Time.deltaTime * leftDoor;
                 }
             }
-            else
+            else if (selectedDoor.parent.forward.z < -0.5f)
+            {
+                if (dragPointGameobject.transform.position.x > selectedDoor.position.x)
+                {
+                    motor.targetVelocity = delta * speedMultiplier * Time.deltaTime * leftDoor;
+                }
+                else
+                {
+                    motor.targetVelocity = delta * -speedMultiplier * Time.deltaTime * leftDoor;
+                }
+            }
+            else if (selectedDoor.parent.transform.forward.x > 0.5f)
+            {
+                if (dragPointGameobject.transform.position.z > selectedDoor.position.z)
+                {
+                    motor.targetVelocity = delta * speedMultiplier * Time.deltaTime * leftDoor;
+                }
+                else
+                {
+                    motor.targetVelocity = delta * -speedMultiplier * Time.deltaTime * leftDoor;
+                }
+            }
+            else if (selectedDoor.parent.transform.forward.x < -0.5f)
             {
                 if (dragPointGameobject.transform.position.z > selectedDoor.position.z)
                 {
