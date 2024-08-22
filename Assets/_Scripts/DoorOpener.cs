@@ -5,12 +5,14 @@ using UnityEngine;
 [DefaultExecutionOrder(-10)]
 public class DoorOpener : MonoBehaviour
 {
-    // TODO Fix Closing (Not fully closing)
-    // TODO Bool to mark door openable by enemy
+    // TODO Fix Closing (Not fully closing) (kinda done.. stops moving when 0.1f away from goal)
+    // TODO Bool to mark door as closet door
     // TODO door open angle interaction with enemy (if in closet but door is open enemy can see player)
 
     [SerializeField] private HingeJoint joint;
     [SerializeField] private bool doorSideSwitch;
+    [field: SerializeField] public bool isCloset { get; private set; }
+    public bool moving { get; private set; }
 
     private bool playerMovingDoor;
 
@@ -58,6 +60,8 @@ public class DoorOpener : MonoBehaviour
 
     private IEnumerator DoorMovingRoutine(float speed, float targetAngle, bool open)
     {
+        moving = true;
+
         if (open)
         {
             if (targetAngle > joint.limits.max  && joint.limits.min == 0) targetAngle = joint.limits.max;
@@ -68,19 +72,19 @@ public class DoorOpener : MonoBehaviour
             if (targetAngle <= 0f) targetAngle = 0f;
         }
 
-        print("Moving Door Target Angle = " + targetAngle);
+        //print("Moving Door Target Angle = " + targetAngle);
 
         JointMotor motor = joint.motor;
 
         if (open)
         {
-            while (Mathf.Abs(joint.angle) < targetAngle && !playerMovingDoor)
+            while (Mathf.Abs(joint.angle) < targetAngle - 0.1f && !playerMovingDoor)
             {
                 if (doorSideSwitch)
                 {
                     motor.targetVelocity = -speed * Time.deltaTime;
 
-                    print("1 OpeningDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Max = " + joint.limits.max + " Target = " + targetAngle);
+                    //print("1 OpeningDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Max = " + joint.limits.max + " Target = " + targetAngle);
 
                     joint.motor = motor;
                 }
@@ -88,7 +92,7 @@ public class DoorOpener : MonoBehaviour
                 {
                     motor.targetVelocity = speed * Time.deltaTime;
 
-                    print("2 OpeningDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Max = " + joint.limits.max + " Target = " + targetAngle);
+                    //print("2 OpeningDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Max = " + joint.limits.max + " Target = " + targetAngle);
 
                     joint.motor = motor;
                 }
@@ -98,13 +102,13 @@ public class DoorOpener : MonoBehaviour
         }
         else
         {
-            while (Mathf.Abs(joint.angle) > targetAngle && !playerMovingDoor)
+            while (Mathf.Abs(joint.angle) > targetAngle + 0.1f && !playerMovingDoor)
             {
                 if (doorSideSwitch)
                 {
                     motor.targetVelocity = speed * Time.deltaTime;
 
-                    print("1 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Min = " + joint.limits.min + " Target = " + targetAngle);
+                    //print("1 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Min = " + joint.limits.min + " Target = " + targetAngle);
 
                     joint.motor = motor;
                 }
@@ -112,21 +116,20 @@ public class DoorOpener : MonoBehaviour
                 {
                     motor.targetVelocity = -speed * Time.deltaTime;
 
-                    print("2 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Min = " + joint.limits.min + " Target = " + targetAngle);
+                    //print("2 ClosingDoor " + motor.targetVelocity + " Angle = " + joint.angle + " Min = " + joint.limits.min + " Target = " + targetAngle);
 
                     joint.motor = motor;
                 }
-
-                if (Mathf.Approximately(Mathf.Abs(joint.angle), targetAngle)) print("Approx");
-
                 yield return null;
             }
         }
 
-        print("Door Finished Opening");
+        //print("Door Finished Opening");
 
         motor.targetVelocity = 0f;
         joint.motor = motor;
+
+        moving = false;
     }
 
     public void PlayerMovingDoor()

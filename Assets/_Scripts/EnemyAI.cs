@@ -19,6 +19,7 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField] private LayerMask seenLayers;
     [SerializeField] private LayerMask playerLayer;
+    [SerializeField] private LayerMask doorLayer;
 
     private void Start()
     {
@@ -35,6 +36,17 @@ public class EnemyAI : MonoBehaviour
 
         // TODO Slam non closet doors open when walking through
         if (playerHidingSequence) return;
+
+        Collider[] doorsColliders = Physics.OverlapSphere(transform.position, 2f, doorLayer);
+        if (doorsColliders.Length > 0)
+        {
+            foreach (var collider in doorsColliders)
+            {
+                DoorOpener doorOpener = collider.GetComponent<DoorOpener>();
+                if (!doorOpener.isCloset && Physics.OverlapSphere(transform.position, 0.5f, doorLayer).Length > 0) doorOpener.MoveDoor(50000f, 360f, false);
+                else if (!doorOpener.isCloset && !doorOpener.moving) doorOpener.MoveDoor(500f, Random.Range(-10f, 10f), true);
+            }
+        }
 
         if (PlayerInSight())
         {
