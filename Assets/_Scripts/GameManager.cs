@@ -21,6 +21,12 @@ public class GameManager : MonoBehaviour
 
     private CursorLockMode lockModeBeforePause;
 
+    private int currentDay;
+    public int GetCurrentDay()
+    {
+        return currentDay;
+    }
+
     private void Start()
     {
         foreach (var hidingSpot in hidingSpots)
