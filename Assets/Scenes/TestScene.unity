@@ -1718,12 +1718,12 @@ PrefabInstance:
     - target: {fileID: 7417019158484556526, guid: 5ca0766de25b44746b59fd8e6a9cd644,
         type: 3}
       propertyPath: m_Limits.max
-      value: 90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7417019158484556526, guid: 5ca0766de25b44746b59fd8e6a9cd644,
         type: 3}
       propertyPath: m_Limits.min
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4119,6 +4119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 388399022}
+  doorMoveSpeed: 100000
   doorLayer:
     serializedVersion: 2
     m_Bits: 1024

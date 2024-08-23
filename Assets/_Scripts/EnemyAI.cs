@@ -128,7 +128,7 @@ public class EnemyAI : MonoBehaviour
         print("Enemy Knows Player Entered Hiding Spot " + locationToWalkTo);
 
         // TODO Kill Player Upon Reaching The Hiding Spot
-        if (distanceToPlayer <= sightRange / 5)
+        if (distanceToPlayer <= sightRange / 5 && (walkingToSnapshot || PlayerInSight()))
         {
             WalkToHidingSpot(locationToWalkTo);
             print("Kill PLayer Upon Reaching The Hiding Spot");
