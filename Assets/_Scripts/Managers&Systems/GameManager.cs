@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [field: SerializeField] public Transform playerTransform { get; private set; }
-    [SerializeField] private FirstPersonController playerController;
+    [field: SerializeField] public FirstPersonController playerController { get; private set; }
     [SerializeField] private InteractionHandler playerInteractionHandler;
 
     [SerializeField] private EnemyAI enemyAI;
@@ -94,6 +94,15 @@ public class GameManager : MonoBehaviour
     {
         playerController.canMove = true;
         playerInteractionHandler.canInteract = true;
+    }
+
+    public void StunEnemy(float time)
+    {
+        enemyAI.Stun(time);
+    }
+    public void UnStunEnemy()
+    {
+        enemyAI.UnStun();
     }
 
     public static GameManager Instance;

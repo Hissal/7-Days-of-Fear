@@ -9,13 +9,14 @@ public class EnemyAI : MonoBehaviour
     private Transform playerT;
 
     [SerializeField] private float sightRange;
+    [SerializeField] private float nearSightRange;
     [SerializeField] private float killRadius;
 
     private Vector3 playerPositionSnapshot;
     private bool playerWasInSight;
-    private bool wandering;
-    private bool walkingToSnapshot;
-    private bool playerHidingSequence;
+
+    public enum EnemyState {Wandering, ChasingPlayer, PlayerHidingSequence, Stunned}
+    public EnemyState State { get; private set; }
 
     [SerializeField] private LayerMask seenLayers;
     [SerializeField] private LayerMask playerLayer;
@@ -34,8 +35,7 @@ public class EnemyAI : MonoBehaviour
             throw new System.Exception("Enemy is not on navmesh " + gameObject);
         }
 
-        // TODO Slam non closet doors open when walking through
-        if (playerHidingSequence) return;
+        if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
 
         Collider[] doorsColliders = Physics.OverlapSphere(transform.position, 2f, doorLayer);
         if (doorsColliders.Length > 0)
@@ -51,7 +51,7 @@ public class EnemyAI : MonoBehaviour
         if (PlayerInSight())
         {
             WalkTowardPlayer();
-
+            State = EnemyState.ChasingPlayer;
             if (Physics.OverlapSphere(transform.position, killRadius, playerLayer).Length > 0)
             {
                 print("Player In Kill Radius.. KILL PLAYER");
@@ -63,36 +63,53 @@ public class EnemyAI : MonoBehaviour
             SnapshotPlayerPosition();
             StartCoroutine(MoveToPlayerSnapshot());
         }
-        else if (!wandering && !walkingToSnapshot)
-        {
-            StartCoroutine(WanderRandomly());
-        }
     }
 
     private IEnumerator MoveToPlayerSnapshot()
     {
         print("MovingToSnapshot");
-        walkingToSnapshot = true;
 
         agent.SetDestination(playerPositionSnapshot);
 
-        yield return new WaitUntil(() => Vector3.Distance(transform.position, playerPositionSnapshot) < 0.1f || PlayerInSight());
-
-        print("ArrivedAtSnapshot");
+        yield return new WaitUntil(() => AgentReachedDestiantion() || PlayerInSight());
 
         if (!PlayerInSight())
         {
+            print("Arrived At Snapshot Player Not In Sight Walking forward");
             Vector3 newPos = transform.position + transform.forward * 1f;
             agent.SetDestination(newPos);
+            yield return null;
 
-            yield return new WaitUntil(() => Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(newPos)) < 0.05f || PlayerInSight());
-
-            walkingToSnapshot = false;
+            yield return new WaitUntil(() => AgentReachedDestiantion() || PlayerInSight());
+            print("Arrived at new position");
 
             if (!PlayerInSight()) StartCoroutine(WanderRandomly());
         }
+    }
 
-        walkingToSnapshot = false;
+    private IEnumerator WanderRandomly()
+    {
+        State = EnemyState.Wandering;
+
+        print("Wandering");
+
+        agent.SetDestination(RandomNavmeshLocation(5f));
+
+        yield return new WaitUntil(() => AgentReachedDestiantion() || State != EnemyState.Wandering);
+
+        float secondsToWait = Random.Range(0f, 5f);
+        float timeElapsed = 0f;
+
+        while (State == EnemyState.Wandering && timeElapsed < secondsToWait)
+        {
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (State == EnemyState.Wandering)
+        {
+            StartCoroutine(WanderRandomly());
+        }
     }
 
     private bool PlayerInSight()
@@ -119,6 +136,30 @@ public class EnemyAI : MonoBehaviour
         agent.SetDestination(playerT.position);
     }
 
+    /// <summary>
+    /// Stuns the nemy for given time, negative values stun until manually unstunned
+    /// </summary>
+    /// <param name="time"></param>
+    public void Stun(float time)
+    {
+        StopAllCoroutines();
+        agent.isStopped = true;
+        State = EnemyState.Stunned;
+        if (time < 0) return;
+        StartCoroutine(StunRoutine(time));
+    }
+    private IEnumerator StunRoutine(float time)
+    {
+        yield return new WaitForSeconds(time);
+        UnStun();
+    }
+    public void UnStun()
+    {
+        StopAllCoroutines();
+        agent.isStopped = false;
+        StartCoroutine(WanderRandomly());
+    }
+
     public void PlayerEnteredHidingSpot(Vector3 locationToWalkTo)
     {
         float distanceToPlayer = Vector3.Distance(playerT.position, transform.position);
@@ -128,26 +169,24 @@ public class EnemyAI : MonoBehaviour
         print("Enemy Knows Player Entered Hiding Spot " + locationToWalkTo);
 
         // TODO Kill Player Upon Reaching The Hiding Spot
-        if (distanceToPlayer <= sightRange / 5 && (walkingToSnapshot || PlayerInSight()))
+        if (distanceToPlayer <= nearSightRange && State == EnemyState.ChasingPlayer)
         {
             WalkToHidingSpot(locationToWalkTo);
             print("Kill PLayer Upon Reaching The Hiding Spot");
         } 
-        else if (distanceToPlayer <= sightRange && (walkingToSnapshot || PlayerInSight())) WalkToHidingSpot(locationToWalkTo);
+        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(locationToWalkTo);
     }
     private void WalkToHidingSpot(Vector3 locationToWalkTo)
     {
         print("Walking to hiding spot");
 
         StopAllCoroutines();
-        StartCoroutine(WalkToHidingSpotSequance(locationToWalkTo));
+        StartCoroutine(WalkToHidingSpotSequence(locationToWalkTo));
     }
-    private IEnumerator WalkToHidingSpotSequance(Vector3 locationToWalkTo)
+    private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo)
     {
-        playerHidingSequence = true;
+        State = EnemyState.PlayerHidingSequence;
 
-        wandering = false;
-        walkingToSnapshot = false;
         playerWasInSight = false;
         agent.SetDestination(locationToWalkTo);
 
@@ -187,36 +226,13 @@ public class EnemyAI : MonoBehaviour
             if (PlayerInSight())
             {
                 print("Enemy spotted player while walking away from hiding spot");
-                playerHidingSequence = false;
                 yield break;
             }
             yield return null;
         }
 
         print("Reached a location away from hiding spot");
-        playerHidingSequence = false;
-        playerWasInSight = false;
-    }
-
-    private IEnumerator WanderRandomly()
-    {
-        if (walkingToSnapshot == true) yield break;
-
-        print("Wandering");
-        wandering = true;
-
-        agent.SetDestination(RandomNavmeshLocation(2f));
-
-        yield return new WaitForSeconds(Random.Range(1f, 6f));
-
-        if (!PlayerInSight())
-        {
-            StartCoroutine(WanderRandomly());
-        }
-        else
-        {
-            wandering = false;
-        }
+        StartCoroutine(WanderRandomly());
     }
 
     public Vector3 RandomNavmeshLocation(float radius)
@@ -232,6 +248,15 @@ public class EnemyAI : MonoBehaviour
         return finalPosition;
     }
 
+    private bool AgentReachedDestiantion()
+    {
+        float dist = agent.remainingDistance;
+        if (dist != Mathf.Infinity && agent.pathStatus == NavMeshPathStatus.PathComplete && agent.remainingDistance == 0)
+        return true;
+
+        return false;
+    }
+
     private Vector2 Vector2XZFromVector3(Vector3 vectorToChange)
     {
         return new Vector2(vectorToChange.x, vectorToChange.z);
@@ -241,11 +266,15 @@ public class EnemyAI : MonoBehaviour
     {
         Gizmos.DrawWireSphere(transform.position, killRadius);
 
-        if (!Application.isPlaying) return;
+        if (!Application.isEditor || !Application.isPlaying) return;
 
         if (PlayerInSight()) Gizmos.color = Color.red;
         else Gizmos.color = Color.green;
 
         Gizmos.DrawLine(transform.position, transform.position + (playerT.position - transform.position).normalized * sightRange);
+
+        if (PlayerInSight() && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) <= nearSightRange) Gizmos.color = Color.red;
+        else Gizmos.color = Color.green;
+        Gizmos.DrawLine(transform.position, transform.position + (playerT.position - transform.position).normalized * nearSightRange);
     }
 }

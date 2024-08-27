@@ -69,7 +69,7 @@ public class FirstPersonController : MonoBehaviour
         #endregion
 
         #region Handles Rotation
-        characterController.Move(moveDirection * Time.deltaTime);
+        if (canMove) characterController.Move(moveDirection * Time.deltaTime);
 
         if (canMove)
         {

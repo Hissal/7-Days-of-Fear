@@ -55,7 +55,6 @@ public class TimeManager : MonoBehaviour
                 }
 
                 OnHourChanged?.Invoke();
-
             }
 
             OnMinuteChanged?.Invoke();
