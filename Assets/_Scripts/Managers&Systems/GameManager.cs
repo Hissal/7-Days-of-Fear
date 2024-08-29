@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     [field: SerializeField] public FirstPersonController playerController { get; private set; }
     [SerializeField] private InteractionHandler playerInteractionHandler;
 
-    [SerializeField] private EnemyAI enemyAI;
+    [field: SerializeField] public EnemyAI enemyAI { get; private set; }
 
     [SerializeField] private GameObject pauseScreen;
 

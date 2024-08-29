@@ -5,25 +5,20 @@ using UnityEngine;
 public class CinematicManager : MonoBehaviour
 {
     // TODO Cinematic Chaining
-
     // Play one cinematic at the end of another seamlessly
-    // Return to out of cinematic state only after no more cinematics in chain (Player controls and enemy showing and having control back)
-    // nextCinematic variable serialized to unity
 
-    // TODO QTES in cinematics
-
-    // QTEManager
-    // public QTE DisplayQTE(Vector2 positionOnScreen) <- Generates and displays a random qte on screen and returns a reference to it
-
-    // display qte at certain point in timeline and subscribe to onfail / onsuccess
-    // play next cinematic in chain depending on qte outcome
-    // QTEFailedCinematic & QTESuccessCinematic serialized to unity
+    [field: SerializeField] public Camera cinematicCamera { get; private set; }
 
     public void PlayCinematic(Cinematic cinematic)
     {
         GameManager.Instance.StunEnemy(-1);
         GameManager.Instance.TakeAwayPlayerControl();
-        MoveAndRotatePlayerToStartOfCinematic(cinematic);
+        if(cinematic.isFirstCinematicOfChain) MoveAndRotatePlayerToStartOfCinematic(cinematic);
+        else
+        {
+            cinematic.gameObject.SetActive(true);
+            cinematic.PlayCinematic(GameManager.Instance.playerController.playerCamera, cinematicCamera);
+        }
     }
 
     private void MoveAndRotatePlayerToStartOfCinematic(Cinematic cinematic)
@@ -48,9 +43,10 @@ public class CinematicManager : MonoBehaviour
         Quaternion cameraStartRotation = cameraT.localRotation;
         float timeElapsed = 0;
 
-        while (playerT.position != desiredPosition || playerT.rotation != desiredRotation)
+        while (timeElapsed < time)
         {
             float precentageComplete = timeElapsed / time;
+            precentageComplete = Mathf.Clamp(precentageComplete, 0f, 100f);
 
             playerT.position = Vector3.Lerp(startPosition, desiredPosition, precentageComplete);
             playerT.rotation = Quaternion.Lerp(startRotaion, desiredRotation, precentageComplete);
@@ -62,7 +58,7 @@ public class CinematicManager : MonoBehaviour
 
         print("DoneMovingPLayer");
         cinematic.gameObject.SetActive(true);
-        cinematic.PlayCinematic();
+        cinematic.PlayCinematic(GameManager.Instance.playerController.playerCamera, cinematicCamera);
     }
 
     public static CinematicManager Instance;

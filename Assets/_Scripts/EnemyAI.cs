@@ -54,7 +54,7 @@ public class EnemyAI : MonoBehaviour
             State = EnemyState.ChasingPlayer;
             if (Physics.OverlapSphere(transform.position, killRadius, playerLayer).Length > 0)
             {
-                print("Player In Kill Radius.. KILL PLAYER");
+                //print("Player In Kill Radius.. KILL PLAYER");
             }
         }
         else if (playerWasInSight == true)
