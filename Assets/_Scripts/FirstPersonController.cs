@@ -8,7 +8,7 @@ public class FirstPersonController : MonoBehaviour
     public Camera playerCamera;
     [SerializeField] private float walkSpeed = 6f;
     [SerializeField] private float runSpeed = 12f;
-    [SerializeField] private float jumpPower = 7f;
+    //[SerializeField] private float jumpPower = 7f;
     [SerializeField] private float gravity = 10f;
 
 
@@ -17,7 +17,7 @@ public class FirstPersonController : MonoBehaviour
 
 
     Vector3 moveDirection = Vector3.zero;
-    float rotationX = 0;
+    public float rotationX = 0;
 
     public bool canMove = true;
 
@@ -37,6 +37,7 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance.paused) return;
 
         #region Handles Movment
 
@@ -68,7 +69,7 @@ public class FirstPersonController : MonoBehaviour
         #endregion
 
         #region Handles Rotation
-        characterController.Move(moveDirection * Time.deltaTime);
+        if (canMove) characterController.Move(moveDirection * Time.deltaTime);
 
         if (canMove)
         {
@@ -76,6 +77,8 @@ public class FirstPersonController : MonoBehaviour
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
+
+            //print($"RotationX: {rotationX}, RotationY: {Input.GetAxis("Mouse X") * lookSpeed}");
         }
 
         #endregion

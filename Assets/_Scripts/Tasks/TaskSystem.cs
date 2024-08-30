@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class TaskSystem : MonoBehaviour
 {
-    [SerializeField] private FirstPersonController playerController;
-
     private int completedTasks;
     private int failedTasks;
 
@@ -16,12 +14,6 @@ public class TaskSystem : MonoBehaviour
 
     private void Start()
     {
-        if (playerController == null)
-        {
-            Debug.LogWarning("PlayerController on TaskSystem is null... Calling FindObjectOfType");
-            playerController = FindObjectOfType<FirstPersonController>();
-        }
-
         if (canvas == null)
         {
             Debug.LogWarning("Canvas on TaskSystem is null... Calling FindObjectOfType");
@@ -31,7 +23,7 @@ public class TaskSystem : MonoBehaviour
 
     public void StartTask(Task task, Vector2 positionOnScreen)
     {
-        playerController.canMove = false;
+        GameManager.Instance.TakeAwayPlayerControl();
 
         switch (task.type)
         {
@@ -58,6 +50,7 @@ public class TaskSystem : MonoBehaviour
         taskAction.transform.localPosition = positionOnScreen;
         taskAction.task = task;
         task.OnSuccess += TaskSuccess;
+        task.OnFail += TaskFail;
     }
 
     public void TaskSuccess(Task task)
@@ -74,7 +67,23 @@ public class TaskSystem : MonoBehaviour
 
     private void TaskDone(Task task)
     {
-        playerController.canMove = true;
+        task.OnSuccess -= TaskSuccess;
+        task.OnFail -= TaskFail;
+
+        GameManager.Instance.GivePlayerControlBack();
+    }
+
+    public void EnableBreathHolding()
+    {
+        // Breath Holding ui appears and sends message to enemy to walk to hiding spot and play minigame if enemy is close enough on entry
+
+        // TODO on success make enemy walk to another room
+        // TODO on fail Kill player
+    }
+
+    public void DisableBreathHolding()
+    {
+        // Disable breath holding
     }
 
     public static TaskSystem Instance;
