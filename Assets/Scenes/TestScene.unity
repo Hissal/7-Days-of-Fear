@@ -4001,9 +4001,9 @@ MonoBehaviour:
   enemyEndPosition: {x: 0.78, y: 0.75, z: 8.4}
   enemyEndRotation: {x: 0, y: 0, z: 0}
   hasQTE: 1
-  qteAppearanceTime: 1.7
-  qteDuration: 1.5
-  qtePosition: {x: 0, y: 0}
+  qteAppearanceTime: 2.5
+  qteDuration: 1.25
+  qtePosition: {x: 50, y: 100}
   qteSuccessCinematic: {fileID: 780163406}
   qteFailCinematic: {fileID: 1661120980}
 --- !u!320 &1400582556

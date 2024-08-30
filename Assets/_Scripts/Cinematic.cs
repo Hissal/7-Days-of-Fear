@@ -128,11 +128,20 @@ public class Cinematic : MonoBehaviour
     private IEnumerator SlowTime()
     {
         float timeElapsed = 0;
-        
+
+        while (Time.timeScale != 0.33f)
+        {
+            timeElapsed += Time.unscaledDeltaTime;
+            Time.timeScale = Mathf.Lerp(1, 0.2f, timeElapsed / 0.1f);
+            if (Time.timeScale < 0.2f) Time.timeScale = 0.2f;
+            yield return null;
+        }
+
+        timeElapsed = 0;
         while (Time.timeScale != 0f)
         {
             timeElapsed += Time.unscaledDeltaTime;
-            Time.timeScale = Mathf.Lerp(1, 0f, timeElapsed / qteDuration);
+            Time.timeScale = Mathf.Lerp(1, 0f, timeElapsed / qteDuration - 0.1f);
             if (Time.timeScale < 0f) Time.timeScale = 0f;
             yield return null;
         }
