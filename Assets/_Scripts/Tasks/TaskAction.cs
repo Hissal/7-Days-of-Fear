@@ -12,7 +12,7 @@ public abstract class TaskAction : MonoBehaviour
         task.TaskSuccess();
         print("TaskSuccess");
 
-        DestroyTask();
+        DestroyTaskAction();
     }
 
     protected virtual void TaskFail()
@@ -20,10 +20,10 @@ public abstract class TaskAction : MonoBehaviour
         task.TaskFail();
         print("TaskFail");
 
-        DestroyTask();
+        DestroyTaskAction();
     }
 
-    private void DestroyTask()
+    private void DestroyTaskAction()
     {
         Destroy(gameObject);
     }

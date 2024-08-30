@@ -8,6 +8,8 @@ public class TaskObject : Interactable
 
     private TaskSystem taskSystem;
 
+    private bool canBeInteractedWith = true;
+
     private void Start()
     {
         taskSystem = TaskSystem.Instance;
@@ -16,44 +18,45 @@ public class TaskObject : Interactable
         task.OnFail += FailTask;
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            BeginTask();
-        }
-    }
-
     private void BeginTask()
     {
-        // TODO Player Loses Control Untill succes or fail
         taskSystem.StartTask(task, Vector2.zero);
-        // TODO Choose Task Type to Do
     }
 
     private void SucceedTask(Task task)
     {
-        
+        canBeInteractedWith = false;
+
+        base.OnLoseFocus();
     }
 
     private void FailTask(Task task)
     {
-        
+
     }
 
     public override void OnFocus()
     {
-        print("Looking at" + gameObject.name);
+        if (!canBeInteractedWith) return;
+
+        base.OnFocus();
+
+        //GetComponent<Renderer>().material.color = Color.white;
     }
 
     public override void OnLoseFocus()
     {
-        print("No longer looking at " + gameObject.name);
+        if (!canBeInteractedWith) return;
+
+        base.OnLoseFocus();
+
+        //GetComponent<Renderer>().material.color = Color.gray;
     }
 
     public override void OnInteract()
     {
+        if (!canBeInteractedWith) return;
 
-        print("Interacted with " + gameObject.name);
+        BeginTask();
     }
 }
