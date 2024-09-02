@@ -27,14 +27,6 @@ public class TaskSystem : MonoBehaviour
 
         switch (task.type)
         {
-            case Task.TaskType.QTE:
-                ShowTask(task, QTEPrefab, positionOnScreen);
-                break;
-
-            case Task.TaskType.ButtonSpam:
-                ShowTask(task, ButtonSpamPrefab, positionOnScreen);
-                break;
-
             case Task.TaskType.PrecicionBar:
                 ShowTask(task, PrecicionBarPrefab, positionOnScreen);
                 break;

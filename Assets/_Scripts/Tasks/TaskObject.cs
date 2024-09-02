@@ -8,7 +8,10 @@ public class TaskObject : Interactable
 
     private TaskSystem taskSystem;
 
-    private bool canBeInteractedWith = true;
+    private bool canBeInteractedWith = false;
+
+    [SerializeField] private bool morningTask;
+    [SerializeField] private bool eveningTask;
 
     private void Start()
     {
@@ -16,6 +19,18 @@ public class TaskObject : Interactable
 
         task.OnSuccess += SucceedTask;
         task.OnFail += FailTask;
+
+        if (morningTask) TimeManager.OnMorning += ActivateTask;
+        if (eveningTask) TimeManager.OnMorning += ActivateTask;
+    }
+
+    private void ActivateTask()
+    {
+        canBeInteractedWith = true;
+    }
+    private void DeactivateTask()
+    {
+        canBeInteractedWith = false;
     }
 
     private void BeginTask()
@@ -25,8 +40,7 @@ public class TaskObject : Interactable
 
     private void SucceedTask(Task task)
     {
-        canBeInteractedWith = false;
-
+        DeactivateTask();
         base.OnLoseFocus();
     }
 
@@ -58,5 +72,16 @@ public class TaskObject : Interactable
         if (!canBeInteractedWith) return;
 
         BeginTask();
+    }
+
+    private void OnDestroy()
+    {
+        task.OnSuccess -= SucceedTask;
+        task.OnFail -= FailTask;
+
+        if (morningTask) TimeManager.OnMorning -= ActivateTask;
+        if (eveningTask) TimeManager.OnMorning -= ActivateTask;
+
+        task.Dispose();
     }
 }

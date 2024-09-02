@@ -4,12 +4,10 @@ using UnityEngine;
 using System;
 
 [System.Serializable]
-public class Task
+public class Task : IDisposable
 {
     public enum TaskType
     {
-        QTE,
-        ButtonSpam,
         PrecicionBar,
     }
     public TaskType type;
@@ -35,5 +33,10 @@ public class Task
     {
         OnFail.Invoke(this);
         MentalHealth.Instance.ReduceMentalHealth(mentalHealthLostOnFail);
+    }
+
+    public void Dispose()
+    {
+        Dispose();
     }
 }
