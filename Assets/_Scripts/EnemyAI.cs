@@ -21,6 +21,9 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private LayerMask seenLayers;
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private LayerMask doorLayer;
+    [SerializeField] private LayerMask lightLayer;
+
+    private List<LightFlicker> flickeringLights = new List<LightFlicker>();
 
     private void Start()
     {
@@ -36,6 +39,9 @@ public class EnemyAI : MonoBehaviour
         }
 
         if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
+
+        FlickerNearbyLights();
+
 
         Collider[] doorsColliders = Physics.OverlapSphere(transform.position, 2f, doorLayer);
         if (doorsColliders.Length > 0)
@@ -62,6 +68,55 @@ public class EnemyAI : MonoBehaviour
             playerWasInSight = false;
             SnapshotPlayerPosition();
             StartCoroutine(MoveToPlayerSnapshot());
+        }
+    }
+
+    private void FlickerNearbyLights()
+    {
+        Collider[] lightColliders = Physics.OverlapSphere(transform.position, 2f, lightLayer);
+        if (lightColliders.Length > 0)
+        {
+            foreach (var collider in lightColliders)
+            {
+                LightFlicker lightFlicker = collider.GetComponent<LightFlicker>();
+                if (!flickeringLights.Contains(lightFlicker) && lightFlicker.light.intensity > 0f)
+                {
+                    flickeringLights.Add(lightFlicker);
+                    lightFlicker.flicker = true;
+                }
+            }
+        }
+
+        if (flickeringLights.Count != 0)
+        {
+            LightFlicker flickerToRemove = null;
+
+            foreach (var lightFlicker in flickeringLights)
+            {
+                bool contains = false;
+
+                Collider col = lightFlicker.GetComponent<Collider>();
+
+                foreach (var collider in lightColliders)
+                {
+                    if (collider == col)
+                    {
+                        contains = true;
+                    }
+                }
+
+                if (!contains)
+                {
+                    flickerToRemove = lightFlicker;
+                }
+            }
+
+            if (flickerToRemove != null)
+            {
+                flickerToRemove.flicker = false;
+                flickerToRemove.light.intensity = 0f;
+                flickeringLights.Remove(flickerToRemove);
+            }
         }
     }
 

@@ -2312,7 +2312,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 5363610512011702909, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
+        type: 3}
+      propertyPath: runSpeed
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5363610512011702909, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
+        type: 3}
+      propertyPath: walkSpeed
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 2484003975844548665, guid: 572ff5f8a3a42437b8f5fcc4a06a5503, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 4138489574084714998, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
@@ -4075,7 +4086,9 @@ GameObject:
   - component: {fileID: 1382476501}
   - component: {fileID: 1382476503}
   - component: {fileID: 1382476502}
-  m_Layer: 0
+  - component: {fileID: 1382476504}
+  - component: {fileID: 1382476505}
+  m_Layer: 11
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4175,13 +4188,51 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 6570
-  m_UseColorTemperature: 0
+  m_ColorTemperature: 5500
+  m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &1382476504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382476500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b72bf22aa83b64aac89d61250b124406, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  light: {fileID: 0}
+  minIntensity: 0
+  maxIntensity: 0.5
+  smoothing: 5
+  flicker: 0
+--- !u!135 &1382476505
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382476500}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1383003017
 GameObject:
   m_ObjectHideFlags: 0
@@ -15405,7 +15456,7 @@ PrefabInstance:
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.55
+      value: -6.9
       objectReference: {fileID: 0}
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
@@ -15415,7 +15466,7 @@ PrefabInstance:
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.79
+      value: 5.64
       objectReference: {fileID: 0}
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
@@ -15452,10 +15503,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5838895406554261807, guid: c47431bf4d9e2461796c620d960afaee,
+        type: 3}
+      propertyPath: lightLayer.m_Bits
+      value: 2048
+      objectReference: {fileID: 0}
     - target: {fileID: 6417743520833474577, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
       propertyPath: m_Name
       value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717744170844072908, guid: c47431bf4d9e2461796c620d960afaee,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -17282,6 +17343,9 @@ GameObject:
   - component: {fileID: 7339049359419335346}
   - component: {fileID: 6984088405636906098}
   - component: {fileID: 1155011064429079409}
+  - component: {fileID: 8777530238722471060}
+  - component: {fileID: 8777530238722471059}
+  - component: {fileID: 8777530238722471061}
   m_Layer: 0
   m_Name: light_switch.001
   m_TagString: Untagged
@@ -17289,6 +17353,60 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &8777530238722471059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8777530238722471058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f377e1385546a4bbfaa29890bc04825a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outline: {fileID: 0}
+  attatchedLight: {fileID: 1382476503}
+  lightIntensity: 1
+--- !u!114 &8777530238722471060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8777530238722471058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!65 &8777530238722471061
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8777530238722471058}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.06556626, y: 0.06556625, z: 0.007636912}
+  m_Center: {x: 0, y: 0, z: -0.014850905}
 --- !u!4 &8785451224924923112
 Transform:
   m_ObjectHideFlags: 0

@@ -52,7 +52,7 @@ public class Cinematic : MonoBehaviour
             return;
         }
 
-        GameManager.Instance.enemyAI.GetComponent<MeshRenderer>().enabled = false;
+        GameManager.Instance.enemyAI.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
 
         this.cinematicCamera = cinematicCamera;
 
@@ -84,7 +84,7 @@ public class Cinematic : MonoBehaviour
 
             gameManager.enemyAI.transform.position = enemyEndPosition;
             gameManager.enemyAI.transform.rotation = Quaternion.Euler(enemyEndRotation);
-            gameManager.enemyAI.GetComponent<MeshRenderer>().enabled = true;
+            gameManager.enemyAI.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
 
             cinematicCamera.enabled = false;
             gameManager.playerController.playerCamera.enabled = true;
