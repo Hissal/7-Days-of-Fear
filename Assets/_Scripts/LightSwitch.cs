@@ -4,19 +4,32 @@ using UnityEngine;
 
 public class LightSwitch : Interactable
 {
-    [SerializeField] Light attatchedLight;
+    [SerializeField] private List<Light> attatchedLights;
 
     [SerializeField] private float lightIntensity;
 
     public override void OnInteract()
     {
-        if (attatchedLight.intensity == lightIntensity)
+        bool turnOn = false;
+
+        foreach (var light in attatchedLights)
         {
-            attatchedLight.intensity = 0;
+            if (light.intensity == 0f)
+            {
+                turnOn = true;
+            }
         }
-        else
+
+        foreach (var light in attatchedLights)
         {
-            attatchedLight.intensity = lightIntensity;
+            if (turnOn)
+            {
+                light.intensity = lightIntensity;
+            }
+            else
+            {
+                light.intensity = 0f;
+            }
         }
 
         base.OnInteract();
