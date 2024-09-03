@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class Work : MonoBehaviour
 {
@@ -11,41 +12,43 @@ public class Work : MonoBehaviour
     [SerializeField] AnimationClip anim;
     [SerializeField] private Transform backFromWorkPositionTransform;
 
+    [SerializeField] Cinematic workCinematic;
+
     private int totalTimeLate;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<FirstPersonController>() != null)
         {
-            StartCoroutine(GoToWork());
+            GoToWork();
         }
     }
 
-    private IEnumerator GoToWork()
+    private void GoToWork()
     {
         if (TimeManager.hour >= WORKSTART)
         {
             int hoursLate = TimeManager.hour - WORKSTART;
             totalTimeLate += TimeManager.minute + (hoursLate * 60);
+
+            if (totalTimeLate > 120)
+            {
+                GetFired();
+                //return;
+            }
         }
 
-        // Play Working Animation (MaybeMinigame)
-        animator.Play(anim.name);
-
-        GameManager.Instance.TakeAwayPlayerControl();
-        
-        yield return new WaitWhile(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 0.5f);
-
-        BackHome();
+        CinematicManager.Instance.PlayCinematic(workCinematic);
+        workCinematic.director.stopped += BackHome;
     }
 
-    private void BackHome()
+    private void BackHome(PlayableDirector director)
     {
         TimeManager.SetTime(TimeManager.day, WORKEND, 0);
+    }
 
-        GameManager gameManager = GameManager.Instance;
-        gameManager.playerTransform.position = backFromWorkPositionTransform.position;
-        gameManager.playerTransform.rotation = backFromWorkPositionTransform.rotation;
-        gameManager.GivePlayerControlBack();
+    private void GetFired()
+    {
+
     }
 }

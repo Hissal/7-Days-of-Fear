@@ -7,9 +7,10 @@ using UnityEngine.Playables;
 public class Cinematic : MonoBehaviour
 {
     [field: SerializeField] public bool isFirstCinematicOfChain;
-    [SerializeField] private PlayableDirector director;
+    [field: SerializeField] public PlayableDirector director { get; private set; }
     [SerializeField] private bool playOnStart;
     private bool played;
+    [SerializeField] private bool repeatable;
 
     [field: Header("PlayerStartProperties (Only matters if isFirstCinematicOfChain is true)")]
     [field: SerializeField] public Vector3 playerStartPosition { get; private set; }
@@ -45,7 +46,7 @@ public class Cinematic : MonoBehaviour
 
     public void PlayCinematic(Camera playerCamera, Camera cinematicCamera)
     {
-        if (played)
+        if (played && !repeatable)
         {
             Debug.LogWarning($"Trying to play cinematic for the second time {this}");
             return;

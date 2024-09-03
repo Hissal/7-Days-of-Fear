@@ -81,7 +81,5 @@ public class TaskObject : Interactable
 
         if (morningTask) TimeManager.OnMorning -= ActivateTask;
         if (eveningTask) TimeManager.OnMorning -= ActivateTask;
-
-        task.Dispose();
     }
 }

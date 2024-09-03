@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 
 [System.Serializable]
-public class Task : IDisposable
+public class Task
 {
     public enum TaskType
     {
@@ -33,10 +33,5 @@ public class Task : IDisposable
     {
         OnFail.Invoke(this);
         MentalHealth.Instance.ReduceMentalHealth(mentalHealthLostOnFail);
-    }
-
-    public void Dispose()
-    {
-        Dispose();
     }
 }
