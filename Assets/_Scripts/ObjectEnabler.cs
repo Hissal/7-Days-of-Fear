@@ -5,13 +5,13 @@ using UnityEngine;
 public class ObjectEnabler : MonoBehaviour
 {
     [SerializeField] private MeshRenderer meshRenderer;
-    [SerializeField] private bool day1;
-    [SerializeField] private bool day2;
-    [SerializeField] private bool day3;
-    [SerializeField] private bool day4;
-    [SerializeField] private bool day5;
-    [SerializeField] private bool day6;
-    [SerializeField] private bool day7;
+    [SerializeField] private bool day1 = true;
+    [SerializeField] private bool day2 = true;
+    [SerializeField] private bool day3 = true;
+    [SerializeField] private bool day4 = true;
+    [SerializeField] private bool day5 = true;
+    [SerializeField] private bool day6 = true;
+    [SerializeField] private bool day7 = true;
 
     private void Start()
     {
