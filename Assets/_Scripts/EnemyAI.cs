@@ -15,6 +15,8 @@ public class EnemyAI : MonoBehaviour
     private Vector3 playerPositionSnapshot;
     private bool playerWasInSight;
 
+    [SerializeField] private Animator animator;
+
     public enum EnemyState {Wandering, ChasingPlayer, PlayerHidingSequence, Stunned}
     public EnemyState State { get; private set; }
 
@@ -38,6 +40,9 @@ public class EnemyAI : MonoBehaviour
             throw new System.Exception("Enemy is not on navmesh " + gameObject);
         }
 
+        if (!AgentReachedDestiantion()) animator.SetBool("Moving", true);
+        else animator.SetBool("Moving", false);
+
         if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
 
         FlickerNearbyLights();
@@ -49,8 +54,12 @@ public class EnemyAI : MonoBehaviour
             foreach (var collider in doorsColliders)
             {
                 DoorOpener doorOpener = collider.GetComponent<DoorOpener>();
-                if (!doorOpener.isCloset && Physics.OverlapSphere(transform.position, 0.5f, doorLayer).Length > 0) doorOpener.MoveDoor(50000f, 360f, false);
-                else if (!doorOpener.isCloset && !doorOpener.moving) doorOpener.MoveDoor(500f, Random.Range(-10f, 10f), true);
+                if (!doorOpener.isMovableByEnemy && Physics.OverlapSphere(transform.position, 0.5f, doorLayer).Length > 0)
+                {
+                    doorOpener.MoveDoor(50000f, 360f, false);
+                    animator.SetTrigger("Attack");
+                }
+                else if (!doorOpener.isMovableByEnemy && !doorOpener.moving) doorOpener.MoveDoor(500f, Random.Range(-10f, 10f), true);
             }
         }
 
@@ -249,8 +258,12 @@ public class EnemyAI : MonoBehaviour
 
         // TODO Stare into closet
         print("Reached Hiding Spot... STARING");
+        animator.SetTrigger("Stare");
         float timeStaring = 0f;
         float safeTimeBeforeCanKill = 0.5f;
+
+        int coinFlip = Random.Range(0, 2);
+        bool triggeredStare2 = false;
 
         while (timeStaring < 3f)
         {
@@ -258,8 +271,14 @@ public class EnemyAI : MonoBehaviour
             Vector3 desiredRotation = playerT.position - transform.position;
             desiredRotation.y = 0;
             desiredRotation.Normalize();
-            transform.rotation = Quaternion.Euler(Vector3.RotateTowards(transform.rotation.eulerAngles, desiredRotation, 1f, 1f));
+            //transform.rotation = Quaternion.Euler(Vector3.RotateTowards(transform.rotation.eulerAngles, desiredRotation, 1f, 1f));
             timeStaring += Time.deltaTime;
+
+            if (coinFlip == 1 && timeStaring > 1f && !triggeredStare2)
+            {
+                triggeredStare2 = true;
+                animator.SetTrigger("Stare2");
+            }
 
             if (GameManager.Instance.IsPlayerHoldingBreath() == false && timeStaring >= safeTimeBeforeCanKill)
             {

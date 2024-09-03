@@ -11,7 +11,7 @@ public class DoorOpener : MonoBehaviour
 
     [SerializeField] private HingeJoint joint;
     [SerializeField] private bool doorSideSwitch;
-    [field: SerializeField] public bool isCloset { get; private set; }
+    [field: SerializeField] public bool isMovableByEnemy { get; private set; }
     public bool moving { get; private set; }
 
     private bool playerMovingDoor;

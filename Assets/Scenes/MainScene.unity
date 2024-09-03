@@ -12196,6 +12196,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 704325746}
   m_CullTransparentMesh: 1
+--- !u!95 &707759591 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 3258331963121982017, guid: c47431bf4d9e2461796c620d960afaee,
+    type: 3}
+  m_PrefabInstance: {fileID: 7204909078479067069}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &708951581 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5381834758265497081, guid: 195b2c62793da4498ac6c6229ef68036,
@@ -16018,7 +16024,7 @@ PrefabInstance:
     - target: {fileID: 4138489574084714998, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.2
+      value: -3.84
       objectReference: {fileID: 0}
     - target: {fileID: 4138489574084714998, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
         type: 3}
@@ -16028,7 +16034,7 @@ PrefabInstance:
     - target: {fileID: 4138489574084714998, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.771
+      value: 19.02
       objectReference: {fileID: 0}
     - target: {fileID: 4138489574084714998, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
         type: 3}
@@ -41780,7 +41786,7 @@ PrefabInstance:
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.9
+      value: -5.45
       objectReference: {fileID: 0}
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
@@ -41790,7 +41796,7 @@ PrefabInstance:
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.64
+      value: 20.72
       objectReference: {fileID: 0}
     - target: {fileID: 5113216162089167582, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
@@ -41827,6 +41833,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5838895406554261807, guid: c47431bf4d9e2461796c620d960afaee,
+        type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 707759591}
     - target: {fileID: 5838895406554261807, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
       propertyPath: lightLayer.m_Bits
