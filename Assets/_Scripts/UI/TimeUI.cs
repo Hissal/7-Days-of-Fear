@@ -17,7 +17,7 @@ public class TimeUI : MonoBehaviour
         TimeManager.OnMinuteChanged -= UpdateTime;
     }
 
-    private void UpdateTime()
+    private void UpdateTime(int minute)
     {
         timeTMP.text = $"Aug {TimeManager.day}. {TimeManager.hour:00}:{TimeManager.minute:00}";
     }

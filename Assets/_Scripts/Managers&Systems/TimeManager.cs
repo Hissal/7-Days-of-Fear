@@ -9,9 +9,9 @@ public class TimeManager : MonoBehaviour
         instance = this;
     }
 
-    public static event Action OnMinuteChanged = delegate { };
-    public static event Action OnHourChanged = delegate { };
-    public static event Action OnDayChanged = delegate { };
+    public static event Action<int> OnMinuteChanged = delegate { };
+    public static event Action<int> OnHourChanged = delegate { };
+    public static event Action<int> OnDayChanged = delegate { };
     public static event Action OnMorning = delegate { };
     public static event Action OnEvening = delegate { };
 
@@ -43,7 +43,11 @@ public class TimeManager : MonoBehaviour
     {
         if (IsMorning() && hour > 12) OnEvening?.Invoke();
         else if (!IsMorning() && hour < 13) OnMorning?.Invoke();
-        
+
+        if (TimeManager.day != day) OnDayChanged?.Invoke(day);
+        if (TimeManager.hour != hour) OnHourChanged?.Invoke(hour);
+        if (TimeManager.minute != minute) OnMinuteChanged?.Invoke(minute);
+
         TimeManager.day = day;
         TimeManager.hour = hour;
         TimeManager.minute = minute;
@@ -71,13 +75,13 @@ public class TimeManager : MonoBehaviour
                     day++;
                     hour = 0;
                     minute = 0;
-                    OnDayChanged?.Invoke();
+                    OnDayChanged?.Invoke(day);
                 }
 
-                OnHourChanged?.Invoke();
+                OnHourChanged?.Invoke(hour);
             }
 
-            OnMinuteChanged?.Invoke();
+            OnMinuteChanged?.Invoke(minute);
 
             timer = realTimeSecondsToInGameMinute + timer;
         }
