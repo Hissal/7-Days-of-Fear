@@ -262,10 +262,17 @@ public class EnemyAI : MonoBehaviour
         float timeStaring = 0f;
         float safeTimeBeforeCanKill = 0.5f;
 
-        int coinFlip = Random.Range(0, 2);
-        bool triggeredStare2 = false;
+        int coinFlip = Random.Range(1, 2);
+        int coinFlip2 = Random.Range(1, 2);
+        bool stare2 = coinFlip == 1;
+        bool stare3 = coinFlip2 == 1;
 
-        while (timeStaring < 3f)
+        animator.SetBool("Stare2", stare2);
+        animator.SetBool("Stare3", stare3);
+
+        yield return new WaitUntil( () => animator.GetCurrentAnimatorStateInfo(0).IsName("Stare"));
+
+        while (!animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
         {
             // Stare lolxd
             Vector3 desiredRotation = playerT.position - transform.position;
@@ -273,12 +280,6 @@ public class EnemyAI : MonoBehaviour
             desiredRotation.Normalize();
             //transform.rotation = Quaternion.Euler(Vector3.RotateTowards(transform.rotation.eulerAngles, desiredRotation, 1f, 1f));
             timeStaring += Time.deltaTime;
-
-            if (coinFlip == 1 && timeStaring > 1f && !triggeredStare2)
-            {
-                triggeredStare2 = true;
-                animator.SetTrigger("Stare2");
-            }
 
             if (GameManager.Instance.IsPlayerHoldingBreath() == false && timeStaring >= safeTimeBeforeCanKill)
             {
