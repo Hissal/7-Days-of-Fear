@@ -12,6 +12,7 @@ public class DoorOpener : MonoBehaviour
     [SerializeField] private HingeJoint joint;
     [SerializeField] private bool doorSideSwitch;
     [field: SerializeField] public bool isMovableByEnemy { get; private set; }
+    [field: SerializeField] public bool isCloset { get; private set; }
     public bool moving { get; private set; }
 
     private bool playerMovingDoor;
@@ -34,6 +35,19 @@ public class DoorOpener : MonoBehaviour
         {
             MoveDoor(1000f, -20f, true); ;
         }
+    }
+
+    public float GetOpenPrecentage()
+    {
+        float angleMinAbs = Mathf.Abs(joint.limits.min);
+        float angleMaxAbs = Mathf.Abs(joint.limits.max);
+
+        float maxAngleAbs = 0f;
+
+        if (angleMinAbs > angleMaxAbs) maxAngleAbs = angleMinAbs;
+        else maxAngleAbs = angleMaxAbs;
+
+        return Mathf.Abs(joint.angle) / maxAngleAbs;
     }
 
     public void MoveDoor(float speed, float targetAngle, bool addTargetAngleToCurrent)

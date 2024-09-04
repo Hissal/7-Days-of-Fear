@@ -46,22 +46,7 @@ public class EnemyAI : MonoBehaviour
         if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
 
         FlickerNearbyLights();
-
-
-        Collider[] doorsColliders = Physics.OverlapSphere(transform.position, 2f, doorLayer);
-        if (doorsColliders.Length > 0)
-        {
-            foreach (var collider in doorsColliders)
-            {
-                DoorOpener doorOpener = collider.GetComponent<DoorOpener>();
-                if (!doorOpener.isMovableByEnemy && Physics.OverlapSphere(transform.position, 0.5f, doorLayer).Length > 0)
-                {
-                    doorOpener.MoveDoor(50000f, 360f, false);
-                    animator.SetTrigger("Attack");
-                }
-                else if (!doorOpener.isMovableByEnemy && !doorOpener.moving) doorOpener.MoveDoor(500f, Random.Range(-10f, 10f), true);
-            }
-        }
+        OpenNearbyDoors();
 
         if (PlayerInSight())
         {
@@ -126,6 +111,19 @@ public class EnemyAI : MonoBehaviour
                 flickerToRemove.light.intensity = 0f;
                 flickeringLights.Remove(flickerToRemove);
             }
+        }
+    }
+
+    private void OpenNearbyDoors()
+    {
+        List<DoorOpener> doorOpeners = GetDoorsInRadius(2f);
+        foreach (var door in doorOpeners)
+        {
+            if (door.isMovableByEnemy && !door.isCloset && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(door.transform.position)) < 0.5f)
+            {
+                SlamDoorOpen(door);
+            }
+            else if (door.isMovableByEnemy && !door.isCloset && !door.moving) door.MoveDoor(Random.Range(200f, 500f), Random.Range(-10f, 10f), true);
         }
     }
 
@@ -297,6 +295,14 @@ public class EnemyAI : MonoBehaviour
                 // TODO Kill Player RAAAAAH
                 print("Player failed to hold breath... Kill Player");
             }
+
+            foreach (var door in GetDoorsInRadius(0.5f))
+            {
+                if (door.isCloset && door.GetOpenPrecentage() > 50f)
+                {
+                    print("DOOR WAY TOO OPEN KILL PLAYER");
+                }
+            }
             yield return null;
         }
 
@@ -312,6 +318,7 @@ public class EnemyAI : MonoBehaviour
             if (PlayerInSight())
             {
                 print("Enemy spotted player while walking away from hiding spot");
+                State = EnemyState.ChasingPlayer;
                 yield break;
             }
             yield return null;
@@ -319,6 +326,53 @@ public class EnemyAI : MonoBehaviour
 
         print("Reached a location away from hiding spot");
         StartCoroutine(WanderRandomly());
+    }
+
+    private void KillPlayerInCloset()
+    {
+        foreach (var door in GetDoorsInRadius(1f))
+        {
+            if (!door.isCloset) continue;
+
+            SlamDoorOpen(door);
+            //TODO Kill Player
+        }
+    }
+
+    private void SlamDoorOpen(DoorOpener door)
+    {
+        door.MoveDoor(50000f, 360f, false);
+        animator.SetTrigger("Attack");
+    }
+
+    public void RandomChanceOpenDoor(int chance)
+    {
+        int openDoorChance = 10;
+        int openDoorRoll = Random.Range(0, 100);
+        bool openDoorSligtly = openDoorRoll < openDoorChance;
+
+        if (!openDoorSligtly) return;
+
+        List<DoorOpener> doors = GetDoorsInRadius(1f);
+        foreach (var door in doors)
+        {
+            if (door.isCloset) continue;
+
+            door.MoveDoor(Random.Range(100f, 200f), Random.Range(5f, 20f), true);
+        }
+    }
+
+    private List<DoorOpener> GetDoorsInRadius(float radius)
+    {
+        List<DoorOpener> doorOpeners = new List<DoorOpener>();
+        Collider[] doorsColliders = Physics.OverlapSphere(transform.position, radius, doorLayer);
+        foreach (var collider in doorsColliders)
+        {
+            if (collider.TryGetComponent(out DoorOpener opener))
+            doorOpeners.Add(opener);
+        }
+
+        return doorOpeners;
     }
 
     public Vector3 RandomNavmeshLocation(float radius)
