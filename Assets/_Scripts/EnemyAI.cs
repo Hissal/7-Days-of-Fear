@@ -27,6 +27,8 @@ public class EnemyAI : MonoBehaviour
 
     private List<LightFlicker> flickeringLights = new List<LightFlicker>();
 
+    private bool listening;
+
     private void Start()
     {
         playerT = GameManager.Instance.playerTransform;
@@ -258,7 +260,6 @@ public class EnemyAI : MonoBehaviour
         print("Reached Hiding Spot... STARING");
         animator.SetTrigger("Stare");
         float timeStaring = 0f;
-        float safeTimeBeforeCanKill = 1f;
 
         int coinFlip = Random.Range(0, 2);
         int coinFlip2 = Random.Range(0, 2);
@@ -290,7 +291,7 @@ public class EnemyAI : MonoBehaviour
                 if (transform.rotation == desiredRotation) doneRotating = true;
             }
 
-            if (GameManager.Instance.IsPlayerHoldingBreath() == false && timeStaring >= safeTimeBeforeCanKill)
+            if (GameManager.Instance.IsPlayerHoldingBreath() == false && listening)
             {
                 // TODO Kill Player RAAAAAH
                 print("Player failed to hold breath... Kill Player");
@@ -347,7 +348,7 @@ public class EnemyAI : MonoBehaviour
 
     public void RandomChanceOpenDoor(int chance)
     {
-        int openDoorChance = 10;
+        int openDoorChance = chance;
         int openDoorRoll = Random.Range(0, 100);
         bool openDoorSligtly = openDoorRoll < openDoorChance;
 
@@ -360,6 +361,15 @@ public class EnemyAI : MonoBehaviour
 
             door.MoveDoor(Random.Range(100f, 200f), Random.Range(5f, 20f), true);
         }
+    }
+
+    public void Listen()
+    {
+        listening = true;
+    }
+    public void StopListen()
+    {
+        listening = false;
     }
 
     private List<DoorOpener> GetDoorsInRadius(float radius)
