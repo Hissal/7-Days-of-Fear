@@ -224,30 +224,30 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(WanderRandomly());
     }
 
-    public void PlayerEnteredHidingSpot(Vector3 locationToWalkTo)
+    public void PlayerEnteredHidingSpot(Transform closetFront)
     {
         float distanceToPlayer = Vector3.Distance(playerT.position, transform.position);
 
         if (distanceToPlayer > sightRange) return;
 
-        print("Enemy Knows Player Entered Hiding Spot " + locationToWalkTo);
+        print("Enemy Knows Player Entered Hiding Spot " + closetFront);
 
         // TODO Kill Player Upon Reaching The Hiding Spot
         if (distanceToPlayer <= nearSightRange && State == EnemyState.ChasingPlayer)
         {
-            WalkToHidingSpot(locationToWalkTo);
+            WalkToHidingSpot(closetFront.position, Quaternion.Inverse(closetFront.rotation));
             print("Kill PLayer Upon Reaching The Hiding Spot");
         } 
-        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(locationToWalkTo);
+        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(closetFront.position, Quaternion.Inverse(closetFront.rotation));
     }
-    private void WalkToHidingSpot(Vector3 locationToWalkTo)
+    private void WalkToHidingSpot(Vector3 locationToWalkTo, Quaternion desiredRotation)
     {
         print("Walking to hiding spot");
 
         StopAllCoroutines();
-        StartCoroutine(WalkToHidingSpotSequence(locationToWalkTo));
+        StartCoroutine(WalkToHidingSpotSequence(locationToWalkTo, desiredRotation));
     }
-    private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo)
+    private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo, Quaternion desiredRotation)
     {
         State = EnemyState.PlayerHidingSequence;
 
@@ -260,12 +260,14 @@ public class EnemyAI : MonoBehaviour
         print("Reached Hiding Spot... STARING");
         animator.SetTrigger("Stare");
         float timeStaring = 0f;
-        float safeTimeBeforeCanKill = 0.5f;
+        float safeTimeBeforeCanKill = 1f;
 
-        int coinFlip = Random.Range(1, 2);
-        int coinFlip2 = Random.Range(1, 2);
+        int coinFlip = Random.Range(0, 2);
+        int coinFlip2 = Random.Range(0, 2);
         bool stare2 = coinFlip == 1;
         bool stare3 = coinFlip2 == 1;
+        bool doneRotating = false;
+        Quaternion startRotation = transform.rotation;
 
         animator.SetBool("Stare2", stare2);
         animator.SetBool("Stare3", stare3);
@@ -274,12 +276,21 @@ public class EnemyAI : MonoBehaviour
 
         while (!animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
         {
-            // Stare lolxd
-            Vector3 desiredRotation = playerT.position - transform.position;
-            desiredRotation.y = 0;
-            desiredRotation.Normalize();
-            //transform.rotation = Quaternion.Euler(Vector3.RotateTowards(transform.rotation.eulerAngles, desiredRotation, 1f, 1f));
+            // Stare lolxd     
             timeStaring += Time.deltaTime;
+
+            //desiredRotation.x = 0;
+            //desiredRotation.z = 0;
+            //desiredRotation.Normalize();
+
+            if (!doneRotating)
+            {
+                // Rotate to toward closet
+                print("Rotating to: " + desiredRotation.eulerAngles);
+                float precentageDone = timeStaring / 1f;
+                transform.rotation = Quaternion.Lerp(startRotation, desiredRotation, precentageDone);
+                if (transform.rotation == desiredRotation) doneRotating = true;
+            }
 
             if (GameManager.Instance.IsPlayerHoldingBreath() == false && timeStaring >= safeTimeBeforeCanKill)
             {

@@ -8,14 +8,14 @@ public class HidingSpot : MonoBehaviour
     [SerializeField] private GameObject miniGame;
     [SerializeField, Tooltip("Location For Enemy To Walk To")] private Transform front;
 
-    public event Action<Vector3> onPlayerEnter;
+    public event Action<Transform> onPlayerEnter;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.transform == GameManager.Instance.playerTransform)
         {
             miniGame.SetActive(true);
-            onPlayerEnter.Invoke(front.position);
+            onPlayerEnter.Invoke(front);
         }
     }
 
