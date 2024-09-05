@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,6 +21,10 @@ public class GameManager : MonoBehaviour
     private bool cursorVisibleBeforePause;
 
     private CursorLockMode lockModeBeforePause;
+
+    public bool isPlayerDead { get; private set; }
+
+    [SerializeField] private PlayableDirector director;
 
     private int currentDay;
     public int GetCurrentDay()
@@ -60,6 +65,8 @@ public class GameManager : MonoBehaviour
 
     public void Pause()
     {
+        if (isPlayerDead) return;
+
         paused = true;
         timeScaleBeforePause = Time.timeScale;
         Time.timeScale = 0;
@@ -84,6 +91,14 @@ public class GameManager : MonoBehaviour
         pauseScreen.SetActive(false);
     }
 
+    public void KillPlayer()
+    {
+        isPlayerDead = true;
+        TakeAwayPlayerControl();
+        StunEnemy(-1);
+        director.Play();
+    }
+
     public void TakeAwayPlayerControl()
     {
         playerController.canMove = false;
@@ -96,6 +111,15 @@ public class GameManager : MonoBehaviour
         playerInteractionHandler.canInteract = true;
     }
 
+    public void StunEnemyWithDelay(float delay, float time)
+    {
+        StartCoroutine(StunAfterDelay());
+        IEnumerator StunAfterDelay()
+        {
+            yield return new WaitForSeconds(delay);
+            StunEnemy(time);
+        }
+    }
     public void StunEnemy(float time)
     {
         enemyAI.Stun(time);

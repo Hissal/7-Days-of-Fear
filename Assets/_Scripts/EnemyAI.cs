@@ -10,7 +10,7 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField] private float sightRange;
     [SerializeField] private float nearSightRange;
-    [SerializeField] private float killRadius;
+    [SerializeField] private float killRange;
 
     private Vector3 playerPositionSnapshot;
     private bool playerWasInSight;
@@ -28,6 +28,9 @@ public class EnemyAI : MonoBehaviour
     private List<LightFlicker> flickeringLights = new List<LightFlicker>();
 
     private bool listening;
+    private HidingSpot playersCurrentHidingSpot;
+
+    private bool killPlayer;
 
     private void Start()
     {
@@ -54,9 +57,10 @@ public class EnemyAI : MonoBehaviour
         {
             WalkTowardPlayer();
             State = EnemyState.ChasingPlayer;
-            if (Physics.OverlapSphere(transform.position, killRadius, playerLayer).Length > 0)
+            if (Vector3.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) < killRange && !killPlayer)
             {
                 //print("Player In Kill Radius.. KILL PLAYER");
+                KillPlayer();
             }
         }
         else if (playerWasInSight == true)
@@ -224,13 +228,26 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(WanderRandomly());
     }
 
-    public void PlayerEnteredHidingSpot(Transform closetFront)
+    private void PlayerLeftHidingSpot(HidingSpot hidingSpot)
     {
+        if (playersCurrentHidingSpot == hidingSpot)
+        {
+            playersCurrentHidingSpot = null;
+        }
+        hidingSpot.onPlayerExit -= PlayerLeftHidingSpot;
+    }
+
+    public void PlayerEnteredHidingSpot(Transform closetFront, HidingSpot hidingSpot)
+    {
+        playersCurrentHidingSpot = hidingSpot;
+
         float distanceToPlayer = Vector3.Distance(playerT.position, transform.position);
 
         if (distanceToPlayer > sightRange) return;
 
         print("Enemy Knows Player Entered Hiding Spot " + closetFront);
+
+        hidingSpot.onPlayerExit += PlayerLeftHidingSpot;
 
         // TODO Kill Player Upon Reaching The Hiding Spot
         if (distanceToPlayer <= nearSightRange && State == EnemyState.ChasingPlayer)
@@ -268,6 +285,16 @@ public class EnemyAI : MonoBehaviour
         bool doneRotating = false;
         Quaternion startRotation = transform.rotation;
 
+        float timeToMoveDoor = Random.Range(1f, 15f);
+        bool movedDoor = false;
+        float timeToMoveDoor2 = Random.Range(1f, 15f);
+        bool movedDoor2 = false;
+
+        float stareSpeed1 = Random.Range(0.66f, 1f);
+        float stareSpeed2 = Random.Range(0.66f, 1f);
+
+        stareSpeed1 = 0.66f;
+
         animator.SetBool("Stare2", stare2);
         animator.SetBool("Stare3", stare3);
 
@@ -275,12 +302,33 @@ public class EnemyAI : MonoBehaviour
 
         while (!animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
         {
+
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Stare"))
+            {
+                animator.speed = stareSpeed1;
+            }
+            else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Stare2"))
+            {
+                animator.speed = stareSpeed2;
+            }
+            else
+            {
+                animator.speed = 1f;
+            }
+
             // Stare lolxd     
             timeStaring += Time.deltaTime;
 
-            //desiredRotation.x = 0;
-            //desiredRotation.z = 0;
-            //desiredRotation.Normalize();
+            if (!movedDoor && timeStaring > timeToMoveDoor)
+            {
+                RandomChanceOpenHidingSpotDoors(50);
+                movedDoor = true;
+            }
+            if (!movedDoor2 && timeStaring > timeToMoveDoor2)
+            {
+                RandomChanceOpenHidingSpotDoors(25);
+                movedDoor2 = true;
+            }
 
             if (!doneRotating)
             {
@@ -291,26 +339,31 @@ public class EnemyAI : MonoBehaviour
                 if (transform.rotation == desiredRotation) doneRotating = true;
             }
 
-            if (GameManager.Instance.IsPlayerHoldingBreath() == false && listening)
+            if (GameManager.Instance.IsPlayerHoldingBreath() == false && listening && !killPlayer)
             {
-                // TODO Kill Player RAAAAAH
+                KillPlayerInCloset();
                 print("Player failed to hold breath... Kill Player");
             }
 
-            foreach (var door in GetDoorsInRadius(0.5f))
+            if (playersCurrentHidingSpot == null)
             {
-                if (door.isCloset && door.GetOpenPrecentage() > 50f)
+                print("HidingSpot is null");
+                continue;
+            }
+            foreach (var door in playersCurrentHidingSpot.hidingSpotDoors)
+            {
+                if (door.GetOpenPrecentage() > 0.4f && !killPlayer)
                 {
+                    KillPlayerInCloset();
                     print("DOOR WAY TOO OPEN KILL PLAYER");
                 }
             }
             yield return null;
         }
 
-        // TODO Add chance to come back to stare again
-        // TODO Walk Away From Hiding Spot (start by walking to the side out of sight of player)
         print("Finished Staring... Walking Away");
 
+        animator.speed = 1f;
         Vector3 randomLocation = RandomNavmeshLocation(10f);
         agent.SetDestination(randomLocation);
 
@@ -331,22 +384,35 @@ public class EnemyAI : MonoBehaviour
 
     private void KillPlayerInCloset()
     {
-        foreach (var door in GetDoorsInRadius(1f))
+        if (playersCurrentHidingSpot == null)
         {
-            if (!door.isCloset) continue;
-
-            SlamDoorOpen(door);
-            //TODO Kill Player
+            print("HidingSpot is null");
+            return;
         }
+        foreach (var door in playersCurrentHidingSpot.hidingSpotDoors)
+        {
+            SlamDoorOpen(door);
+        }
+
+        KillPlayer();
+    }
+
+    private void KillPlayer()
+    {
+        killPlayer = true;
+        GameManager.Instance.KillPlayer();
+
+        // TODO Play Death Sequence
     }
 
     private void SlamDoorOpen(DoorOpener door)
     {
+        if (door.GetOpenPrecentage() > 0.95f) return;
         door.MoveDoor(50000f, 360f, false);
         animator.SetTrigger("Attack");
     }
 
-    public void RandomChanceOpenDoor(int chance)
+    public void RandomChanceOpenHidingSpotDoors(int chance)
     {
         int openDoorChance = chance;
         int openDoorRoll = Random.Range(0, 100);
@@ -354,12 +420,17 @@ public class EnemyAI : MonoBehaviour
 
         if (!openDoorSligtly) return;
 
-        List<DoorOpener> doors = GetDoorsInRadius(1f);
-        foreach (var door in doors)
-        {
-            if (door.isCloset) continue;
+        print("Moving Current Hiding Spot Doors");
 
-            door.MoveDoor(Random.Range(100f, 200f), Random.Range(5f, 20f), true);
+        if (playersCurrentHidingSpot == null)
+        {
+            print("HidingSpot is null");
+            return;
+        }
+
+        foreach (var door in playersCurrentHidingSpot.hidingSpotDoors)
+        {
+            door.MoveDoor(Random.Range(100f, 300f), Random.Range(5f, 20f), true);
         }
     }
 
@@ -414,7 +485,7 @@ public class EnemyAI : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(transform.position, killRadius);
+        Gizmos.DrawWireSphere(transform.position, killRange);
 
         if (!Application.isEditor || !Application.isPlaying) return;
 
@@ -426,5 +497,13 @@ public class EnemyAI : MonoBehaviour
         if (PlayerInSight() && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) <= nearSightRange) Gizmos.color = Color.red;
         else Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, transform.position + (playerT.position - transform.position).normalized * nearSightRange);
+    }
+
+    private void OnDisable()
+    {
+        if (playersCurrentHidingSpot != null)
+        {
+            playersCurrentHidingSpot.onPlayerExit -= PlayerLeftHidingSpot;
+        }
     }
 }
