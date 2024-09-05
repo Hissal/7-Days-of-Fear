@@ -42,8 +42,8 @@ public class GameManager : MonoBehaviour
     {
         HideCursor();
 
-        MentalHealth.Instance.OnMentalHealthReachZero += EnableEnemy;
-        DisableEnemy();
+        //MentalHealth.Instance.OnMentalHealthReachZero += EnableEnemy;
+        //DisableEnemy();
 
         foreach (var hidingSpot in hidingSpots)
         {
@@ -150,19 +150,19 @@ public class GameManager : MonoBehaviour
         Cursor.visible = false;
     }
 
-    private void EnableEnemy()
-    {
-        UnStunEnemy();
-        enemyAI.transform.position = enemySpawnPosition.position;
-        enemyAI.transform.rotation = enemySpawnPosition.rotation;
-        enemyAI.Init();
-    }
-    private void DisableEnemy()
-    {
-        StunEnemy(-1f);
-        MentalHealth.Instance.IncreaseMentalHealth(10f);
-        enemyAI.SetPosition(enemyDisabledPosition.position);
-    }
+    //private void EnableEnemy()
+    //{
+    //    UnStunEnemy();
+    //    enemyAI.transform.position = enemySpawnPosition.position;
+    //    enemyAI.transform.rotation = enemySpawnPosition.rotation;
+    //    enemyAI.Init();
+    //}
+    //private void DisableEnemy()
+    //{
+    //    StunEnemy(-1f);
+    //    MentalHealth.Instance.IncreaseMentalHealth(10f);
+    //    enemyAI.SetPosition(enemyDisabledPosition.position);
+    //}
 
     public static GameManager Instance;
 
