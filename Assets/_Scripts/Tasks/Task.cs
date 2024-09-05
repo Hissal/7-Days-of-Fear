@@ -15,8 +15,8 @@ public class Task
     public event Action<Task> OnSuccess = delegate { };
     public event Action<Task> OnFail = delegate { };
 
-    [SerializeField] private float mentalHealthGainedOnSuccess;
-    [SerializeField] private float mentalHealthLostOnFail;
+    [SerializeField] private float mentalHealthGainedOnSuccess = 10f;
+    [SerializeField] private float mentalHealthLostOnFail = 10f;
 
     public virtual void BeginTask()
     {

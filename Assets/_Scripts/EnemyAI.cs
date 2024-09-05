@@ -37,6 +37,14 @@ public class EnemyAI : MonoBehaviour
         playerT = GameManager.Instance.playerTransform;
         if (agent == null) agent = GetComponent<NavMeshAgent>();
     }
+    public void Init()
+    {
+        StartCoroutine(WanderRandomly());
+    }
+    public void SetPosition(Vector3 position)
+    {
+        transform.position = position;
+    }
 
     private void Update()
     {
@@ -48,16 +56,19 @@ public class EnemyAI : MonoBehaviour
         if (!AgentReachedDestiantion()) animator.SetBool("Moving", true);
         else animator.SetBool("Moving", false);
 
-        if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
+        if (State == EnemyState.Stunned) animator.SetBool("Moving", false);
 
         FlickerNearbyLights();
+
+        if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
+
         OpenNearbyDoors();
 
         if (PlayerInSight())
         {
             WalkTowardPlayer();
             State = EnemyState.ChasingPlayer;
-            if (Vector3.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) < killRange && !killPlayer)
+            if (Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) < killRange && !killPlayer)
             {
                 //print("Player In Kill Radius.. KILL PLAYER");
                 KillPlayer();

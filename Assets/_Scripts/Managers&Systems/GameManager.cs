@@ -5,16 +5,22 @@ using UnityEngine.Playables;
 
 public class GameManager : MonoBehaviour
 {
+    [field: Header("Player")]
     [field: SerializeField] public Transform playerTransform { get; private set; }
     [field: SerializeField] public FirstPersonController playerController { get; private set; }
     [SerializeField] private InteractionHandler playerInteractionHandler;
 
+    [field: Header("Enemy")]
     [field: SerializeField] public EnemyAI enemyAI { get; private set; }
+    [SerializeField] private Transform enemySpawnPosition;
+    [SerializeField] private Transform enemyDisabledPosition;
 
-    [SerializeField] private GameObject pauseScreen;
-
+    [field: Header("Hiding")]
     [SerializeField] private List<HidingSpot> hidingSpots;
     [SerializeField] private BreathHoldingMinigame breathHoldingMinigame;
+
+    [field: Header("Other")]
+    [SerializeField] private GameObject pauseScreen;
 
     public bool paused { get; private set; }
     private float timeScaleBeforePause;
@@ -34,6 +40,11 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        HideCursor();
+
+        MentalHealth.Instance.OnMentalHealthReachZero += EnableEnemy;
+        DisableEnemy();
+
         foreach (var hidingSpot in hidingSpots)
         {
             hidingSpot.onPlayerEnter += enemyAI.PlayerEnteredHidingSpot;
@@ -74,8 +85,7 @@ public class GameManager : MonoBehaviour
         lockModeBeforePause = Cursor.lockState;
         cursorVisibleBeforePause = Cursor.visible;
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        ShowCursor();
 
         pauseScreen.transform.SetAsLastSibling();
         pauseScreen.SetActive(true);
@@ -127,6 +137,31 @@ public class GameManager : MonoBehaviour
     public void UnStunEnemy()
     {
         enemyAI.UnStun();
+    }
+
+    public void ShowCursor()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+    public void HideCursor()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    private void EnableEnemy()
+    {
+        UnStunEnemy();
+        enemyAI.transform.position = enemySpawnPosition.position;
+        enemyAI.transform.rotation = enemySpawnPosition.rotation;
+        enemyAI.Init();
+    }
+    private void DisableEnemy()
+    {
+        StunEnemy(-1f);
+        MentalHealth.Instance.IncreaseMentalHealth(10f);
+        enemyAI.SetPosition(enemyDisabledPosition.position);
     }
 
     public static GameManager Instance;

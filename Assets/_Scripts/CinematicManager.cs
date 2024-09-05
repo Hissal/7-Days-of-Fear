@@ -13,7 +13,7 @@ public class CinematicManager : MonoBehaviour
     {
         GameManager.Instance.StunEnemy(-1);
         GameManager.Instance.TakeAwayPlayerControl();
-        if(cinematic.isFirstCinematicOfChain) MoveAndRotatePlayerToStartOfCinematic(cinematic);
+        if(cinematic.isFirstCinematicOfChain && cinematic.requireStartpositions) MoveAndRotatePlayerToStartOfCinematic(cinematic);
         else
         {
             cinematic.gameObject.SetActive(true);

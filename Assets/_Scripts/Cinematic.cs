@@ -11,6 +11,7 @@ public class Cinematic : MonoBehaviour
     [SerializeField] private bool playOnStart;
     private bool played;
     [SerializeField] private bool repeatable;
+    [field: SerializeField] public bool requireStartpositions { get; private set; } = true;
 
     [field: Header("PlayerStartProperties (Only matters if isFirstCinematicOfChain is true)")]
     [field: SerializeField] public Vector3 playerStartPosition { get; private set; }
