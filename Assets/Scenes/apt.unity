@@ -5483,7 +5483,8 @@ MonoBehaviour:
   <playerController>k__BackingField: {fileID: 0}
   playerInteractionHandler: {fileID: 0}
   <enemyAI>k__BackingField: {fileID: 0}
-  pauseScreen: {fileID: 0}
+  enemySpawnPosition: {fileID: 0}
+  enemyDisabledPosition: {fileID: 0}
   hidingSpots:
   - {fileID: 0}
   - {fileID: 0}
@@ -5495,6 +5496,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   breathHoldingMinigame: {fileID: 0}
+  pauseScreen: {fileID: 0}
+  director: {fileID: 0}
 --- !u!1001 &606381257
 PrefabInstance:
   m_ObjectHideFlags: 0
