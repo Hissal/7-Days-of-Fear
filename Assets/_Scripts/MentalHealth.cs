@@ -17,6 +17,8 @@ public class MentalHealth : MonoBehaviour
 
     public event Action OnMentalHealthReachZero = delegate { };
 
+    private bool isMentalHealthZero;
+
     private void Update()
     {
        if (currentMentalHealth != 0f) ReduceMentalHealth(mentalHealthDrainPerSecond * Time.deltaTime);
@@ -26,9 +28,14 @@ public class MentalHealth : MonoBehaviour
     {
         currentMentalHealth -= amount;
 
-        if (currentMentalHealth <= 0)
+        if (currentMentalHealth <= 0 && !isMentalHealthZero)
         {
+            isMentalHealthZero = true;
             OnMentalHealthReachZero?.Invoke();
+        }
+        else if (currentMentalHealth > 0)
+        {
+            isMentalHealthZero = false;
         }
 
         UpdateVisual();

@@ -74,7 +74,7 @@ public class TaskObject : Interactable
         BeginTask();
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         task.OnSuccess -= SucceedTask;
         task.OnFail -= FailTask;

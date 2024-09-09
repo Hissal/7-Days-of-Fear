@@ -13,7 +13,7 @@ public class ObjectEnabler : MonoBehaviour
     [SerializeField] private bool day6 = true;
     [SerializeField] private bool day7 = true;
 
-    private void Start()
+    private void Awake()
     {
         if (meshRenderer == null) meshRenderer = GetComponent<MeshRenderer>();
 

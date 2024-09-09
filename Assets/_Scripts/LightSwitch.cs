@@ -5,30 +5,37 @@ using UnityEngine;
 public class LightSwitch : Interactable
 {
     [SerializeField] private List<Light> attatchedLights;
-
-    [SerializeField] private float lightIntensity;
+    private List<LightFlicker> lightFlickers = new List<LightFlicker>();
 
     public override void OnInteract()
     {
-        bool turnOn = false;
-
-        foreach (var light in attatchedLights)
+        if (lightFlickers.Count == 0)
         {
-            if (light.intensity == 0f)
+            foreach (var light in attatchedLights)
             {
-                turnOn = true;
+                lightFlickers.Add(light.GetComponent<LightFlicker>());
             }
         }
 
+        bool turnOn = true;
+
         foreach (var light in attatchedLights)
+        {
+            if (light.intensity != 0f)
+            {
+                turnOn = false;
+            }
+        }
+
+        foreach (var light in lightFlickers)
         {
             if (turnOn)
             {
-                light.intensity = lightIntensity;
+                light.TurnOnLight();
             }
             else
             {
-                light.intensity = 0f;
+                light.TurnOffLight();
             }
         }
 

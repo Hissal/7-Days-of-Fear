@@ -7,12 +7,17 @@ public abstract class TaskAction : MonoBehaviour
 {
     public Task task;
 
+    public virtual void Init()
+    {
+
+    }
+
     protected virtual void TaskSuccess()
     {
         task.TaskSuccess();
         print("TaskSuccess");
 
-        DestroyTaskAction();
+        DisableTaskAction();
     }
 
     protected virtual void TaskFail()
@@ -20,11 +25,11 @@ public abstract class TaskAction : MonoBehaviour
         task.TaskFail();
         print("TaskFail");
 
-        DestroyTaskAction();
+        DisableTaskAction();
     }
 
-    private void DestroyTaskAction()
+    protected void DisableTaskAction()
     {
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }

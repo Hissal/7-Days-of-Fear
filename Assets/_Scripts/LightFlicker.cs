@@ -7,12 +7,14 @@ public class LightFlicker : MonoBehaviour
     [Tooltip("External light to flicker; you can leave this null if you attach script to a light")]
     public new Light light;
     [Tooltip("Minimum random light intensity")]
-    public float minIntensity = 0f;
+    public float flickerMinIntensity = 0f;
     [Tooltip("Maximum random light intensity")]
-    public float maxIntensity = 1f;
+    public float flickerMaxIntensity = 1f;
     [Tooltip("How much to smooth out the randomness; lower values = sparks, higher = lantern")]
     [Range(1, 50)]
     public int smoothing = 5;
+
+    private float lightIntenisty;
 
     // Continuous average calculation via FIFO queue
     // Saves us iterating every time we update, we just change by the delta
@@ -40,6 +42,9 @@ public class LightFlicker : MonoBehaviour
         {
             light = GetComponent<Light>();
         }
+
+        lightIntenisty = light.intensity;
+        //TurnOffLight();
     }
 
     void Update()
@@ -59,11 +64,20 @@ public class LightFlicker : MonoBehaviour
         }
 
         // Generate random new item, calculate new average
-        float newVal = Random.Range(minIntensity, maxIntensity);
+        float newVal = Random.Range(flickerMinIntensity, flickerMaxIntensity);
         smoothQueue.Enqueue(newVal);
         lastSum += newVal;
 
         // Calculate new smoothed average
         light.intensity = lastSum / (float)smoothQueue.Count;
+    }
+
+    public void TurnOffLight()
+    {
+        light.intensity = 0f;
+    }
+    public void TurnOnLight()
+    {
+        light.intensity = lightIntenisty;
     }
 }

@@ -32,22 +32,39 @@ public class EnemyAI : MonoBehaviour
 
     private bool killPlayer;
 
+    private bool active;
+
     private void Start()
     {
+        active = false;
         playerT = GameManager.Instance.playerTransform;
         if (agent == null) agent = GetComponent<NavMeshAgent>();
     }
-    public void Init()
+    public void Activate(Vector3 position, Quaternion rotation)
     {
-        StartCoroutine(WanderRandomly());
+        if (active) return;
+        agent.enabled = true;
+        UnStun();
+        SetPosition(position);
+        active = true;
+    }
+    public void Disable(Vector3 position)
+    {
+        Stun(-1);
+        SetPosition(position);
+        agent.enabled = false;
+        active = false;
+        StopAllCoroutines();
     }
     public void SetPosition(Vector3 position)
     {
-        transform.position = position;
+        agent.Warp(position);
     }
 
     private void Update()
     {
+        if (!active) return;
+
         if (agent.isOnNavMesh == false)
         {
             throw new System.Exception("Enemy is not on navmesh " + gameObject);
