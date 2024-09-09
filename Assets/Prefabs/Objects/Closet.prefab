@@ -469,6 +469,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   miniGame: {fileID: 0}
   front: {fileID: 1136120894259403023}
+  <enemyRange>k__BackingField: 0.3
   <hidingSpotDoors>k__BackingField:
   - {fileID: 6732169418698153752}
   - {fileID: 3663596182455388979}

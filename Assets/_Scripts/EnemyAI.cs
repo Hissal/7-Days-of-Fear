@@ -5,6 +5,7 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
+    [SerializeField] private Transform RaycastPosition;
     [SerializeField] private NavMeshAgent agent;
     private Transform playerT;
 
@@ -210,10 +211,16 @@ public class EnemyAI : MonoBehaviour
 
     private bool PlayerInSight()
     {
-        if (Physics.Raycast(transform.position, (playerT.position - transform.position).normalized, out RaycastHit hit, sightRange, seenLayers))
+        if (Physics.Raycast(RaycastPosition.position, (playerT.position - RaycastPosition.position).normalized, out RaycastHit hit, sightRange, seenLayers))
         {
-            if (hit.transform.parent == playerT)
+            if (hit.collider.gameObject.layer == playerLayer)
             {
+                print("Player In Sight");
+                playerWasInSight = true;
+                return true;
+            }else if (hit.transform == playerT)
+            {
+                print("Player In Sight");
                 playerWasInSight = true;
                 return true;
             }
@@ -277,13 +284,24 @@ public class EnemyAI : MonoBehaviour
 
         hidingSpot.onPlayerExit += PlayerLeftHidingSpot;
 
+        float range = hidingSpot.enemyRange;
+        Vector3 locationToWalkTo = closetFront.position + closetFront.right * Random.Range(-range, range);
+
+        // Calculates a rotation to face between straight at closet and playerposition randomly
+        Vector3 targetPoint = playerT.position;
+        Vector3 directionToTarget = Vector2XZFromVector3(targetPoint) - Vector2XZFromVector3(locationToWalkTo);
+        directionToTarget.y = 0;
+        Quaternion lookAtTarget = Quaternion.LookRotation(directionToTarget);
+        Quaternion inverseRotation = Quaternion.Inverse(closetFront.rotation);
+        Quaternion desiredRotation = Quaternion.Lerp(lookAtTarget, inverseRotation, Random.Range(0f, 1f));
+
         // TODO Kill Player Upon Reaching The Hiding Spot
         if (distanceToPlayer <= nearSightRange && State == EnemyState.ChasingPlayer)
         {
-            WalkToHidingSpot(closetFront.position, Quaternion.Inverse(closetFront.rotation));
+            WalkToHidingSpot(locationToWalkTo, desiredRotation);
             print("Kill PLayer Upon Reaching The Hiding Spot");
         } 
-        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(closetFront.position, Quaternion.Inverse(closetFront.rotation));
+        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(locationToWalkTo, desiredRotation);
     }
     private void WalkToHidingSpot(Vector3 locationToWalkTo, Quaternion desiredRotation)
     {
@@ -299,7 +317,14 @@ public class EnemyAI : MonoBehaviour
         playerWasInSight = false;
         agent.SetDestination(locationToWalkTo);
 
-        yield return new WaitUntil(() => Vector2XZFromVector3(transform.position) == Vector2XZFromVector3(locationToWalkTo));
+        yield return new WaitUntil(() => Vector2XZFromVector3(transform.position) == Vector2XZFromVector3(locationToWalkTo) || playersCurrentHidingSpot == null);
+
+        if (playersCurrentHidingSpot == null)
+        {
+            print("HidingSpot is null");
+            StartCoroutine(WanderRandomly());
+            yield break;
+        }
 
         // TODO Stare into closet
         print("Reached Hiding Spot... STARING");
@@ -520,11 +545,11 @@ public class EnemyAI : MonoBehaviour
         if (PlayerInSight()) Gizmos.color = Color.red;
         else Gizmos.color = Color.green;
 
-        Gizmos.DrawLine(transform.position, transform.position + (playerT.position - transform.position).normalized * sightRange);
+        Gizmos.DrawLine(RaycastPosition.position, RaycastPosition.position + (playerT.position - RaycastPosition.position).normalized * sightRange);
 
-        if (PlayerInSight() && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) <= nearSightRange) Gizmos.color = Color.red;
+        if (PlayerInSight() && Vector2.Distance(Vector2XZFromVector3(RaycastPosition.position), Vector2XZFromVector3(playerT.position)) <= nearSightRange) Gizmos.color = Color.red;
         else Gizmos.color = Color.green;
-        Gizmos.DrawLine(transform.position, transform.position + (playerT.position - transform.position).normalized * nearSightRange);
+        Gizmos.DrawLine(RaycastPosition.position, RaycastPosition.position + (playerT.position - RaycastPosition.position).normalized * nearSightRange);
     }
 
     private void OnDisable()
