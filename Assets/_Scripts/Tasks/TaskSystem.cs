@@ -36,6 +36,8 @@ public class TaskSystem : MonoBehaviour
 
     private void ShowTask(Task task, GameObject taskUIObject, Vector2 positionOnScreen)
     {
+        Reticle.HideReticle_Static();
+
         TaskAction taskAction = taskUIObject.GetComponent<TaskAction>();
         taskAction.transform.localPosition = positionOnScreen;
         taskAction.task = task;
@@ -60,6 +62,8 @@ public class TaskSystem : MonoBehaviour
 
     private void TaskDone(Task task)
     {
+        Reticle.ShowReticle_Static();
+
         task.OnSuccess -= TaskSuccess;
         task.OnFail -= TaskFail;
 

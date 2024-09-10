@@ -7,18 +7,63 @@ public class Reticle : MonoBehaviour
 {
     private static Reticle instance;
 
-    [SerializeField] private Image reticle;
-    [SerializeField] private Sprite focusedReticle;
-    [SerializeField] private Sprite unFocusedReticle;
+    [SerializeField] private GameObject focusedReticle;
+    [SerializeField] private GameObject unFocusedReticle;
+    [SerializeField] private GameObject grabbingReticle;
+
+    private Image focusedImage;
+    private Image unFocusedImage;
+    private Image grabbingImage;
+
+    private void Start()
+    {
+        focusedImage = focusedReticle.GetComponent<Image>();
+        unFocusedImage = unFocusedReticle.GetComponent<Image>();
+        grabbingImage = grabbingReticle.GetComponent<Image>();
+    }
 
     private void Focus()
     {
-        reticle.sprite = focusedReticle;
+        focusedImage.enabled = true;
+        unFocusedImage.enabled = false;
+        grabbingImage.enabled = false;
     }
 
     private void UnFocus()
     {
-        reticle.sprite = unFocusedReticle;
+        unFocusedImage.enabled = true;
+        focusedImage.enabled = false;
+        grabbingImage.enabled = false;
+    }
+
+    private void Grab()
+    {
+        grabbingImage.enabled = true;
+        focusedImage.enabled = false;
+        unFocusedImage.enabled = false;
+    }
+
+    private void HideReticle()
+    {
+        focusedReticle.SetActive(false);
+        unFocusedReticle.SetActive(false);
+        grabbingReticle.SetActive(false);
+    }
+
+    private void ShowReticle()
+    {
+        focusedReticle.SetActive(true);
+        unFocusedReticle.SetActive(true);
+        grabbingReticle.SetActive(true);
+    }
+
+    public static void HideReticle_Static()
+    {
+        instance.HideReticle();
+    }
+    public static void ShowReticle_Static()
+    {
+        instance.ShowReticle();
     }
 
     public static void Focus_Static()
@@ -31,6 +76,11 @@ public class Reticle : MonoBehaviour
         instance.UnFocus();
     }
 
+    public static void Grab_Static()
+    {
+        instance.Grab();
+    }
+
     private void Awake()
     {
         if (instance != null)
@@ -40,7 +90,6 @@ public class Reticle : MonoBehaviour
         else
         {
             instance = this;
-            reticle.sprite = unFocusedReticle;
         }
     }
 }

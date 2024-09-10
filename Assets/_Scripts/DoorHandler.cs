@@ -6,6 +6,7 @@ public class DoorHandler : MonoBehaviour
 {
     [SerializeField] private Camera cam;
     [SerializeField] private float doorMoveSpeed;
+    [SerializeField] private float grabDistance = 3f;
     private Transform doorToBeSelected;
     private Transform selectedDoor;
     private HingeJoint joint;
@@ -24,16 +25,19 @@ public class DoorHandler : MonoBehaviour
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, 3, doorLayer) && !selectedDoor)
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out hit, grabDistance) && !selectedDoor)
         {
-            if (doorToBeSelected == null || hit.collider.gameObject.GetInstanceID() != doorToBeSelected.gameObject.GetInstanceID())
+            if (((1 << hit.collider.gameObject.layer) & doorLayer.value) != 0)
             {
-                hit.collider.TryGetComponent(out joint);
-
-                if (joint)
+                if (doorToBeSelected == null || hit.collider.gameObject.GetInstanceID() != doorToBeSelected.gameObject.GetInstanceID())
                 {
-                    Reticle.Focus_Static();
-                    doorToBeSelected = joint.transform;
+                    hit.collider.TryGetComponent(out joint);
+
+                    if (joint)
+                    {
+                        Reticle.Focus_Static();
+                        doorToBeSelected = joint.transform;
+                    }
                 }
             }
         }
@@ -46,6 +50,7 @@ public class DoorHandler : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0) && doorToBeSelected)
         {
+            Reticle.Grab_Static();
             selectedDoor = doorToBeSelected;
             selectedDoor.GetComponent<DoorOpener>().PlayerMovingDoor();
         }

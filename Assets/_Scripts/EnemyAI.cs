@@ -186,6 +186,8 @@ public class EnemyAI : MonoBehaviour
 
     private IEnumerator WanderRandomly()
     {
+        if (agent.enabled == false) yield break;
+
         State = EnemyState.Wandering;
 
         print("Wandering");
@@ -246,7 +248,7 @@ public class EnemyAI : MonoBehaviour
     public void Stun(float time)
     {
         StopAllCoroutines();
-        agent.isStopped = true;
+        if (agent.enabled == true) agent.isStopped = true;
         State = EnemyState.Stunned;
         if (time < 0) return;
         StartCoroutine(StunRoutine(time));
@@ -259,7 +261,7 @@ public class EnemyAI : MonoBehaviour
     public void UnStun()
     {
         StopAllCoroutines();
-        agent.isStopped = false;
+        if (agent.enabled == true) agent.isStopped = false;
         StartCoroutine(WanderRandomly());
     }
 

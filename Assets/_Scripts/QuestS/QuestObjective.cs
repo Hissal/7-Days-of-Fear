@@ -8,24 +8,31 @@ public class QuestObjective : MonoBehaviour
     public bool active { get; private set; }
     public event System.Action<QuestObjective> OnObjectiveComplete = delegate { };
     public event System.Action OnObjectiveHighlight = delegate { };
-    public event System.Action OnObjectiveActivated = delegate { };
+    public event System.Action<bool> OnObjectiveActivated = delegate { };
+
+    public event System.Action<QuestObjective> OnConditionBroken = delegate { };
 
     public void Activate()
     {
         active = true;
         isComplete = false;
-        OnObjectiveActivated?.Invoke();
+        OnObjectiveActivated?.Invoke(true);
     }
     public void DeActivate()
     {
         active = false;
+        OnObjectiveActivated?.Invoke(false);
     }
 
     public void OnComplete()
     {
         isComplete = true;
-        active = false;
         OnObjectiveComplete?.Invoke(this);
+    }
+
+    public void ConditionBroken()
+    {
+        OnConditionBroken?.Invoke(this);
     }
 
     public void Highlight()

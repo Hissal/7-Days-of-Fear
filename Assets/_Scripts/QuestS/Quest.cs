@@ -11,7 +11,9 @@ public class Quest
     public bool isComplete { get; private set; }
 
     [SerializeField, Tooltip("If true, only one objective is active at a time")]
-    private bool assisted;
+    private bool oneObjectiveAtOnce;
+    [SerializeField, Tooltip("If true, Objectives will be highlighted")]
+    private bool highlightObjectives;
     private QuestObjective currentObjective;
 
     public event System.Action OnObjectiveChanged = delegate { };
@@ -25,7 +27,7 @@ public class Quest
     {
         get
         {
-            if (assisted && currentObjective != null) return currentObjective.description;
+            if (oneObjectiveAtOnce && currentObjective != null) return currentObjective.description;
             return description;
         }
     }
@@ -34,45 +36,37 @@ public class Quest
     {
         activeObjectives = new List<QuestObjective>();
 
-        if (assisted)
+        if (oneObjectiveAtOnce)
         {
             QuestObjective objective = objectives[0];
 
-            objective.OnObjectiveComplete += ObjectiveCompleted;
-            HighlightObjective(objective);
-            objective.Activate();
-            activeObjectives.Add(objective);
-
-            currentObjective = objective;
+            ActivateObjective(objective);
         }
         else
         {
             foreach (QuestObjective objective in objectives)
             {
-                objective.OnObjectiveComplete += ObjectiveCompleted;
-                objective.Activate();
-                activeObjectives.Add(objective);
+                ActivateObjective(objective);
             }
-            currentObjective = null;
-        }
 
-        OnObjectiveChanged?.Invoke();
+            currentObjective = null;
+            OnObjectiveChanged?.Invoke();
+        }
     }
 
     private void HighlightObjective(QuestObjective objective)
     {
-        Debug.Log("Highlighting Objective");
+        Debug.Log("Highlighting Objective: " + objective);
         objective.Highlight();
     }
 
     private void ObjectiveCompleted(QuestObjective objective)
     {
-        Debug.Log("Objective Completed");
+        Debug.Log("Objective Completed: " + objective);
 
-        activeObjectives.Remove(objective);
-        objective.OnObjectiveComplete -= ObjectiveCompleted;
+        DeActivateObjective(objective);
 
-        if (assisted)
+        if (oneObjectiveAtOnce)
         {
             ActivateNextObjective(objective);
         }
@@ -100,18 +94,47 @@ public class Quest
         if (index + 1 < objectives.Count)
         {
             QuestObjective nextObjective = objectives[index + 1];
-            nextObjective.OnObjectiveComplete += ObjectiveCompleted;
-            HighlightObjective(nextObjective);
-            nextObjective.Activate();
-            activeObjectives.Add(objective);
-
-            currentObjective = nextObjective;
-            OnObjectiveChanged?.Invoke();
+            ActivateObjective(nextObjective);
         }
         else
         {
             CompleteQuest();
         }
+    }
+
+    private void ChangeObjective(QuestObjective objective)
+    {
+        if (currentObjective == objective) return;
+
+        Debug.Log("Objective Condition Broken: " + objective);
+
+        DeActivateObjective(currentObjective);
+        objectives.Insert(objectives.IndexOf(currentObjective), objective);
+
+        ActivateObjective(objective);
+    }
+
+    private void ActivateObjective(QuestObjective objective)
+    {
+        if (activeObjectives.Contains(objective)) return;
+
+        objective.OnConditionBroken += ChangeObjective;
+        objective.OnObjectiveComplete += ObjectiveCompleted;
+        if (highlightObjectives) HighlightObjective(objective);
+        objective.Activate();
+        activeObjectives.Add(objective);
+
+        if (!oneObjectiveAtOnce) return;
+
+        currentObjective = objective;
+        OnObjectiveChanged?.Invoke();
+    }
+    private void DeActivateObjective(QuestObjective objective)
+    {
+        objective.OnObjectiveComplete -= ObjectiveCompleted;
+        objective.OnConditionBroken -= ChangeObjective;
+        objective.DeActivate();
+        activeObjectives.Remove(objective);
     }
 
     public void PauseQuest()
@@ -129,24 +152,24 @@ public class Quest
     {
         EndQuest();
 
-        Debug.Log("Quest Completed");
+        Debug.Log("Quest Completed: " + this);
         isComplete = true;
         OnQuestComplete?.Invoke();
         currentObjective = null;
     }
-    
+
     public void EndQuest()
     {
-        if (assisted)
+        if (oneObjectiveAtOnce)
         {
-            currentObjective.OnObjectiveComplete -= ObjectiveCompleted;
+            DeActivateObjective(currentObjective);
             currentObjective = null;
         }
         else
         {
             foreach (QuestObjective objective in objectives)
             {
-                objective.OnObjectiveComplete -= ObjectiveCompleted;
+                DeActivateObjective(objective);
             }
         }
     }

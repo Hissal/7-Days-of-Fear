@@ -19,7 +19,7 @@ public class TaskObject : Interactable
     {
         if (questObjective != null)
         {
-            questObjective.OnObjectiveActivated += ActivateTask;
+            questObjective.OnObjectiveActivated += SetActive;
             questObjective.OnObjectiveHighlight += Highlight;
         }
 
@@ -32,18 +32,13 @@ public class TaskObject : Interactable
         //if (eveningTask) TimeManager.OnMorning += ActivateTask;
     }
 
-    private void ActivateTask()
+    private void SetActive(bool active)
     {
-        active = true;
+        this.active = active;
     }
     private void Highlight()
     {
         outline.enabled = true;
-    }
-
-    private void DeactivateTask()
-    {
-        active = false;
     }
 
     private void BeginTask()
@@ -54,14 +49,14 @@ public class TaskObject : Interactable
     private void SucceedTask(Task task)
     {
         questObjective.OnComplete();
-        DeactivateTask();
+        SetActive(false);
         base.OnLoseFocus();
     }
 
     private void FailTask(Task task)
     {
         questObjective.OnComplete();
-        DeactivateTask();
+        SetActive(false);
         base.OnLoseFocus();
     }
 
@@ -86,10 +81,13 @@ public class TaskObject : Interactable
         BeginTask();
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         task.OnSuccess -= SucceedTask;
         task.OnFail -= FailTask;
+
+        questObjective.OnObjectiveActivated -= SetActive;
+        questObjective.OnObjectiveHighlight -= Highlight;
 
         //if (morningTask) TimeManager.OnMorning -= ActivateTask;
         //if (eveningTask) TimeManager.OnMorning -= ActivateTask;

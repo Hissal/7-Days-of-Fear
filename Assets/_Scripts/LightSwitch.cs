@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,8 @@ public class LightSwitch : Interactable
 {
     [SerializeField] private List<Light> attatchedLights;
     private List<LightFlicker> lightFlickers = new List<LightFlicker>();
+    public bool LightsOn => attatchedLights.TrueForAll(light => light.intensity != 0f);
+    public event Action OnLightSwitch = delegate { };
 
     public override void OnInteract()
     {
@@ -38,6 +41,8 @@ public class LightSwitch : Interactable
                 light.TurnOffLight();
             }
         }
+
+        OnLightSwitch?.Invoke();
 
         base.OnInteract();
     }
