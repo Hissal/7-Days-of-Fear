@@ -8,6 +8,7 @@ public class BreathHoldingMinigame : MonoBehaviour
     [SerializeField] private KeyCode breathHoldingKey = KeyCode.Space;
 
     [SerializeField] private Image breathBar;
+    [SerializeField] private Image backGround;
 
     [SerializeField] private float maxBreath;
     [SerializeField] private float breathDrainSpeed;
@@ -20,6 +21,9 @@ public class BreathHoldingMinigame : MonoBehaviour
     private float breathRechargeTimer;
 
     private bool releasedBreathKey;
+
+    [SerializeField] private Color highBreathColor;
+    [SerializeField] private Color lowBreathColor;
 
     private void OnEnable()
     {
@@ -58,7 +62,20 @@ public class BreathHoldingMinigame : MonoBehaviour
 
     private void DrainBreath()
     {
-        breathLeft -= breathDrainSpeed * Time.deltaTime;
+        float breathPrecentage = breathLeft / maxBreath;
+
+        if (breathPrecentage > 0.66f)
+        {
+            breathLeft -= breathDrainSpeed * 1.2f * Time.deltaTime;
+        }
+        else if (breathPrecentage > 0.33f)
+        {
+            breathLeft -= breathDrainSpeed * Time.deltaTime;
+        }
+        else
+        {
+            breathLeft -= breathDrainSpeed * 0.8f * Time.deltaTime;
+        }
 
         if (breathLeft < 0)
         {
@@ -84,5 +101,13 @@ public class BreathHoldingMinigame : MonoBehaviour
     private void UpdateVisual()
     {
         breathBar.fillAmount = breathLeft / maxBreath;
+
+        Color highBreathTransparent = highBreathColor;
+        highBreathTransparent.a = 0.2f;
+        Color lowBreathTransparent = lowBreathColor;
+        lowBreathTransparent.a = 0.2f;
+
+        breathBar.color = Color.Lerp(lowBreathColor, highBreathColor, breathBar.fillAmount);
+        backGround.color = Color.Lerp(lowBreathTransparent, highBreathTransparent, breathBar.fillAmount);
     }
 }

@@ -10,18 +10,35 @@ public class MentalHealth : MonoBehaviour
     [SerializeField] private float maxMentalhealth;
     public float currentMentalHealth { get; private set;}
 
+    [SerializeField] private float mentalHealthDrainPerSecond;
+
+    [SerializeField] private Color highMentalHealthColor;
+    [SerializeField] private Color lowMentalHealthColor;
+
     public event Action OnMentalHealthReachZero = delegate { };
+
+    private bool isMentalHealthZero;
+
+    private void Update()
+    {
+       if (currentMentalHealth != 0f) ReduceMentalHealth(mentalHealthDrainPerSecond * Time.deltaTime);
+    }
 
     public void ReduceMentalHealth(float amount)
     {
         currentMentalHealth -= amount;
 
-        if (currentMentalHealth <= 0)
+        if (currentMentalHealth <= 0 && !isMentalHealthZero)
         {
-            OnMentalHealthReachZero.Invoke();
+            isMentalHealthZero = true;
+            OnMentalHealthReachZero?.Invoke();
+        }
+        else if (currentMentalHealth > 0)
+        {
+            isMentalHealthZero = false;
         }
 
-        UpdateBar();
+        UpdateVisual();
     }
 
     public void IncreaseMentalHealth(float amount)
@@ -30,12 +47,13 @@ public class MentalHealth : MonoBehaviour
 
         if (currentMentalHealth > maxMentalhealth) currentMentalHealth = maxMentalhealth;
 
-        UpdateBar();
+        UpdateVisual();
     }
 
-    private void UpdateBar()
+    private void UpdateVisual()
     {
-        bar.fillAmount = currentMentalHealth / maxMentalhealth;
+        float mentalHealthPrecentage = currentMentalHealth / maxMentalhealth;
+        bar.color = Color.Lerp(lowMentalHealthColor, highMentalHealthColor, mentalHealthPrecentage);
     }
 
     public static MentalHealth Instance;
@@ -43,7 +61,7 @@ public class MentalHealth : MonoBehaviour
     private void Awake()
     {
         currentMentalHealth = maxMentalhealth;
-        UpdateBar();
+        UpdateVisual();
 
         if (Instance != null)
         {

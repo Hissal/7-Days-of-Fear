@@ -5,15 +5,18 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
+    [SerializeField] private Transform RaycastPosition;
     [SerializeField] private NavMeshAgent agent;
     private Transform playerT;
 
     [SerializeField] private float sightRange;
     [SerializeField] private float nearSightRange;
-    [SerializeField] private float killRadius;
+    [SerializeField] private float killRange;
 
     private Vector3 playerPositionSnapshot;
     private bool playerWasInSight;
+
+    [SerializeField] private Animator animator;
 
     public enum EnemyState {Wandering, ChasingPlayer, PlayerHidingSequence, Stunned}
     public EnemyState State { get; private set; }
@@ -21,40 +24,72 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private LayerMask seenLayers;
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private LayerMask doorLayer;
+    [SerializeField] private LayerMask lightLayer;
+
+    private List<LightFlicker> flickeringLights = new List<LightFlicker>();
+
+    private bool listening;
+    private HidingSpot playersCurrentHidingSpot;
+
+    private bool killPlayer;
+
+    private bool active;
 
     private void Start()
     {
+        active = false;
         playerT = GameManager.Instance.playerTransform;
         if (agent == null) agent = GetComponent<NavMeshAgent>();
+    }
+    public void Activate(Vector3 position, Quaternion rotation)
+    {
+        if (active) return;
+        agent.enabled = true;
+        UnStun();
+        SetPosition(position);
+        active = true;
+    }
+    public void Disable(Vector3 position)
+    {
+        Stun(-1);
+        SetPosition(position);
+        agent.enabled = false;
+        active = false;
+        StopAllCoroutines();
+    }
+    public void SetPosition(Vector3 position)
+    {
+        agent.Warp(position);
     }
 
     private void Update()
     {
+        if (!active) return;
+
         if (agent.isOnNavMesh == false)
         {
             throw new System.Exception("Enemy is not on navmesh " + gameObject);
         }
 
+        if (!AgentReachedDestiantion()) animator.SetBool("Moving", true);
+        else animator.SetBool("Moving", false);
+
+        if (State == EnemyState.Stunned) animator.SetBool("Moving", false);
+
+        FlickerNearbyLights();
+
         if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
 
-        Collider[] doorsColliders = Physics.OverlapSphere(transform.position, 2f, doorLayer);
-        if (doorsColliders.Length > 0)
-        {
-            foreach (var collider in doorsColliders)
-            {
-                DoorOpener doorOpener = collider.GetComponent<DoorOpener>();
-                if (!doorOpener.isCloset && Physics.OverlapSphere(transform.position, 0.5f, doorLayer).Length > 0) doorOpener.MoveDoor(50000f, 360f, false);
-                else if (!doorOpener.isCloset && !doorOpener.moving) doorOpener.MoveDoor(500f, Random.Range(-10f, 10f), true);
-            }
-        }
+        OpenNearbyDoors();
 
         if (PlayerInSight())
         {
             WalkTowardPlayer();
             State = EnemyState.ChasingPlayer;
-            if (Physics.OverlapSphere(transform.position, killRadius, playerLayer).Length > 0)
+            if (Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) < killRange && !killPlayer)
             {
                 //print("Player In Kill Radius.. KILL PLAYER");
+                KillPlayer();
             }
         }
         else if (playerWasInSight == true)
@@ -62,6 +97,68 @@ public class EnemyAI : MonoBehaviour
             playerWasInSight = false;
             SnapshotPlayerPosition();
             StartCoroutine(MoveToPlayerSnapshot());
+        }
+    }
+
+    private void FlickerNearbyLights()
+    {
+        Collider[] lightColliders = Physics.OverlapSphere(transform.position, 2f, lightLayer);
+        if (lightColliders.Length > 0)
+        {
+            foreach (var collider in lightColliders)
+            {
+                LightFlicker lightFlicker = collider.GetComponent<LightFlicker>();
+                if (!flickeringLights.Contains(lightFlicker) && lightFlicker.light.intensity > 0f)
+                {
+                    flickeringLights.Add(lightFlicker);
+                    lightFlicker.flicker = true;
+                }
+            }
+        }
+
+        if (flickeringLights.Count != 0)
+        {
+            LightFlicker flickerToRemove = null;
+
+            foreach (var lightFlicker in flickeringLights)
+            {
+                bool contains = false;
+
+                Collider col = lightFlicker.GetComponent<Collider>();
+
+                foreach (var collider in lightColliders)
+                {
+                    if (collider == col)
+                    {
+                        contains = true;
+                    }
+                }
+
+                if (!contains)
+                {
+                    flickerToRemove = lightFlicker;
+                }
+            }
+
+            if (flickerToRemove != null)
+            {
+                flickerToRemove.flicker = false;
+                flickerToRemove.light.intensity = 0f;
+                flickeringLights.Remove(flickerToRemove);
+            }
+        }
+    }
+
+    private void OpenNearbyDoors()
+    {
+        List<DoorOpener> doorOpeners = GetDoorsInRadius(2f);
+        foreach (var door in doorOpeners)
+        {
+            if (door.isMovableByEnemy && !door.isCloset && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(door.transform.position)) < 0.5f)
+            {
+                SlamDoorOpen(door);
+            }
+            else if (door.isMovableByEnemy && !door.isCloset && !door.moving) door.MoveDoor(Random.Range(200f, 500f), Random.Range(-10f, 10f), true);
         }
     }
 
@@ -114,10 +211,16 @@ public class EnemyAI : MonoBehaviour
 
     private bool PlayerInSight()
     {
-        if (Physics.Raycast(transform.position, (playerT.position - transform.position).normalized, out RaycastHit hit, sightRange, seenLayers))
+        if (Physics.Raycast(RaycastPosition.position, (playerT.position - RaycastPosition.position).normalized, out RaycastHit hit, sightRange, seenLayers))
         {
-            if (hit.transform.parent == playerT)
+            if (hit.collider.gameObject.layer == playerLayer)
             {
+                print("Player In Sight");
+                playerWasInSight = true;
+                return true;
+            }else if (hit.transform == playerT)
+            {
+                print("Player In Sight");
                 playerWasInSight = true;
                 return true;
             }
@@ -160,64 +263,160 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(WanderRandomly());
     }
 
-    public void PlayerEnteredHidingSpot(Vector3 locationToWalkTo)
+    private void PlayerLeftHidingSpot(HidingSpot hidingSpot)
     {
+        if (playersCurrentHidingSpot == hidingSpot)
+        {
+            playersCurrentHidingSpot = null;
+        }
+        hidingSpot.onPlayerExit -= PlayerLeftHidingSpot;
+    }
+
+    public void PlayerEnteredHidingSpot(Transform closetFront, HidingSpot hidingSpot)
+    {
+        playersCurrentHidingSpot = hidingSpot;
+
         float distanceToPlayer = Vector3.Distance(playerT.position, transform.position);
 
         if (distanceToPlayer > sightRange) return;
 
-        print("Enemy Knows Player Entered Hiding Spot " + locationToWalkTo);
+        print("Enemy Knows Player Entered Hiding Spot " + closetFront);
+
+        hidingSpot.onPlayerExit += PlayerLeftHidingSpot;
+
+        float range = hidingSpot.enemyRange;
+        Vector3 locationToWalkTo = closetFront.position + closetFront.right * Random.Range(-range, range);
+
+        // Calculates a rotation to face between straight at closet and playerposition randomly
+        Vector3 targetPoint = playerT.position;
+        Vector3 directionToTarget = Vector2XZFromVector3(targetPoint) - Vector2XZFromVector3(locationToWalkTo);
+        directionToTarget.y = 0;
+        Quaternion lookAtTarget = Quaternion.LookRotation(directionToTarget);
+        Quaternion inverseRotation = Quaternion.Inverse(closetFront.rotation);
+        Quaternion desiredRotation = Quaternion.Lerp(lookAtTarget, inverseRotation, Random.Range(0f, 1f));
 
         // TODO Kill Player Upon Reaching The Hiding Spot
         if (distanceToPlayer <= nearSightRange && State == EnemyState.ChasingPlayer)
         {
-            WalkToHidingSpot(locationToWalkTo);
+            WalkToHidingSpot(locationToWalkTo, desiredRotation);
             print("Kill PLayer Upon Reaching The Hiding Spot");
         } 
-        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(locationToWalkTo);
+        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(locationToWalkTo, desiredRotation);
     }
-    private void WalkToHidingSpot(Vector3 locationToWalkTo)
+    private void WalkToHidingSpot(Vector3 locationToWalkTo, Quaternion desiredRotation)
     {
         print("Walking to hiding spot");
 
         StopAllCoroutines();
-        StartCoroutine(WalkToHidingSpotSequence(locationToWalkTo));
+        StartCoroutine(WalkToHidingSpotSequence(locationToWalkTo, desiredRotation));
     }
-    private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo)
+    private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo, Quaternion desiredRotation)
     {
         State = EnemyState.PlayerHidingSequence;
 
         playerWasInSight = false;
         agent.SetDestination(locationToWalkTo);
 
-        yield return new WaitUntil(() => Vector2XZFromVector3(transform.position) == Vector2XZFromVector3(locationToWalkTo));
+        yield return new WaitUntil(() => Vector2XZFromVector3(transform.position) == Vector2XZFromVector3(locationToWalkTo) || playersCurrentHidingSpot == null);
+
+        if (playersCurrentHidingSpot == null)
+        {
+            print("HidingSpot is null");
+            StartCoroutine(WanderRandomly());
+            yield break;
+        }
 
         // TODO Stare into closet
         print("Reached Hiding Spot... STARING");
+        animator.SetTrigger("Stare");
         float timeStaring = 0f;
-        float safeTimeBeforeCanKill = 0.5f;
 
-        while (timeStaring < 3f)
+        int coinFlip = Random.Range(0, 2);
+        int coinFlip2 = Random.Range(0, 2);
+        bool stare2 = coinFlip == 1;
+        bool stare3 = coinFlip2 == 1;
+        bool doneRotating = false;
+        Quaternion startRotation = transform.rotation;
+
+        float timeToMoveDoor = Random.Range(1f, 15f);
+        bool movedDoor = false;
+        float timeToMoveDoor2 = Random.Range(1f, 15f);
+        bool movedDoor2 = false;
+
+        float stareSpeed1 = Random.Range(0.66f, 1f);
+        float stareSpeed2 = Random.Range(0.66f, 1f);
+
+        stareSpeed1 = 0.66f;
+
+        animator.SetBool("Stare2", stare2);
+        animator.SetBool("Stare3", stare3);
+
+        yield return new WaitUntil( () => animator.GetCurrentAnimatorStateInfo(0).IsName("Stare"));
+
+        while (!animator.GetCurrentAnimatorStateInfo(0).IsName("Idle"))
         {
-            // Stare lolxd
-            Vector3 desiredRotation = playerT.position - transform.position;
-            desiredRotation.y = 0;
-            desiredRotation.Normalize();
-            transform.rotation = Quaternion.Euler(Vector3.RotateTowards(transform.rotation.eulerAngles, desiredRotation, 1f, 1f));
+
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Stare"))
+            {
+                animator.speed = stareSpeed1;
+            }
+            else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Stare2"))
+            {
+                animator.speed = stareSpeed2;
+            }
+            else
+            {
+                animator.speed = 1f;
+            }
+
+            // Stare lolxd     
             timeStaring += Time.deltaTime;
 
-            if (GameManager.Instance.IsPlayerHoldingBreath() == false && timeStaring >= safeTimeBeforeCanKill)
+            if (!movedDoor && timeStaring > timeToMoveDoor)
             {
-                // TODO Kill Player RAAAAAH
+                RandomChanceOpenHidingSpotDoors(50);
+                movedDoor = true;
+            }
+            if (!movedDoor2 && timeStaring > timeToMoveDoor2)
+            {
+                RandomChanceOpenHidingSpotDoors(25);
+                movedDoor2 = true;
+            }
+
+            if (!doneRotating)
+            {
+                // Rotate to toward closet
+                print("Rotating to: " + desiredRotation.eulerAngles);
+                float precentageDone = timeStaring / 1f;
+                transform.rotation = Quaternion.Lerp(startRotation, desiredRotation, precentageDone);
+                if (transform.rotation == desiredRotation) doneRotating = true;
+            }
+
+            if (GameManager.Instance.IsPlayerHoldingBreath() == false && listening && !killPlayer)
+            {
+                KillPlayerInCloset();
                 print("Player failed to hold breath... Kill Player");
+            }
+
+            if (playersCurrentHidingSpot == null)
+            {
+                print("HidingSpot is null");
+                continue;
+            }
+            foreach (var door in playersCurrentHidingSpot.hidingSpotDoors)
+            {
+                if (door.GetOpenPrecentage() > 0.4f && !killPlayer)
+                {
+                    KillPlayerInCloset();
+                    print("DOOR WAY TOO OPEN KILL PLAYER");
+                }
             }
             yield return null;
         }
 
-        // TODO Add chance to come back to stare again
-        // TODO Walk Away From Hiding Spot (start by walking to the side out of sight of player)
         print("Finished Staring... Walking Away");
 
+        animator.speed = 1f;
         Vector3 randomLocation = RandomNavmeshLocation(10f);
         agent.SetDestination(randomLocation);
 
@@ -226,6 +425,7 @@ public class EnemyAI : MonoBehaviour
             if (PlayerInSight())
             {
                 print("Enemy spotted player while walking away from hiding spot");
+                State = EnemyState.ChasingPlayer;
                 yield break;
             }
             yield return null;
@@ -233,6 +433,80 @@ public class EnemyAI : MonoBehaviour
 
         print("Reached a location away from hiding spot");
         StartCoroutine(WanderRandomly());
+    }
+
+    private void KillPlayerInCloset()
+    {
+        if (playersCurrentHidingSpot == null)
+        {
+            print("HidingSpot is null");
+            return;
+        }
+        foreach (var door in playersCurrentHidingSpot.hidingSpotDoors)
+        {
+            SlamDoorOpen(door);
+        }
+
+        KillPlayer();
+    }
+
+    private void KillPlayer()
+    {
+        killPlayer = true;
+        GameManager.Instance.KillPlayer();
+
+        // TODO Play Death Sequence
+    }
+
+    private void SlamDoorOpen(DoorOpener door)
+    {
+        if (door.GetOpenPrecentage() > 0.95f) return;
+        door.MoveDoor(50000f, 360f, false);
+        animator.SetTrigger("Attack");
+    }
+
+    public void RandomChanceOpenHidingSpotDoors(int chance)
+    {
+        int openDoorChance = chance;
+        int openDoorRoll = Random.Range(0, 100);
+        bool openDoorSligtly = openDoorRoll < openDoorChance;
+
+        if (!openDoorSligtly) return;
+
+        print("Moving Current Hiding Spot Doors");
+
+        if (playersCurrentHidingSpot == null)
+        {
+            print("HidingSpot is null");
+            return;
+        }
+
+        foreach (var door in playersCurrentHidingSpot.hidingSpotDoors)
+        {
+            door.MoveDoor(Random.Range(100f, 300f), Random.Range(5f, 20f), true);
+        }
+    }
+
+    public void Listen()
+    {
+        listening = true;
+    }
+    public void StopListen()
+    {
+        listening = false;
+    }
+
+    private List<DoorOpener> GetDoorsInRadius(float radius)
+    {
+        List<DoorOpener> doorOpeners = new List<DoorOpener>();
+        Collider[] doorsColliders = Physics.OverlapSphere(transform.position, radius, doorLayer);
+        foreach (var collider in doorsColliders)
+        {
+            if (collider.TryGetComponent(out DoorOpener opener))
+            doorOpeners.Add(opener);
+        }
+
+        return doorOpeners;
     }
 
     public Vector3 RandomNavmeshLocation(float radius)
@@ -264,17 +538,25 @@ public class EnemyAI : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(transform.position, killRadius);
+        Gizmos.DrawWireSphere(transform.position, killRange);
 
         if (!Application.isEditor || !Application.isPlaying) return;
 
         if (PlayerInSight()) Gizmos.color = Color.red;
         else Gizmos.color = Color.green;
 
-        Gizmos.DrawLine(transform.position, transform.position + (playerT.position - transform.position).normalized * sightRange);
+        Gizmos.DrawLine(RaycastPosition.position, RaycastPosition.position + (playerT.position - RaycastPosition.position).normalized * sightRange);
 
-        if (PlayerInSight() && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) <= nearSightRange) Gizmos.color = Color.red;
+        if (PlayerInSight() && Vector2.Distance(Vector2XZFromVector3(RaycastPosition.position), Vector2XZFromVector3(playerT.position)) <= nearSightRange) Gizmos.color = Color.red;
         else Gizmos.color = Color.green;
-        Gizmos.DrawLine(transform.position, transform.position + (playerT.position - transform.position).normalized * nearSightRange);
+        Gizmos.DrawLine(RaycastPosition.position, RaycastPosition.position + (playerT.position - RaycastPosition.position).normalized * nearSightRange);
+    }
+
+    private void OnDisable()
+    {
+        if (playersCurrentHidingSpot != null)
+        {
+            playersCurrentHidingSpot.onPlayerExit -= PlayerLeftHidingSpot;
+        }
     }
 }

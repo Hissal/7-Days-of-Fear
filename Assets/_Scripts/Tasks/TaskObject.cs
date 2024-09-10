@@ -8,14 +8,42 @@ public class TaskObject : Interactable
 
     private TaskSystem taskSystem;
 
-    private bool canBeInteractedWith = true;
+    private bool active = false;
+
+    //[SerializeField] private bool morningTask;
+    //[SerializeField] private bool eveningTask;
+
+    [SerializeField] private QuestObjective questObjective;
 
     private void Start()
     {
+        if (questObjective != null)
+        {
+            questObjective.OnObjectiveActivated += ActivateTask;
+            questObjective.OnObjectiveHighlight += Highlight;
+        }
+
         taskSystem = TaskSystem.Instance;
 
         task.OnSuccess += SucceedTask;
         task.OnFail += FailTask;
+
+        //if (morningTask) TimeManager.OnMorning += ActivateTask;
+        //if (eveningTask) TimeManager.OnMorning += ActivateTask;
+    }
+
+    private void ActivateTask()
+    {
+        active = true;
+    }
+    private void Highlight()
+    {
+        outline.enabled = true;
+    }
+
+    private void DeactivateTask()
+    {
+        active = false;
     }
 
     private void BeginTask()
@@ -25,38 +53,45 @@ public class TaskObject : Interactable
 
     private void SucceedTask(Task task)
     {
-        canBeInteractedWith = false;
-
+        questObjective.OnComplete();
+        DeactivateTask();
         base.OnLoseFocus();
     }
 
     private void FailTask(Task task)
     {
-
+        questObjective.OnComplete();
+        DeactivateTask();
+        base.OnLoseFocus();
     }
 
     public override void OnFocus()
     {
-        if (!canBeInteractedWith) return;
+        if (!active) return;
 
         base.OnFocus();
-
-        //GetComponent<Renderer>().material.color = Color.white;
     }
 
     public override void OnLoseFocus()
     {
-        if (!canBeInteractedWith) return;
+        if (!active) return;
 
         base.OnLoseFocus();
-
-        //GetComponent<Renderer>().material.color = Color.gray;
     }
 
     public override void OnInteract()
     {
-        if (!canBeInteractedWith) return;
+        if (!active) return;
 
         BeginTask();
+    }
+
+    private void OnDisable()
+    {
+        task.OnSuccess -= SucceedTask;
+        task.OnFail -= FailTask;
+
+        //if (morningTask) TimeManager.OnMorning -= ActivateTask;
+        //if (eveningTask) TimeManager.OnMorning -= ActivateTask;
     }
 }

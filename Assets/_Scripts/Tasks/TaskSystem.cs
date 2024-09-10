@@ -8,9 +8,7 @@ public class TaskSystem : MonoBehaviour
     private int failedTasks;
 
     [SerializeField] private Transform canvas;
-    [SerializeField] private GameObject QTEPrefab;
-    [SerializeField] private GameObject ButtonSpamPrefab;
-    [SerializeField] private GameObject PrecicionBarPrefab;
+    [SerializeField] private GameObject precisionBar;
 
     private void Start()
     {
@@ -27,16 +25,8 @@ public class TaskSystem : MonoBehaviour
 
         switch (task.type)
         {
-            case Task.TaskType.QTE:
-                ShowTask(task, QTEPrefab, positionOnScreen);
-                break;
-
-            case Task.TaskType.ButtonSpam:
-                ShowTask(task, ButtonSpamPrefab, positionOnScreen);
-                break;
-
             case Task.TaskType.PrecicionBar:
-                ShowTask(task, PrecicionBarPrefab, positionOnScreen);
+                ShowTask(task, precisionBar, positionOnScreen);
                 break;
 
             default:
@@ -44,13 +34,16 @@ public class TaskSystem : MonoBehaviour
         }
     }
 
-    private void ShowTask(Task task, GameObject taskPrefab, Vector2 positionOnScreen)
+    private void ShowTask(Task task, GameObject taskUIObject, Vector2 positionOnScreen)
     {
-        TaskAction taskAction = Instantiate(taskPrefab, positionOnScreen, Quaternion.identity, canvas).GetComponent<TaskAction>();
+        TaskAction taskAction = taskUIObject.GetComponent<TaskAction>();
         taskAction.transform.localPosition = positionOnScreen;
         taskAction.task = task;
         task.OnSuccess += TaskSuccess;
         task.OnFail += TaskFail;
+
+        taskAction.gameObject.SetActive(true);
+        taskAction.Init();
     }
 
     public void TaskSuccess(Task task)
@@ -71,19 +64,6 @@ public class TaskSystem : MonoBehaviour
         task.OnFail -= TaskFail;
 
         GameManager.Instance.GivePlayerControlBack();
-    }
-
-    public void EnableBreathHolding()
-    {
-        // Breath Holding ui appears and sends message to enemy to walk to hiding spot and play minigame if enemy is close enough on entry
-
-        // TODO on success make enemy walk to another room
-        // TODO on fail Kill player
-    }
-
-    public void DisableBreathHolding()
-    {
-        // Disable breath holding
     }
 
     public static TaskSystem Instance;

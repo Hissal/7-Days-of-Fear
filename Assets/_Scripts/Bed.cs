@@ -6,6 +6,6 @@ public class Bed : Interactable
 {
     public override void OnInteract()
     {
-        TimeManager.SetTime(TimeManager.day + 1, 7, 0);
+        TimeManager.SetTime(TimeManager.day + 1, 6, 30);
     }
 }

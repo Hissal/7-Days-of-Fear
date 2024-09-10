@@ -9,9 +9,11 @@ public class TimeManager : MonoBehaviour
         instance = this;
     }
 
-    public static event Action OnMinuteChanged = delegate { };
-    public static event Action OnHourChanged = delegate { };
-    public static event Action OnDayChanged = delegate { };
+    public static event Action<int> OnMinuteChanged = delegate { };
+    public static event Action<int> OnHourChanged = delegate { };
+    public static event Action<int> OnDayChanged = delegate { };
+    public static event Action OnMorning = delegate { };
+    public static event Action OnEvening = delegate { };
 
     public static int minute { get; private set; }
     public static int hour { get; private set; }
@@ -20,6 +22,18 @@ public class TimeManager : MonoBehaviour
     [SerializeField] private float realTimeSecondsToInGameMinute = 1f;
     private float timer;
 
+    public static bool IsMorning()
+    {
+        if (hour < 13)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     private void Start()
     {
         SetTime(1, 0, 0);
@@ -27,6 +41,13 @@ public class TimeManager : MonoBehaviour
 
     public static void SetTime(int day, int hour, int minute)
     {
+        if (IsMorning() && hour > 12) OnEvening?.Invoke();
+        else if (!IsMorning() && hour < 13) OnMorning?.Invoke();
+
+        if (TimeManager.day != day) OnDayChanged?.Invoke(day);
+        if (TimeManager.hour != hour) OnHourChanged?.Invoke(hour);
+        if (TimeManager.minute != minute) OnMinuteChanged?.Invoke(minute);
+
         TimeManager.day = day;
         TimeManager.hour = hour;
         TimeManager.minute = minute;
@@ -43,6 +64,9 @@ public class TimeManager : MonoBehaviour
 
             if (minute >= 60)
             {
+                if (hour == 12) OnEvening?.Invoke();
+                else if (hour == 0) OnMorning?.Invoke();
+
                 hour++;
                 minute = 0;
 
@@ -51,13 +75,13 @@ public class TimeManager : MonoBehaviour
                     day++;
                     hour = 0;
                     minute = 0;
-                    OnDayChanged?.Invoke();
+                    OnDayChanged?.Invoke(day);
                 }
 
-                OnHourChanged?.Invoke();
+                OnHourChanged?.Invoke(hour);
             }
 
-            OnMinuteChanged?.Invoke();
+            OnMinuteChanged?.Invoke(minute);
 
             timer = realTimeSecondsToInGameMinute + timer;
         }
