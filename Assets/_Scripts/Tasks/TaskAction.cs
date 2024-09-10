@@ -14,16 +14,16 @@ public abstract class TaskAction : MonoBehaviour
 
     protected virtual void TaskSuccess()
     {
-        task.TaskSuccess();
         print("TaskSuccess");
+        task.TaskSuccess();
 
         DisableTaskAction();
     }
 
     protected virtual void TaskFail()
     {
-        task.TaskFail();
         print("TaskFail");
+        task.TaskFail();
 
         DisableTaskAction();
     }
