@@ -102,15 +102,15 @@ public class Quest
         }
     }
 
-    private void ChangeObjective(QuestObjective objective)
+    private void ReActivatePreviousObjective(QuestObjective objective)
     {
         if (currentObjective == objective) return;
 
         Debug.Log("Objective Condition Broken: " + objective);
 
-        DeActivateObjective(currentObjective);
+        objectives.Remove(objective);
         objectives.Insert(objectives.IndexOf(currentObjective), objective);
-
+        DeActivateObjective(currentObjective);
         ActivateObjective(objective);
     }
 
@@ -118,7 +118,7 @@ public class Quest
     {
         if (activeObjectives.Contains(objective)) return;
 
-        objective.OnConditionBroken += ChangeObjective;
+        objective.OnConditionBroken += ReActivatePreviousObjective;
         objective.OnObjectiveComplete += ObjectiveCompleted;
         if (highlightObjectives) HighlightObjective(objective);
         objective.Activate();
@@ -132,7 +132,7 @@ public class Quest
     private void DeActivateObjective(QuestObjective objective)
     {
         objective.OnObjectiveComplete -= ObjectiveCompleted;
-        objective.OnConditionBroken -= ChangeObjective;
+        objective.OnConditionBroken -= ReActivatePreviousObjective;
         objective.DeActivate();
         activeObjectives.Remove(objective);
     }

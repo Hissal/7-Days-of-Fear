@@ -41,8 +41,8 @@ public class TimeManager : MonoBehaviour
 
     public static void SetTime(int day, int hour, int minute)
     {
-        if (IsMorning() && hour > 12) OnEvening?.Invoke();
-        else if (!IsMorning() && hour < 13) OnMorning?.Invoke();
+        if (IsMorning() && hour > 15) OnEvening?.Invoke();
+        else if (!IsMorning() && hour < 16) OnMorning?.Invoke();
 
         if (TimeManager.day != day) OnDayChanged?.Invoke(day);
         if (TimeManager.hour != hour) OnHourChanged?.Invoke(hour);
@@ -64,7 +64,7 @@ public class TimeManager : MonoBehaviour
 
             if (minute >= 60)
             {
-                if (hour == 12) OnEvening?.Invoke();
+                if (hour == 16) OnEvening?.Invoke();
                 else if (hour == 0) OnMorning?.Invoke();
 
                 hour++;

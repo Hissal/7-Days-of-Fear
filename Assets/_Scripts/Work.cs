@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 
-public class Work : MonoBehaviour
+public class Work : Interactable
 {
     private const int WORKSTART = 8;
     private const int WORKEND = 18;
@@ -16,7 +16,6 @@ public class Work : MonoBehaviour
 
     private int totalTimeLate;
 
-    [SerializeField] private Outline outline;
     [SerializeField] private QuestObjective questObjective;
     private bool active = false;
 
@@ -48,6 +47,12 @@ public class Work : MonoBehaviour
         {
             GoToWork();
         }
+    }
+
+    public override void OnInteract()
+    {
+        GoToWork();
+        base.OnInteract();
     }
 
     private void GoToWork()

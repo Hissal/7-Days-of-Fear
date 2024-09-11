@@ -21,7 +21,7 @@ public class PrecisionBar : TaskAction
     // Start is called before the first frame update
     void Start()
     {
-        referenceResolutionWidth = transform.parent.GetComponent<CanvasScaler>().referenceResolution.x;
+        referenceResolutionWidth = transform.parent.parent.GetComponent<CanvasScaler>().referenceResolution.x;
 
         DisableTaskAction();
     }
@@ -103,7 +103,7 @@ public class PrecisionBar : TaskAction
 
     private void MovePointer()
     {
-        float moveAmount = referenceResolutionWidth / (10 / pointerSpeed) * Time.deltaTime;
+        float moveAmount = Screen.width / referenceResolutionWidth / (10 / pointerSpeed) * Time.deltaTime;
 
         pointer.position = new Vector2(pointer.position.x + moveAmount * pointerDirection, pointer.position.y);
         if (pointer.localPosition.x > barWidth * 0.5f || pointer.localPosition.x < -barWidth * 0.5f)

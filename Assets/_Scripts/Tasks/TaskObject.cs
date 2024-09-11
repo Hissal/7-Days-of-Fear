@@ -15,7 +15,7 @@ public class TaskObject : Interactable
 
     [SerializeField] private QuestObjective questObjective;
 
-    private void Start()
+    private void OnEnable()
     {
         if (questObjective != null)
         {
@@ -23,10 +23,13 @@ public class TaskObject : Interactable
             questObjective.OnObjectiveHighlight += Highlight;
         }
 
-        taskSystem = TaskSystem.Instance;
-
         task.OnSuccess += SucceedTask;
         task.OnFail += FailTask;
+    }
+
+    private void Start()
+    {
+        taskSystem = TaskSystem.Instance;
 
         //if (morningTask) TimeManager.OnMorning += ActivateTask;
         //if (eveningTask) TimeManager.OnMorning += ActivateTask;
@@ -81,13 +84,16 @@ public class TaskObject : Interactable
         BeginTask();
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         task.OnSuccess -= SucceedTask;
         task.OnFail -= FailTask;
 
-        questObjective.OnObjectiveActivated -= SetActive;
-        questObjective.OnObjectiveHighlight -= Highlight;
+        if (questObjective != null)
+        {
+            questObjective.OnObjectiveActivated -= SetActive;
+            questObjective.OnObjectiveHighlight -= Highlight;
+        }
 
         //if (morningTask) TimeManager.OnMorning -= ActivateTask;
         //if (eveningTask) TimeManager.OnMorning -= ActivateTask;
