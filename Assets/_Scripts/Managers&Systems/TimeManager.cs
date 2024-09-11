@@ -9,8 +9,8 @@ public class TimeManager : MonoBehaviour
         instance = this;
     }
 
-    public static event Action<int> OnMinuteChanged = delegate { };
-    public static event Action<int> OnHourChanged = delegate { };
+    //public static event Action<int> OnMinuteChanged = delegate { };
+    //public static event Action<int> OnHourChanged = delegate { };
     public static event Action<int> OnDayChanged = delegate { };
     public static event Action OnMorning = delegate { };
     public static event Action OnEvening = delegate { };
@@ -41,49 +41,99 @@ public class TimeManager : MonoBehaviour
 
     public static void SetTime(int day, int hour, int minute)
     {
-        if (IsMorning() && hour > 15) OnEvening?.Invoke();
-        else if (!IsMorning() && hour < 16) OnMorning?.Invoke();
+        //if (IsMorning() && hour > 15) OnEvening?.Invoke();
+        //else if (!IsMorning() && hour < 16) OnMorning?.Invoke();
 
         if (TimeManager.day != day) OnDayChanged?.Invoke(day);
-        if (TimeManager.hour != hour) OnHourChanged?.Invoke(hour);
-        if (TimeManager.minute != minute) OnMinuteChanged?.Invoke(minute);
+        //if (TimeManager.hour != hour) OnHourChanged?.Invoke(hour);
+        //if (TimeManager.minute != minute) OnMinuteChanged?.Invoke(minute);
 
         TimeManager.day = day;
         TimeManager.hour = hour;
         TimeManager.minute = minute;
         instance.timer = instance.realTimeSecondsToInGameMinute;
+
+        if (day == 1 && hour < 12) OnMorning?.Invoke();
+    }
+
+    public static void OnMorningInvoke()
+    {
+        OnMorning?.Invoke();
+    }
+    public static void OnEveningInvoke()
+    {
+        OnEvening?.Invoke();
     }
 
     private void Update()
     {
-        timer -= Time.deltaTime;
 
-        if (timer <= 0)
+#if UNITY_EDITOR
+        // For Debugging purposes
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            minute++;
-
-            if (minute >= 60)
-            {
-                if (hour == 16) OnEvening?.Invoke();
-                else if (hour == 0) OnMorning?.Invoke();
-
-                hour++;
-                minute = 0;
-
-                if (hour >= 24)
-                {
-                    day++;
-                    hour = 0;
-                    minute = 0;
-                    OnDayChanged?.Invoke(day);
-                }
-
-                OnHourChanged?.Invoke(hour);
-            }
-
-            OnMinuteChanged?.Invoke(minute);
-
-            timer = realTimeSecondsToInGameMinute + timer;
+            SetTime(1, 0, 0);
         }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            SetTime(2, 0, 0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            SetTime(3, 0, 0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            SetTime(4, 0, 0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            SetTime(5, 0, 0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            SetTime(6, 0, 0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha7))
+        {
+            SetTime(7, 0, 0);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            OnEveningInvoke();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            OnMorningInvoke();
+        }
+#endif
+
+        //timer -= Time.deltaTime;
+
+        //if (timer <= 0)
+        //{
+        //    minute++;
+
+        //    if (minute >= 60)
+        //    {
+        //        hour++;
+        //        minute = 0;
+
+        //        if (hour >= 24)
+        //        {
+        //            day++;
+        //            hour = 0;
+        //            minute = 0;
+        //            OnDayChanged?.Invoke(day);
+        //        }
+
+        //        OnHourChanged?.Invoke(hour);
+        //    }
+
+        //    OnMinuteChanged?.Invoke(minute);
+
+        //    timer = realTimeSecondsToInGameMinute + timer;
+        //}
     }
 }

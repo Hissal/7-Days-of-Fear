@@ -7,8 +7,8 @@ public class PrecisionBar : TaskAction
 {
     [SerializeField] int barWidth;
     [SerializeField] private RectTransform pointer;
-    [SerializeField] float pointerSpeed;
     [SerializeField] private RectTransform successPoint;
+    [SerializeField] private GameObject parent;
 
     private int pointerDirection;
 
@@ -18,7 +18,24 @@ public class PrecisionBar : TaskAction
 
     private bool active = false;
 
-    // Start is called before the first frame update
+    private float pointerSpeed;
+    [SerializeField] private float speedOnDay1;
+    [SerializeField] private float speedOnDay2;
+    [SerializeField] private float speedOnDay3;
+    [SerializeField] private float speedOnDay4;
+    [SerializeField] private float speedOnDay5;
+    [SerializeField] private float speedOnDay6;
+    [SerializeField] private float speedOnDay7;
+
+    private void OnEnable()
+    {
+        TimeManager.OnDayChanged += SetPointerSpeed;
+    }
+    private void OnDisable()
+    {
+        TimeManager.OnDayChanged -= SetPointerSpeed;
+    }
+
     void Start()
     {
         referenceResolutionWidth = transform.parent.parent.GetComponent<CanvasScaler>().referenceResolution.x;
@@ -26,8 +43,39 @@ public class PrecisionBar : TaskAction
         DisableTaskAction();
     }
 
+    private void SetPointerSpeed(int day)
+    {
+        switch (day)
+        {
+            case 1:
+                pointerSpeed = speedOnDay1;
+                break;
+            case 2:
+                pointerSpeed = speedOnDay2;
+                break;
+            case 3:
+                pointerSpeed = speedOnDay3;
+                break;
+            case 4:
+                pointerSpeed = speedOnDay4;
+                break;
+            case 5:
+                pointerSpeed = speedOnDay5;
+                break;
+            case 6:
+                pointerSpeed = speedOnDay6;
+                break;
+            case 7:
+                pointerSpeed = speedOnDay7;
+                break;
+            default:
+                break;
+        }
+    }
+
     public override void Init()
     {
+        parent.SetActive(true);
         SetRandomPointerPositionAndDirection();
         SetRandomSuccessPosition();
         active = true;
@@ -67,6 +115,11 @@ public class PrecisionBar : TaskAction
         {
             EndTask(OnSuccessPoint());
         }
+    }
+
+    protected override void DisableTaskAction()
+    {
+        parent.gameObject.SetActive(false);
     }
 
     private void EndTask(bool success)

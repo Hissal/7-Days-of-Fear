@@ -31,12 +31,18 @@ public class LightsChecker : MonoBehaviour
         if (active)
         {
             checkLights = true;
-            CheckLights();
+            StartCoroutine(CheckLightsAfterDelay(1f));
         }
+    }
+    private IEnumerator CheckLightsAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        CheckLights();
     }
 
     private void OnLightSwitch()
     {
+        StopAllCoroutines();
         if (checkLights) CheckLights();
     }
 

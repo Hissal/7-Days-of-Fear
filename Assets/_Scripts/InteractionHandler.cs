@@ -34,6 +34,11 @@ public class InteractionHandler : MonoBehaviour
         {
             if (hit.collider.gameObject.layer == 9 && (currentInteractable == null || hit.collider.gameObject.GetInstanceID() != currentInteractable.gameObject.GetInstanceID()))
             {
+                if (currentInteractable)
+                {
+                    currentInteractable.OnLoseFocus();
+                }
+
                 hit.collider.TryGetComponent(out currentInteractable);
 
                 if (currentInteractable)

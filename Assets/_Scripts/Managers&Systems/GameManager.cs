@@ -111,13 +111,13 @@ public class GameManager : MonoBehaviour
 
     public void TakeAwayPlayerControl()
     {
-        playerController.canMove = false;
+        playerController.Stun();
         playerInteractionHandler.canInteract = false;
     }
 
     public void GivePlayerControlBack()
     {
-        playerController.canMove = true;
+        playerController.Unstun();
         playerInteractionHandler.canInteract = true;
     }
 
@@ -152,18 +152,20 @@ public class GameManager : MonoBehaviour
 
     private void EnableEnemy()
     {
+        if (enemyAI == null) throw new System.Exception("EnemyAI is null");
+
+        if (enemyAI.active) return;
+
+        MentalHealth.Instance.PauseDrainage();
+        QuestSystem.Instance.PauseCurrentQuest("HIDE!");
+
         enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation);
-        StartCoroutine(DisableEnemyRoutine());
     }
-    private void DisableEnemy()
+    public void DisableEnemy()
     {
+        MentalHealth.Instance.ResumeDrainage();
         enemyAI.Disable(enemyDisabledPosition.position);
-        MentalHealth.Instance.IncreaseMentalHealth(25f);
-    }
-    private IEnumerator DisableEnemyRoutine()
-    {
-        yield return new WaitUntil(() => MentalHealth.Instance.currentMentalHealth >= 25f);
-        DisableEnemy();
+        QuestSystem.Instance.ResumeCurrentQuest();
     }
 
     public static GameManager Instance;

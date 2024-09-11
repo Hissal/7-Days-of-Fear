@@ -5,20 +5,20 @@ using TMPro;
 
 public class TimeUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI timeTMP;
+    [SerializeField] private TextMeshProUGUI dayTMP;
 
     private void OnEnable()
     {
-        TimeManager.OnMinuteChanged += UpdateTime;
+        TimeManager.OnDayChanged += updateDay;
     }
 
     private void OnDisable()
     {
-        TimeManager.OnMinuteChanged -= UpdateTime;
+        TimeManager.OnDayChanged -= updateDay;
     }
 
-    private void UpdateTime(int minute)
+    private void updateDay(int day)
     {
-        timeTMP.text = $"Aug {TimeManager.day}. {TimeManager.hour:00}:{TimeManager.minute:00}";
+        dayTMP.text = $"Aug {day}";
     }
 }

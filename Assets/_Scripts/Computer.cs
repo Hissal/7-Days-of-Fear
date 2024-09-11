@@ -1,10 +1,57 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Computer : Interactable
 {
-    [SerializeField] private GameObject computerScreenUI;
+    [SerializeField] private ComputerUI computerUI;
+
+    [SerializeField] private QuestObjective questObjective;
+
+    private bool questActive = false;
+
+    private void OnEnable()
+    {
+        TimeManager.OnMorning += SendMorningEmails;
+        TimeManager.OnEvening += SendEveningEmails;
+
+        questObjective.OnObjectiveActivated += ObjectiveActivated;
+        questObjective.OnObjectiveHighlight += Highlight;
+    }
+    private void OnDisable()
+    {
+        TimeManager.OnMorning -= SendMorningEmails;
+        TimeManager.OnEvening -= SendEveningEmails;
+
+        questObjective.OnObjectiveActivated -= ObjectiveActivated;
+        questObjective.OnObjectiveHighlight -= Highlight;
+    }
+
+    private void ObjectiveActivated(bool active)
+    {
+        questActive = active;
+        computerUI.SetTask();
+        computerUI.OnTaskSuccesful += OnTaskComplete;
+    }
+    private void Highlight()
+    {
+        OnFocus();
+    }
+
+    private void OnTaskComplete()
+    {
+        questObjective.OnComplete();
+    }
+
+    private void SendMorningEmails()
+    {
+        computerUI.ActivateEmailMorning();
+    }
+    private void SendEveningEmails()
+    {
+        computerUI.ActivateEmailsEvening();
+    }
 
     public override void OnInteract()
     {
@@ -13,16 +60,15 @@ public class Computer : Interactable
 
     private void ShowInternetUI()
     {
-        //TODO "Pause" game during computer gamings
-
-        computerScreenUI.transform.SetAsLastSibling();
+        computerUI.transform.SetAsLastSibling();
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         GameManager.Instance.TakeAwayPlayerControl();
+        MentalHealth.Instance.PauseDrainage();
 
-        computerScreenUI.SetActive(true);
+        computerUI.gameObject.SetActive(true);
     }
 
     public void HideInternetUI()
@@ -31,7 +77,8 @@ public class Computer : Interactable
         Cursor.visible = false;
 
         GameManager.Instance.GivePlayerControlBack();
+        MentalHealth.Instance.ResumeDrainage();
 
-        computerScreenUI.SetActive(false);
+        computerUI.gameObject.SetActive(false);
     }
 }

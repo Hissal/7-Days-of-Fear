@@ -40,24 +40,35 @@ public class Work : Interactable
         if (outline != null) outline.enabled = true;
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!active) return;
-        if (other.GetComponent<FirstPersonController>() != null)
-        {
-            GoToWork();
-        }
-    }
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (!active) return;
+    //    if (other.GetComponent<FirstPersonController>() != null)
+    //    {
+    //        GoToWork();
+    //    }
+    //}
 
     public override void OnInteract()
     {
+        if (!active) return;
         GoToWork();
         base.OnInteract();
+        base.OnLoseFocus();
+    }
+    override public void OnFocus()
+    {
+        if (active) base.OnFocus();
+    }
+    override public void OnLoseFocus()
+    {
+        if (active) base.OnLoseFocus();
     }
 
     private void GoToWork()
     {
         questObjective.OnComplete();
+        MentalHealth.Instance.PauseDrainage();
 
         if (TimeManager.hour >= WORKSTART)
         {
@@ -77,7 +88,11 @@ public class Work : Interactable
 
     private void BackHome(PlayableDirector director)
     {
+        MentalHealth.Instance.IncreaseMentalHealth(25f);
         TimeManager.SetTime(TimeManager.day, WORKEND, 0);
+        TimeManager.OnEveningInvoke();
+        MentalHealth.Instance.ResumeDrainage();
+        director.stopped -= BackHome;
     }
 
     private void GetFired()

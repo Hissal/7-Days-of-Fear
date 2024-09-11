@@ -6,19 +6,61 @@ public class QuestChain : MonoBehaviour
     [SerializeField] private List<Quest> quests;
     private Quest currentQuest;
 
-    [SerializeField] private int activeDay;
+    [SerializeField] private int[] activeDays;
+
+    [SerializeField] private bool activeInMorning;
+    [SerializeField] private bool activeInEvening;
+    private bool active;
 
     private void Awake()
     {
         TimeManager.OnDayChanged += CheckDay;
     }
-    
-    void CheckDay(int day)
+
+    private void OnEnable()
     {
-        if (day == activeDay)
+        TimeManager.OnDayChanged += CheckDay;
+        if (activeInMorning) TimeManager.OnMorning += TryStartQuestChain;
+        if (activeInEvening) TimeManager.OnEvening += TryStartQuestChain;
+    }
+
+    private void OnDisable()
+    {
+        TimeManager.OnDayChanged -= CheckDay;
+        if (activeInMorning) TimeManager.OnMorning -= TryStartQuestChain;
+        if (activeInEvening) TimeManager.OnEvening -= TryStartQuestChain;
+    }
+
+    private void TryStartQuestChain()
+    {
+        if (active)
         {
             StartQuestChain();
         }
+    }
+
+    void CheckDay(int day)
+    {
+        if (IsDayActive(day))
+        {
+            active = true;
+        }
+        else
+        {
+            active = false;
+        }
+    }
+
+    private bool IsDayActive(int day)
+    {
+        foreach (int activeDay in activeDays)
+        {
+            if (day == activeDay)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void StartQuestChain()

@@ -9,6 +9,13 @@ public class QuestSystem : MonoBehaviour
     private Quest currentQuest;
     private List<Quest> nextQuests = new List<Quest>();
 
+    private Vector2 questHelperPosition;
+
+    private void Start()
+    {
+        questHelperPosition = questTMP.rectTransform.position;
+    }
+
     public void StartQuest(Quest quest)
     {
         if (currentQuest != null && !quest.overrideCurrentQuest)
@@ -31,11 +38,13 @@ public class QuestSystem : MonoBehaviour
         currentQuest.StartQuest();
     }
 
-    private void UpdateQuestText()
+    private void UpdateQuestText(string newText)
     {
+        StopAllCoroutines();
+
         StartCoroutine(FadeOutAndMoveText(() =>
         {
-            questTMP.text = currentQuest.Description;
+            questTMP.text = newText;
             StartCoroutine(FadeInText());
         }));
     }
@@ -44,7 +53,7 @@ public class QuestSystem : MonoBehaviour
     {
         float fadeDuration = 0.5f;
         float elapsedTime = 0f;
-        Vector3 originalPosition = questTMP.rectTransform.position;
+        Vector3 originalPosition = questHelperPosition;
         Color originalColor = questTMP.color;
 
         while (elapsedTime < fadeDuration)
@@ -72,7 +81,7 @@ public class QuestSystem : MonoBehaviour
         float fadeDuration = 0.3f;
         float elapsedTime = 0f;
         Color originalColor = questTMP.color;
-        Vector3 originalPosition = questTMP.rectTransform.position;
+        Vector3 originalPosition = questHelperPosition;
 
         while (elapsedTime < fadeDuration)
         {
@@ -104,7 +113,7 @@ public class QuestSystem : MonoBehaviour
         }
         else
         {
-            questTMP.text = "";
+            UpdateQuestText("");
         }
     }
 
@@ -112,14 +121,23 @@ public class QuestSystem : MonoBehaviour
     {
         if (newQuestText != "")
         {
-            questTMP.text = newQuestText;
+            UpdateQuestText(newQuestText);
         }
+
+        if (currentQuest == null) return;
+
         currentQuest.PauseQuest();
     }
     public void ResumeCurrentQuest()
     {
+        if (currentQuest == null)
+        {
+            questTMP.text = "";
+            return; 
+        }
+
         currentQuest.ResumeQuest();
-        questTMP.text += currentQuest.Description;
+        UpdateQuestText(currentQuest.Description);
     }
 
     public static QuestSystem Instance;

@@ -16,12 +16,14 @@ public class Quest
     private bool highlightObjectives;
     private QuestObjective currentObjective;
 
-    public event System.Action OnObjectiveChanged = delegate { };
+    public event System.Action<string> OnObjectiveChanged = delegate { };
     public event System.Action OnQuestComplete = delegate { };
 
     public bool paused { get; private set; }
 
     [field: SerializeField] public bool overrideCurrentQuest { get; private set; }
+
+    private int currentObjectiveIndex;
 
     public string Description
     {
@@ -39,7 +41,7 @@ public class Quest
         if (oneObjectiveAtOnce)
         {
             QuestObjective objective = objectives[0];
-
+            currentObjectiveIndex = 0;
             ActivateObjective(objective);
         }
         else
@@ -50,7 +52,7 @@ public class Quest
             }
 
             currentObjective = null;
-            OnObjectiveChanged?.Invoke();
+            OnObjectiveChanged?.Invoke(description);
         }
     }
 
@@ -90,11 +92,12 @@ public class Quest
 
     private void ActivateNextObjective(QuestObjective objective)
     {
-        int index = objectives.IndexOf(objective);
+        int index = currentObjectiveIndex;
         if (index + 1 < objectives.Count)
         {
             QuestObjective nextObjective = objectives[index + 1];
             ActivateObjective(nextObjective);
+            currentObjectiveIndex++;
         }
         else
         {
@@ -109,7 +112,7 @@ public class Quest
         Debug.Log("Objective Condition Broken: " + objective);
 
         objectives.Remove(objective);
-        objectives.Insert(objectives.IndexOf(currentObjective), objective);
+        objectives.Insert(currentObjectiveIndex, objective);
         DeActivateObjective(currentObjective);
         ActivateObjective(objective);
     }
@@ -127,7 +130,7 @@ public class Quest
         if (!oneObjectiveAtOnce) return;
 
         currentObjective = objective;
-        OnObjectiveChanged?.Invoke();
+        OnObjectiveChanged?.Invoke(objective.description);
     }
     private void DeActivateObjective(QuestObjective objective)
     {

@@ -5,10 +5,6 @@ using UnityEngine;
 [DefaultExecutionOrder(-10)]
 public class DoorOpener : MonoBehaviour
 {
-    // TODO Fix Closing (Not fully closing) (kinda done.. stops moving when 0.1f away from goal)
-    // TODO Bool to mark door as closet door
-    // TODO door open angle interaction with enemy (if in closet but door is open enemy can see player)
-
     [SerializeField] private HingeJoint joint;
     [SerializeField] private bool doorSideSwitch;
     [field: SerializeField] public bool isMovableByEnemy { get; private set; }
@@ -52,6 +48,10 @@ public class DoorOpener : MonoBehaviour
 
     public void MoveDoor(float speed, float targetAngle, bool addTargetAngleToCurrent)
     {
+        if (playerMovingDoor && speed < 10000f) return;
+
+        playerMovingDoor = false;
+
         bool open;
 
         if (addTargetAngleToCurrent)

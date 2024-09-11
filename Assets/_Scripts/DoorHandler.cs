@@ -40,6 +40,12 @@ public class DoorHandler : MonoBehaviour
                     }
                 }
             }
+            else if (doorToBeSelected && !selectedDoor)
+            {
+                Reticle.UnFocus_Static();
+                doorToBeSelected = null;
+                joint = null;
+            }
         }
         else if (doorToBeSelected && !selectedDoor)
         {

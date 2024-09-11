@@ -44,7 +44,6 @@ public class TaskSystem : MonoBehaviour
         task.OnSuccess += TaskSuccess;
         task.OnFail += TaskFail;
 
-        taskAction.gameObject.SetActive(true);
         taskAction.Init();
     }
 

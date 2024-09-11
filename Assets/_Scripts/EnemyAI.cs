@@ -5,10 +5,15 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
+    [Header("Setup")]
+    [SerializeField] private AudioSource audioSource;
     [SerializeField] private Transform RaycastPosition;
     [SerializeField] private NavMeshAgent agent;
+    [SerializeField] private Animator animator;
+
     private Transform playerT;
 
+    [Header("Sight")]
     [SerializeField] private float sightRange;
     [SerializeField] private float nearSightRange;
     [SerializeField] private float killRange;
@@ -16,11 +21,15 @@ public class EnemyAI : MonoBehaviour
     private Vector3 playerPositionSnapshot;
     private bool playerWasInSight;
 
-    [SerializeField] private Animator animator;
-
     public enum EnemyState {Wandering, ChasingPlayer, PlayerHidingSequence, Stunned}
     public EnemyState State { get; private set; }
 
+    [Header("Mental Health")]
+    [SerializeField] private float mentalHealthToGoAway = 25f;
+    [SerializeField] private float mentalHealthIncreaseOnSuccesfulHide = 25f;
+    [SerializeField] private float mentalHealthIncreasePerSecondWhenPlayerNotInSight = 0.1f;
+
+    [Header("Layers")]
     [SerializeField] private LayerMask seenLayers;
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private LayerMask doorLayer;
@@ -33,7 +42,32 @@ public class EnemyAI : MonoBehaviour
 
     private bool killPlayer;
 
-    private bool active;
+    public bool active { get; private set; }
+
+    [Header("Footsteps")]
+    [SerializeField] private AudioClip[] footstepSounds;
+    [SerializeField] private float footstepFrequency = 0.5f;
+    [SerializeField] private float footstepRandomization = 0.1f;
+    [SerializeField] private float footstepVolume = 0.5f;
+    [SerializeField] private float footstepPitch = 1f;
+    private float footstepTimer;
+
+    private bool moving;
+
+    private void OnEnable()
+    {
+        MentalHealth.Instance.OnMentalHealthIncrease += MentalHealthIncreased;
+    }
+
+    private void MentalHealthIncreased(float currentMentalHealth)
+    {
+        if (!active) return;
+
+        if (currentMentalHealth >= mentalHealthToGoAway)
+        {
+            GameManager.Instance.DisableEnemy();
+        }
+    }
 
     private void Start()
     {
@@ -71,16 +105,21 @@ public class EnemyAI : MonoBehaviour
             throw new System.Exception("Enemy is not on navmesh " + gameObject);
         }
 
-        if (!AgentReachedDestiantion()) animator.SetBool("Moving", true);
-        else animator.SetBool("Moving", false);
+        if (!AgentReachedDestiantion()) moving = true;
+        else moving = false;
 
-        if (State == EnemyState.Stunned) animator.SetBool("Moving", false);
+        if (State == EnemyState.Stunned) moving = false;
+        animator.SetBool("Moving", moving);
+
+        HandleFootsteps();
 
         FlickerNearbyLights();
 
-        if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
-
         OpenNearbyDoors();
+
+        if (State != EnemyState.ChasingPlayer) MentalHealth.Instance.IncreaseMentalHealth(mentalHealthIncreasePerSecondWhenPlayerNotInSight * Time.deltaTime);
+
+        if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
 
         if (PlayerInSight())
         {
@@ -97,6 +136,19 @@ public class EnemyAI : MonoBehaviour
             playerWasInSight = false;
             SnapshotPlayerPosition();
             StartCoroutine(MoveToPlayerSnapshot());
+        }
+    }
+
+    private void HandleFootsteps()
+    {
+        if (footstepTimer >= footstepFrequency && moving)
+        {
+            footstepTimer = 0f + Random.Range(-footstepRandomization, footstepRandomization);
+            PlayRandomFootstep();
+        }
+        else
+        {
+            footstepTimer += Time.deltaTime;
         }
     }
 
@@ -154,7 +206,7 @@ public class EnemyAI : MonoBehaviour
         List<DoorOpener> doorOpeners = GetDoorsInRadius(2f);
         foreach (var door in doorOpeners)
         {
-            if (door.isMovableByEnemy && !door.isCloset && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(door.transform.position)) < 0.5f)
+            if (door.isMovableByEnemy && !door.isCloset && Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(door.transform.position)) < 0.75f)
             {
                 SlamDoorOpen(door);
             }
@@ -180,11 +232,11 @@ public class EnemyAI : MonoBehaviour
             yield return new WaitUntil(() => AgentReachedDestiantion() || PlayerInSight());
             print("Arrived at new position");
 
-            if (!PlayerInSight()) StartCoroutine(WanderRandomly());
+            if (!PlayerInSight()) StartCoroutine(WanderRandomly(1f));
         }
     }
 
-    private IEnumerator WanderRandomly()
+    private IEnumerator WanderRandomly(float minDistance)
     {
         if (agent.enabled == false) yield break;
 
@@ -192,7 +244,7 @@ public class EnemyAI : MonoBehaviour
 
         print("Wandering");
 
-        agent.SetDestination(RandomNavmeshLocation(5f));
+        agent.SetDestination(RandomNavmeshLocation(10f, minDistance, 5));
 
         yield return new WaitUntil(() => AgentReachedDestiantion() || State != EnemyState.Wandering);
 
@@ -207,7 +259,7 @@ public class EnemyAI : MonoBehaviour
 
         if (State == EnemyState.Wandering)
         {
-            StartCoroutine(WanderRandomly());
+            StartCoroutine(WanderRandomly(1f));
         }
     }
 
@@ -262,7 +314,7 @@ public class EnemyAI : MonoBehaviour
     {
         StopAllCoroutines();
         if (agent.enabled == true) agent.isStopped = false;
-        StartCoroutine(WanderRandomly());
+        StartCoroutine(WanderRandomly(1f));
     }
 
     private void PlayerLeftHidingSpot(HidingSpot hidingSpot)
@@ -290,12 +342,14 @@ public class EnemyAI : MonoBehaviour
         Vector3 locationToWalkTo = closetFront.position + closetFront.right * Random.Range(-range, range);
 
         // Calculates a rotation to face between straight at closet and playerposition randomly
-        Vector3 targetPoint = playerT.position;
-        Vector3 directionToTarget = Vector2XZFromVector3(targetPoint) - Vector2XZFromVector3(locationToWalkTo);
-        directionToTarget.y = 0;
-        Quaternion lookAtTarget = Quaternion.LookRotation(directionToTarget);
-        Quaternion inverseRotation = Quaternion.Inverse(closetFront.rotation);
-        Quaternion desiredRotation = Quaternion.Lerp(lookAtTarget, inverseRotation, Random.Range(0f, 1f));
+        //Vector3 targetPoint = playerT.position;
+        //Vector3 directionToTarget = Vector2XZFromVector3(targetPoint) - Vector2XZFromVector3(locationToWalkTo);
+        //directionToTarget.y = 0;
+        //Quaternion lookAtTarget = Quaternion.LookRotation(directionToTarget);
+        //Quaternion inverseRotation = Quaternion.Inverse(closetFront.rotation);
+        //Quaternion desiredRotation = Quaternion.Lerp(lookAtTarget, inverseRotation, Random.Range(0f, 1f));
+
+        Quaternion desiredRotation = Quaternion.Inverse(closetFront.rotation);
 
         // TODO Kill Player Upon Reaching The Hiding Spot
         if (distanceToPlayer <= nearSightRange && State == EnemyState.ChasingPlayer)
@@ -324,7 +378,7 @@ public class EnemyAI : MonoBehaviour
         if (playersCurrentHidingSpot == null)
         {
             print("HidingSpot is null");
-            StartCoroutine(WanderRandomly());
+            StartCoroutine(WanderRandomly(1f));
             yield break;
         }
 
@@ -389,7 +443,8 @@ public class EnemyAI : MonoBehaviour
             {
                 // Rotate to toward closet
                 print("Rotating to: " + desiredRotation.eulerAngles);
-                float precentageDone = timeStaring / 1f;
+                float precentageDone = Mathf.Clamp(timeStaring / 0.69f, 0f, 1f);
+                
                 transform.rotation = Quaternion.Lerp(startRotation, desiredRotation, precentageDone);
                 if (transform.rotation == desiredRotation) doneRotating = true;
             }
@@ -419,7 +474,7 @@ public class EnemyAI : MonoBehaviour
         print("Finished Staring... Walking Away");
 
         animator.speed = 1f;
-        Vector3 randomLocation = RandomNavmeshLocation(10f);
+        Vector3 randomLocation = RandomNavmeshLocation(10f, 5f, 10);
         agent.SetDestination(randomLocation);
 
         while (Vector2XZFromVector3(transform.position) != Vector2XZFromVector3(randomLocation))
@@ -434,7 +489,11 @@ public class EnemyAI : MonoBehaviour
         }
 
         print("Reached a location away from hiding spot");
-        StartCoroutine(WanderRandomly());
+
+        if (MentalHealth.Instance.IncreaseMentalHealth(mentalHealthIncreaseOnSuccesfulHide) > mentalHealthToGoAway)
+        yield break;
+
+        StartCoroutine(WanderRandomly(1f));
     }
 
     private void KillPlayerInCloset()
@@ -463,7 +522,7 @@ public class EnemyAI : MonoBehaviour
     private void SlamDoorOpen(DoorOpener door)
     {
         if (door.GetOpenPrecentage() > 0.95f) return;
-        door.MoveDoor(50000f, 360f, false);
+        door.MoveDoor(50000f, 180f, false);
         animator.SetTrigger("Attack");
     }
 
@@ -489,6 +548,23 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    private void PlayRandomFootstep()
+    {
+        AudioClip footstep = null;
+
+        if (footstepSounds.Length > 0)
+        {
+            footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
+        }
+
+        if (footstep != null)
+        {
+            audioSource.volume = footstepVolume;
+            audioSource.pitch = footstepPitch;
+            audioSource.PlayOneShot(footstep);
+        }
+    }
+
     public void Listen()
     {
         listening = true;
@@ -511,16 +587,34 @@ public class EnemyAI : MonoBehaviour
         return doorOpeners;
     }
 
-    public Vector3 RandomNavmeshLocation(float radius)
+    public Vector3 RandomNavmeshLocation(float radius, float minDistance, int maxAttempts)
     {
         Vector3 randomDirection = Random.insideUnitSphere * radius;
         randomDirection += transform.position;
         NavMeshHit hit;
         Vector3 finalPosition = Vector3.zero;
-        if (NavMesh.SamplePosition(randomDirection, out hit, radius, 1))
+        float highestDistance = 0f;
+
+        for (int i = 0; i < maxAttempts; i++)
         {
-            finalPosition = hit.position;
+            if (NavMesh.SamplePosition(randomDirection, out hit, radius, 1))
+            {
+                float distance = Vector3.Distance(transform.position, hit.position);
+                if (distance >= minDistance)
+                {
+                    finalPosition = hit.position;
+                    break;
+                }
+                else if (distance > highestDistance)
+                {
+                    finalPosition = hit.position;
+                    highestDistance = distance;
+                }
+            }
+            randomDirection = Random.insideUnitSphere * radius;
+            randomDirection += transform.position;
         }
+
         return finalPosition;
     }
 
@@ -560,5 +654,6 @@ public class EnemyAI : MonoBehaviour
         {
             playersCurrentHidingSpot.onPlayerExit -= PlayerLeftHidingSpot;
         }
+        MentalHealth.Instance.OnMentalHealthIncrease -= MentalHealthIncreased;
     }
 }

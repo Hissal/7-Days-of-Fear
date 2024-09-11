@@ -28,7 +28,7 @@ public abstract class TaskAction : MonoBehaviour
         DisableTaskAction();
     }
 
-    protected void DisableTaskAction()
+    protected virtual void DisableTaskAction()
     {
         gameObject.SetActive(false);
     }
