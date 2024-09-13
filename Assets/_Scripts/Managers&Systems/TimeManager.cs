@@ -23,6 +23,9 @@ public class TimeManager : MonoBehaviour
     [SerializeField] private float realTimeSecondsToInGameMinute = 1f;
     private float timer;
 
+    public static bool evening { get; private set; }
+
+
     public static bool IsMorning()
     {
         if (hour < 13)
@@ -66,10 +69,12 @@ public class TimeManager : MonoBehaviour
     public static void OnMorningInvoke()
     {
         OnMorning?.Invoke();
+        evening = false;
     }
     public static void OnEveningInvoke()
     {
         OnEvening?.Invoke();
+        evening = true;
     }
 
     private void Update()

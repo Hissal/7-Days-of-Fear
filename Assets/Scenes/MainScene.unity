@@ -387,6 +387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Go to sleep
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!1 &14949539
 GameObject:
   m_ObjectHideFlags: 0
@@ -1602,6 +1603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Turn off all lights
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!1001 &66534446
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2428,6 +2430,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Take a piss
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!1001 &78105174
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3438,6 +3441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Heat up some food
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!1001 &125328714
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5102,6 +5106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Wash your hands!
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!114 &204408024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22412,6 +22417,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Check your emails
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!1 &1024209191
 GameObject:
   m_ObjectHideFlags: 0
@@ -27955,6 +27961,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Take a shower
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!1001 &1248217562
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -31630,6 +31637,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Go to work
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!114 &1394969649
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32745,6 +32753,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: ESCAPE!
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!114 &1456867913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37149,6 +37158,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Make some food
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!1 &1708325828
 GameObject:
   m_ObjectHideFlags: 0
@@ -48530,6 +48540,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Brush your teeth
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 1
 --- !u!1001 &3480248437425939107
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48893,6 +48904,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <description>k__BackingField: Go to work
+  forceEnemySpawnInEveningOnDay4IfNotSpawnedYet: 0
 --- !u!114 &5985173406455682636
 MonoBehaviour:
   m_ObjectHideFlags: 0

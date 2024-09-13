@@ -258,6 +258,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    public void EnableEnemyIfNotAppearedYet()
+    {
+        if (enemyFirstAppearance) MentalHealth.Instance.ReduceMentalHealth(100f);
+    }
     private void EnableEnemy()
     {
         if (enemyAI == null) throw new System.Exception("EnemyAI is null");
@@ -266,17 +271,29 @@ public class GameManager : MonoBehaviour
 
         if (enemyFirstAppearance)
         {
+            StartCoroutine(EnableEnemyWithDelay());
             QuestSystem.Instance.PauseCurrentQuest("HIDE!");
             enemyFirstAppearance = false;
         }
+        else
+        {
+            enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false);
+        }
 
         StartCoroutine(FlickerAllLights());
-        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false);
+
+        
 
         MentalHealth.Instance.PauseDrainage();
 
         enemyActive = true;
     }
+    IEnumerator EnableEnemyWithDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false);
+    }
+
     public void EnableEnemyLastEscape()
     {
         if (enemyAI == null) throw new System.Exception("EnemyAI is null");

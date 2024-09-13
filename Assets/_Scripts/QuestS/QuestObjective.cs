@@ -13,6 +13,8 @@ public class QuestObjective : MonoBehaviour
 
     public event System.Action<QuestObjective> OnConditionBroken = delegate { };
 
+    [SerializeField] bool forceEnemySpawnInEveningOnDay4IfNotSpawnedYet = false;
+
     public bool paused { get; private set; }
 
     public void Activate()
@@ -31,6 +33,8 @@ public class QuestObjective : MonoBehaviour
     {
         isComplete = true;
         OnObjectiveComplete?.Invoke(this);
+
+        if (forceEnemySpawnInEveningOnDay4IfNotSpawnedYet && TimeManager.day == 4 && TimeManager.evening) GameManager.Instance.EnableEnemyIfNotAppearedYet();
     }
 
     public void Pause()
