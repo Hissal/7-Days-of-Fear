@@ -40,7 +40,7 @@ public class TimeManager : MonoBehaviour
 
     private void Start()
     {
-        SetTime(1, 0, 0, false);
+        //SetTime(1, 0, 0, false);
     }
 
     public static void SetDayDirty(int day)
@@ -48,12 +48,12 @@ public class TimeManager : MonoBehaviour
         TimeManager.day = day;
     }
 
-    public static void SetTime(int day, int hour, int minute, bool callMorning)
+    public static void SetTime(int day, int hour, int minute, bool callMorning, bool retry)
     {
         //if (IsMorning() && hour > 15) OnEvening?.Invoke();
         //else if (!IsMorning() && hour < 16) OnMorning?.Invoke();
 
-        if (TimeManager.day != day) OnDayChanged?.Invoke(day);
+        if (TimeManager.day != day || retry) OnDayChanged?.Invoke(day);
         //if (TimeManager.hour != hour) OnHourChanged?.Invoke(hour);
         //if (TimeManager.minute != minute) OnMinuteChanged?.Invoke(minute);
 
@@ -84,31 +84,31 @@ public class TimeManager : MonoBehaviour
         // For Debugging purposes
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            SetTime(1, 0, 0, false);
+            SetTime(1, 0, 0, false, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            SetTime(2, 0, 0, false);
+            SetTime(2, 0, 0, false, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            SetTime(3, 0, 0, false);
+            SetTime(3, 0, 0, false, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            SetTime(4, 0, 0, false);
+            SetTime(4, 0, 0, false, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            SetTime(5, 0, 0, false);
+            SetTime(5, 0, 0, false, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha6))
         {
-            SetTime(6, 0, 0, false);
+            SetTime(6, 0, 0, false, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha7))
         {
-            SetTime(7, 0, 0, false);
+            SetTime(7, 0, 0, false, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {

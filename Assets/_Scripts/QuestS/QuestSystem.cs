@@ -16,8 +16,8 @@ public class QuestSystem : MonoBehaviour
 
     private void Start()
     {
-        questHelperColor = questTMP.color;
-        questHelperPosition = questTMP.rectTransform.position;
+        questHelperColor = Color.white;
+        questHelperPosition = questTMP.rectTransform.anchoredPosition;
     }
 
     public void StartQuest(Quest quest)
@@ -70,14 +70,14 @@ public class QuestSystem : MonoBehaviour
 
             float yOffset = Mathf.Lerp(0f, 20f, elapsedTime / fadeDuration);
             Vector3 newPosition = originalPosition + new Vector3(0f, yOffset, 0f);
-            questTMP.rectTransform.position = newPosition;
+            questTMP.rectTransform.anchoredPosition = newPosition;
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
         questTMP.color = originalColor;
-        questTMP.rectTransform.position = originalPosition;
+        questTMP.rectTransform.anchoredPosition = originalPosition;
 
         onComplete?.Invoke();
     }
@@ -97,13 +97,13 @@ public class QuestSystem : MonoBehaviour
 
             float xOffset = Mathf.Lerp(100f, 0, elapsedTime / fadeDuration);
             Vector3 newPosition = originalPosition + new Vector3(xOffset, 0f, 0f);
-            questTMP.rectTransform.position = newPosition;
+            questTMP.rectTransform.anchoredPosition = newPosition;
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        questTMP.rectTransform.position = originalPosition;
+        questTMP.rectTransform.anchoredPosition = originalPosition;
         questTMP.color = originalColor;
     }
 

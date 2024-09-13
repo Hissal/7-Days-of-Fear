@@ -75,6 +75,29 @@ public class ComputerUI : MonoBehaviour
         {
             if (emailButton.diseappearAfterRead && emailButton.read) continue;
 
+            if (PlayerPrefs.GetInt("HiJohn") == 1 && emailButton.hiJohn && PlayerPrefs.GetInt("Retry") == 1)
+            {
+                if (TimeManager.day == emailButton.appearanceDay && emailButton.emailType == emailType)
+                {
+                    emailButton.gameObject.SetActive(true);
+                }
+                else
+                {
+                    emailButton.gameObject.SetActive(false);
+                }
+            }
+            else if (PlayerPrefs.GetInt("Smiley") == 1 && emailButton.smiley && PlayerPrefs.GetInt("Retry") == 1)
+            {
+                if (TimeManager.day == emailButton.appearanceDay && emailButton.emailType == emailType)
+                {
+                    emailButton.gameObject.SetActive(true);
+                }
+                else
+                {
+                    emailButton.gameObject.SetActive(false);
+                }
+            }
+
             if (emailButton.appearanceDay == TimeManager.day && emailButton.emailType == emailType)
             {
                 emailButton.gameObject.SetActive(true);

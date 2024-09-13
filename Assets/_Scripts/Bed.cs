@@ -18,14 +18,6 @@ public class Bed : Interactable
 
     [SerializeField] Transform playerSpawnPoint;
 
-    [SerializeField] private float mentalHealthOnDay1;
-    [SerializeField] private float mentalHealthOnDay2;
-    [SerializeField] private float mentalHealthOnDay3;
-    [SerializeField] private float mentalHealthOnDay4;
-    [SerializeField] private float mentalHealthOnDay5;
-    [SerializeField] private float mentalHealthOnDay6;
-    [SerializeField] private float mentalHealthOnDay7;
-
     [SerializeField] private Transform playerOnBedTransform;
     [SerializeField] private Image blackFader;
     [SerializeField] private LightFlicker[] lightFlickers;
@@ -87,6 +79,9 @@ public class Bed : Interactable
         }
         else
         {
+            float newDaynumberParentPositionY = 450f - (TimeManager.day - 1) * 150f;
+            dayNumbersParent.anchoredPosition = new Vector2(dayNumbersParent.anchoredPosition.x, newDaynumberParentPositionY);
+
             questObjective.OnComplete();
             GameManager.Instance.TakeAwayPlayerControl();
             MentalHealth.Instance.PauseDrainage();
@@ -325,34 +320,7 @@ public class Bed : Interactable
         Reticle.ShowReticle_Static();
         GameManager.Instance.GivePlayerControlBack();
         MentalHealth.Instance.ResumeDrainage();
-        TimeManager.SetTime(TimeManager.day + 1, 6, 30, false);
+        TimeManager.SetTime(TimeManager.day + 1, 6, 30, false, false);
         TimeManager.OnMorningInvoke();
-
-        switch (TimeManager.day)
-        {
-            case 1:
-                MentalHealth.Instance.SetMentalHealth(mentalHealthOnDay1);
-                break;
-            case 2:
-                MentalHealth.Instance.SetMentalHealth(mentalHealthOnDay2);
-                break;
-            case 3:
-                MentalHealth.Instance.SetMentalHealth(mentalHealthOnDay3);
-                break;
-            case 4:
-                MentalHealth.Instance.SetMentalHealth(mentalHealthOnDay4);
-                break;
-            case 5:
-                MentalHealth.Instance.SetMentalHealth(mentalHealthOnDay5);
-                break;
-            case 6:
-                MentalHealth.Instance.SetMentalHealth(mentalHealthOnDay6);
-                break;
-            case 7:
-                MentalHealth.Instance.SetMentalHealth(mentalHealthOnDay7);
-                break;
-            default:
-                break;
-        }
     }
 }

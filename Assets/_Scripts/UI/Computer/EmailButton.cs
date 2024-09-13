@@ -12,6 +12,8 @@ public class EmailButton : MonoBehaviour
     [field: SerializeField] public EmailType emailType { get; private set; }
 
     public event System.Action<EmailButton> OnEmailOpened = delegate { };
+    [field: SerializeField] public bool hiJohn = false;
+    [field: SerializeField] public bool smiley = false;
 
     public bool read { get; private set; } = false;
 
@@ -23,6 +25,15 @@ public class EmailButton : MonoBehaviour
         read = true;
         if (diseappearAfterRead)
         {
+            if (hiJohn)
+            {
+                PlayerPrefs.SetInt("HiJohn", 1);
+            }
+            else if (smiley)
+            {
+                PlayerPrefs.SetInt("Smiley", 1);
+            }
+            
             gameObject.SetActive(false);
         }
     }

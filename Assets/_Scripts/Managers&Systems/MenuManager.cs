@@ -8,6 +8,11 @@ public class MenuManager : MonoBehaviour
 
     public void LoadScene(string sceneName)
     {
+        PlayerPrefs.SetInt("Hidden", 0);
+        PlayerPrefs.SetInt("Retry", 0);
+        PlayerPrefs.SetInt("DayToLoad", 1);
+        PlayerPrefs.SetInt("HiJohn", 0);
+        PlayerPrefs.SetInt("Smiley", 0);
         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
     }
 

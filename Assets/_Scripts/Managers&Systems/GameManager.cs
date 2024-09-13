@@ -50,6 +50,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private LightFlicker[] lightFlickers;
 
+    [SerializeField] private Cinematic introCinematic;
+    [SerializeField] private GameObject gameOverScreen;
+
+    [SerializeField] private LightSwitch entranceSwitch;
+    [SerializeField] private LightSwitch bedroomSwitch;
+
     private void OnEnable()
     {
         TimeManager.OnDayChanged += SetMentalHealthGained;
@@ -94,12 +100,61 @@ public class GameManager : MonoBehaviour
         HideCursor();
 
         MentalHealth.Instance.OnMentalHealthReachZero += EnableEnemy;
+
+        enemyActive = true;
         DisableEnemy();
 
         foreach (var hidingSpot in hidingSpots)
         {
             hidingSpot.onPlayerEnter += enemyAI.PlayerEnteredHidingSpot;
         }
+
+        StartGame();
+    }
+
+    public void RestartDay()
+    {
+        PlayerPrefs.SetInt("Retry", 1);
+        PlayerPrefs.SetInt("DayToLoad", TimeManager.day);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+    }
+    public void LoadMainMenu()
+    {
+        TimeManager.SetDayDirty(0);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+    public void ActivateGameOverScreen()
+    {
+        gameOverScreen.SetActive(true);
+        gameOverScreen.transform.SetAsLastSibling();
+    }
+
+    private void StartGame()
+    {
+        int dayToLoad = PlayerPrefs.GetInt("DayToLoad");
+        print("StartGame, Day: " + dayToLoad);
+
+        if (dayToLoad != 1)
+        {
+            TimeManager.SetTime(dayToLoad, 0, 0, true, true);
+            bedroomSwitch.TurnOnLights();
+        }
+        else
+        {
+            PlayIntro();
+            entranceSwitch.TurnOnLights();
+        }
+    }
+    private void PlayIntro()
+    {
+        CinematicManager.Instance.PlayCinematic(introCinematic);
+        PlayableDirector director = introCinematic.director;
+        director.stopped += OnIntroEnd;
+    }
+    private void OnIntroEnd(PlayableDirector director)
+    {
+        director.stopped -= OnIntroEnd;
+        TimeManager.SetTime(1, 0, 0, false, true);
     }
 
     public bool IsPlayerHoldingBreath()
@@ -269,8 +324,9 @@ public class GameManager : MonoBehaviour
 
         if (enemyAI.active) return;
 
-        if (enemyFirstAppearance)
+        if (enemyFirstAppearance && PlayerPrefs.GetInt("Hidden") == 0)
         {
+            PlayerPrefs.SetInt("Hidden", 1);
             StartCoroutine(EnableEnemyWithDelay());
             QuestSystem.Instance.PauseCurrentQuest("HIDE!");
             enemyFirstAppearance = false;
@@ -314,6 +370,18 @@ public class GameManager : MonoBehaviour
 
         if (QuestSystem.Instance.paused) QuestSystem.Instance.ResumeCurrentQuest();
 
+        MentalHealth.Instance.ResumeDrainage();
+
+        if (!enemyActive)
+        {
+            Debug.LogWarning("Trying to Disable enemy when it is already disabled");
+            return;
+        }
+
+        enemyActive = false;
+
+        enemyAI.Disable(enemyDisabledPosition.position);
+
         if (mentalHealthGained > 0)
         {
             MentalHealth.Instance.IncreaseMentalHealth(mentalHealthGained);
@@ -322,19 +390,13 @@ public class GameManager : MonoBehaviour
         {
             MentalHealth.Instance.ReduceMentalHealth(-mentalHealthGained);
         }
-
-        MentalHealth.Instance.ResumeDrainage();
-        enemyAI.Disable(enemyDisabledPosition.position);
-
-        enemyActive = false;
     }
 
     public void GameWin()
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        TimeManager.SetDayDirty(0);
-        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        LoadMainMenu();
     }
 
     public static GameManager Instance;

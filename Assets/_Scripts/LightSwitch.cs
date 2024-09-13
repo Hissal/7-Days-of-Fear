@@ -18,6 +18,15 @@ public class LightSwitch : Interactable
         base.OnInteract();
     }
 
+    public void Highlight()
+    {
+        outline.enabled = true;
+    }
+    public void DeHighligh()
+    {
+        outline.enabled = false;
+    }
+
     public void ToggleLights()
     {
         if (lightFlickers.Count == 0)

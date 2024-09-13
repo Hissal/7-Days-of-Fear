@@ -70,7 +70,11 @@ public class LightsChecker : MonoBehaviour
         {
             if (lightSwitch.LightsOn)
             {
-                lightSwitch.OnFocus();
+                lightSwitch.Highlight();
+            }
+            else
+            {
+                lightSwitch.DeHighligh();
             }
         }
     }

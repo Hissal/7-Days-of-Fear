@@ -93,7 +93,7 @@ public class Work : Interactable
 
     private void BackHome(PlayableDirector director)
     {
-        TimeManager.SetTime(TimeManager.day, WORKEND, 0, false);
+        TimeManager.SetTime(TimeManager.day, WORKEND, 0, false, false);
         TimeManager.OnEveningInvoke();
         MentalHealth.Instance.ResumeDrainage();
         director.stopped -= BackHome;

@@ -30,11 +30,42 @@ public class MentalHealth : MonoBehaviour
     [SerializeField] private float drainageOnDay6;
     [SerializeField] private float drainageOnDay7;
 
+    [SerializeField] private float mentalHealthOnDay1 = 100f;
+    [SerializeField] private float mentalHealthOnDay2 = 100f;
+    [SerializeField] private float mentalHealthOnDay3 = 80f;
+    [SerializeField] private float mentalHealthOnDay4 = 70f;
+    [SerializeField] private float mentalHealthOnDay5 = 60f;
+    [SerializeField] private float mentalHealthOnDay6 = 50f;
+    [SerializeField] private float mentalHealthOnDay7 = 40f;
+
+
+    IEnumerator FailureCheckerLoop()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(5f);
+            if (GameManager.Instance.enemyActive)
+            {
+                PauseDrainage();
+            }
+            else
+            {
+                ResumeDrainage();
+            }
+        }
+    }
 
     private void OnEnable()
     {
         TimeManager.OnDayChanged += SetDrainageAmount;
+        StartCoroutine(FailureCheckerLoop());
     }
+    private void OnDisable()
+    {
+        TimeManager.OnDayChanged -= SetDrainageAmount;
+        StopAllCoroutines();
+    }
+
     private void Update()
     {
        if (currentMentalHealth != 0f && !paused) ReduceMentalHealth(mentalHealthDrainPerSecond * Time.deltaTime);
@@ -54,27 +85,35 @@ public class MentalHealth : MonoBehaviour
         {
             case 1:
                 mentalHealthDrainPerSecond = drainageOnDay1;
+                currentMentalHealth = mentalHealthOnDay1;
                 break;
             case 2:
                 mentalHealthDrainPerSecond = drainageOnDay2;
+                currentMentalHealth = mentalHealthOnDay2;
                 break;
             case 3:
                 mentalHealthDrainPerSecond = drainageOnDay3;
+                currentMentalHealth = mentalHealthOnDay3;
                 break;
             case 4:
                 mentalHealthDrainPerSecond = drainageOnDay4;
+                currentMentalHealth = mentalHealthOnDay4;
                 break;
             case 5:
                 mentalHealthDrainPerSecond = drainageOnDay5;
+                currentMentalHealth = mentalHealthOnDay5;
                 break;
             case 6:
                 mentalHealthDrainPerSecond = drainageOnDay6;
+                currentMentalHealth = mentalHealthOnDay6;
                 break;
             case 7:
                 mentalHealthDrainPerSecond = drainageOnDay7;
+                currentMentalHealth = mentalHealthOnDay7;
                 break;
             default:
                 mentalHealthDrainPerSecond = drainageOnDay1;
+                currentMentalHealth = mentalHealthOnDay1;
                 break;
         }
     }

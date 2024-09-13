@@ -98,6 +98,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (!active) return;
         if (cantDeactivate) return;
+        if (!GameManager.Instance.enemyActive) return;
 
         if (currentMentalHealth >= mentalHealthToGoAway)
         {
@@ -116,31 +117,45 @@ public class EnemyAI : MonoBehaviour
         this.cantDeactivate = cantDeactivate;
         if (active) return;
         agent.enabled = true;
-        UnStun(false);
+
+        StopAllCoroutines();
+
         SetPosition(position);
 
-        active = true;
-
+        StartCoroutine(ActivateDelay());
+    }
+    IEnumerator ActivateDelay()
+    {
+        yield return new WaitForSeconds(0.1f);
+        UnStun(false);
         SnapshotPlayerPosition();
-        StopAllCoroutines();
         State = EnemyState.ChasingPlayer;
         StartCoroutine(MoveToPlayerSnapshot());
+        active = true;
     }
+
     public void Disable(Vector3 position)
     {
         if (cantDeactivate) return;
 
-        Stun(-1);
+        StopAllCoroutines();
+        State = EnemyState.Stunned;
         SetPosition(position);
+        StartCoroutine(Deactivate());
+    }
+    IEnumerator Deactivate()
+    {
+        yield return new WaitForSeconds(0.1f);
+        Stun(-1);
         agent.enabled = false;
         active = false;
-        StopAllCoroutines();
 
         foreach (LightFlicker lightFlicker in flickeringLights)
         {
             UnFlickerLight(lightFlicker);
         }
     }
+
     public void SetPosition(Vector3 position)
     {
         agent.Warp(position);

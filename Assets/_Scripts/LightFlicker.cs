@@ -34,7 +34,7 @@ public class LightFlicker : MonoBehaviour
         lastSum = 0;
     }
 
-    void Start()
+    void Awake()
     {
         smoothQueue = new Queue<float>(smoothing);
         // External or internal light?
@@ -44,7 +44,7 @@ public class LightFlicker : MonoBehaviour
         }
 
         lightIntenisty = light.intensity;
-        //TurnOffLight();
+        TurnOffLight();
     }
 
     void Update()
