@@ -9,8 +9,11 @@ public class QuestObjective : MonoBehaviour
     public event System.Action<QuestObjective> OnObjectiveComplete = delegate { };
     public event System.Action OnObjectiveHighlight = delegate { };
     public event System.Action<bool> OnObjectiveActivated = delegate { };
+    public event System.Action<bool> OnObjectivePaused = delegate { };
 
     public event System.Action<QuestObjective> OnConditionBroken = delegate { };
+
+    public bool paused { get; private set; }
 
     public void Activate()
     {
@@ -28,6 +31,17 @@ public class QuestObjective : MonoBehaviour
     {
         isComplete = true;
         OnObjectiveComplete?.Invoke(this);
+    }
+
+    public void Pause()
+    {
+        paused = true;
+        OnObjectivePaused?.Invoke(true);
+    }
+    public void UnPause()
+    {
+        paused = false;
+        OnObjectivePaused?.Invoke(false);
     }
 
     public void ConditionBroken()

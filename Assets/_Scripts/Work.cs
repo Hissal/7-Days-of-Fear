@@ -51,7 +51,9 @@ public class Work : Interactable
 
     public override void OnInteract()
     {
-        if (!active) return;
+        // TODO Play locked sound if enemy is active
+        if (!active || GameManager.Instance.enemyActive) return;
+
         GoToWork();
         base.OnInteract();
         base.OnLoseFocus();
@@ -69,6 +71,7 @@ public class Work : Interactable
     {
         questObjective.OnComplete();
         MentalHealth.Instance.PauseDrainage();
+        MentalHealth.Instance.IncreaseMentalHealth(25f);
 
         if (TimeManager.hour >= WORKSTART)
         {
@@ -88,8 +91,7 @@ public class Work : Interactable
 
     private void BackHome(PlayableDirector director)
     {
-        MentalHealth.Instance.IncreaseMentalHealth(25f);
-        TimeManager.SetTime(TimeManager.day, WORKEND, 0);
+        TimeManager.SetTime(TimeManager.day, WORKEND, 0, false);
         TimeManager.OnEveningInvoke();
         MentalHealth.Instance.ResumeDrainage();
         director.stopped -= BackHome;

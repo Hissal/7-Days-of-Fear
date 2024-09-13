@@ -5,14 +5,23 @@ using UnityEngine.UI;
 
 public class BreathHoldingMinigame : MonoBehaviour
 {
+    [SerializeField] private GameObject spaceBarIndicator;
     [SerializeField] private KeyCode breathHoldingKey = KeyCode.Space;
 
     [SerializeField] private Image breathBar;
     [SerializeField] private Image backGround;
 
     [SerializeField] private float maxBreath;
-    [SerializeField] private float breathDrainSpeed;
+    private float breathDrainSpeed;
     [SerializeField] private float breathRegainSpeed;
+    [SerializeField] private float breathDrainSpeedDay1 = 12;
+    [SerializeField] private float breathDrainSpeedDay2 = 12;
+    [SerializeField] private float breathDrainSpeedDay3 = 12;
+    [SerializeField] private float breathDrainSpeedDay4 = 14;
+    [SerializeField] private float breathDrainSpeedDay5 = 15;
+    [SerializeField] private float breathDrainSpeedDay6 = 17;
+    [SerializeField] private float breathDrainSpeedDay7 = 18;
+
     private float breathLeft;
 
     public bool holdingBreath { get; private set; }
@@ -25,16 +34,66 @@ public class BreathHoldingMinigame : MonoBehaviour
     [SerializeField] private Color highBreathColor;
     [SerializeField] private Color lowBreathColor;
 
+    public bool active { get; private set; }
+
+    private void Awake()
+    {
+        TimeManager.OnDayChanged += SetBreathDrainSpeed;
+        gameObject.SetActive(false);
+    }
+    private void OnDestroy()
+    {
+        TimeManager.OnDayChanged -= SetBreathDrainSpeed;
+    }
+
     private void OnEnable()
     {
+        active = true;
         breathLeft = maxBreath;
         releasedBreathKey = true;
         holdingBreath = false;
         UpdateVisual();
     }
 
+    private void OnDisable()
+    {
+        active = false;
+    }
+
+    private void SetBreathDrainSpeed(int day)
+    {
+        switch (day)
+        {
+            case 1:
+                breathDrainSpeed = breathDrainSpeedDay1;
+                break;
+            case 2:
+                breathDrainSpeed = breathDrainSpeedDay2;
+                break;
+            case 3:
+                breathDrainSpeed = breathDrainSpeedDay3;
+                break;
+            case 4:
+                breathDrainSpeed = breathDrainSpeedDay4;
+                break;
+            case 5:
+                breathDrainSpeed = breathDrainSpeedDay5;
+                break;
+            case 6:
+                breathDrainSpeed = breathDrainSpeedDay6;
+                break;
+            case 7:
+                breathDrainSpeed = breathDrainSpeedDay7;
+                break;
+            default:
+                break;
+        }
+    }
+
     private void Update()
     {
+        if (!active) return;
+
         if (Input.GetKeyUp(breathHoldingKey))
         {
             releasedBreathKey = true;
@@ -62,6 +121,8 @@ public class BreathHoldingMinigame : MonoBehaviour
 
     private void DrainBreath()
     {
+        if (spaceBarIndicator.activeInHierarchy) spaceBarIndicator.SetActive(false);
+
         float breathPrecentage = breathLeft / maxBreath;
 
         if (breathPrecentage > 0.66f)

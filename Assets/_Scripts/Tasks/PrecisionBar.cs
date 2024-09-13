@@ -78,9 +78,15 @@ public class PrecisionBar : TaskAction
         parent.SetActive(true);
         SetRandomPointerPositionAndDirection();
         SetRandomSuccessPosition();
-        active = true;
+        StartCoroutine(StartTaskRoutine());
 
         base.Init();
+    }
+
+    private IEnumerator StartTaskRoutine()
+    {
+        yield return null;
+        active = true;
     }
 
     private void SetRandomPointerPositionAndDirection()
@@ -113,6 +119,7 @@ public class PrecisionBar : TaskAction
 
         if (Input.GetKeyDown(KeyCode.E))
         {
+            print("Pressed Precision bar key");
             EndTask(OnSuccessPoint());
         }
     }
@@ -130,8 +137,6 @@ public class PrecisionBar : TaskAction
     {
         active = false;
 
-        yield return new WaitForSeconds(0.2f);
-
         if (success)
         {
             TaskSuccess();
@@ -140,6 +145,11 @@ public class PrecisionBar : TaskAction
         {
             TaskFail();
         }
+
+        yield return new WaitForSeconds(0.2f);
+
+
+        DisableTaskAction();
     }
 
     private bool OnSuccessPoint()

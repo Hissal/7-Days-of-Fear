@@ -9,6 +9,22 @@ public class ComputerUI : MonoBehaviour
     [SerializeField] private EmailButton[] emailButtons;
 
     private bool ongoingTask = false;
+    private bool taskDone = true;
+    private bool emailFound = false;
+
+    private void OnEnable()
+    {
+        if (!emailFound && ongoingTask)
+            OnTaskComplete(null);
+    }
+    private void OnDisable()
+    {
+        if (taskDone)
+        {
+            taskDone = false;
+            OnTaskSuccesful?.Invoke();
+        }
+    }
 
     public void ActivateEmailMorning()
     {
@@ -22,19 +38,25 @@ public class ComputerUI : MonoBehaviour
     public void SetTask()
     {
         if (ongoingTask) return;
+        ongoingTask = true;
+
+        bool emailFound = false;
 
         foreach (var emailButton in emailButtons)
         {
             if (emailButton.appearanceDay == TimeManager.day && emailButton.isPartOfQuest)
             {
+                emailFound = true;
                 if (emailButton.read) StartCoroutine(OnTaskCompleteWithDelay(emailButton));
                 else
                 {
+                    taskDone = false;
                     emailButton.OnEmailOpened += OnTaskComplete;
-                    ongoingTask = true;
                 }
             }
         }
+
+        this.emailFound = emailFound;
     }
 
     private IEnumerator OnTaskCompleteWithDelay(EmailButton emailButton)
@@ -74,9 +96,9 @@ public class ComputerUI : MonoBehaviour
 
     public void OnTaskComplete(EmailButton emailButton)
     {
+        taskDone = true;
         ongoingTask = false;
-        emailButton.OnEmailOpened -= OnTaskComplete;
-        OnTaskSuccesful?.Invoke();
+        if (emailButton != null) emailButton.OnEmailOpened -= OnTaskComplete;
     }
 
 }

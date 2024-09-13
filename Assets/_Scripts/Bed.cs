@@ -47,12 +47,25 @@ public class Bed : Interactable
         OnFocus();
     }
 
+    public override void OnFocus()
+    {
+        if (active)
+            base.OnFocus();
+    }
+
+    public override void OnLoseFocus()
+    {
+        if (active)
+            base.OnLoseFocus();
+    }
+
     public override void OnInteract()
     {
         if (active)
         {
             base.OnInteract();
             GoToSleep();
+            base.OnLoseFocus();
         }
     }
 
@@ -70,6 +83,8 @@ public class Bed : Interactable
     {
         // Enable the day change screen
         dayChangeScreen.SetActive(true);
+
+        AmbienceController.Instance.FadeOutAmbience(3f);
 
         // Set the initial alpha value of the fade image and text to 0
         fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 0f);
@@ -133,6 +148,9 @@ public class Bed : Interactable
 
         yield return new WaitForSeconds(1f);
 
+        AmbienceController.Instance.SwitchAmbience(TimeManager.day + 1);
+        AmbienceController.Instance.FadeInAmbience(3f);
+
         // Fade out the day text and day number texts
         float textFadeOutDuration = 1f;
         float textFadeOutTimer = 0f;
@@ -169,6 +187,9 @@ public class Bed : Interactable
 
         // Disable the day change screen
         dayChangeScreen.SetActive(false);
+        HUD.SetActive(true);
+
+        yield return null;
 
         WakeUp();
     }
@@ -176,10 +197,9 @@ public class Bed : Interactable
     private void WakeUp()
     {
         Reticle.ShowReticle_Static();
-        HUD.SetActive(true);
         GameManager.Instance.GivePlayerControlBack();
         MentalHealth.Instance.ResumeDrainage();
-        TimeManager.SetTime(TimeManager.day + 1, 6, 30);
+        TimeManager.SetTime(TimeManager.day + 1, 6, 30, false);
         TimeManager.OnMorningInvoke();
 
         switch (TimeManager.day)

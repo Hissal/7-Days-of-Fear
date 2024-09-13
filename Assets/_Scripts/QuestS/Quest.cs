@@ -64,6 +64,8 @@ public class Quest
 
     private void ObjectiveCompleted(QuestObjective objective)
     {
+        if (paused) return;
+
         Debug.Log("Objective Completed: " + objective);
 
         DeActivateObjective(objective);
@@ -134,6 +136,7 @@ public class Quest
     }
     private void DeActivateObjective(QuestObjective objective)
     {
+        Debug.Log("Deactivating Objective: " + objective);
         objective.OnObjectiveComplete -= ObjectiveCompleted;
         objective.OnConditionBroken -= ReActivatePreviousObjective;
         objective.DeActivate();
@@ -142,12 +145,12 @@ public class Quest
 
     public void PauseQuest()
     {
-        activeObjectives.ForEach(obj => obj.DeActivate());
+        activeObjectives.ForEach(obj => obj.Pause());
         paused = true;
     }
     public void ResumeQuest()
     {
-        activeObjectives.ForEach(obj => obj.Activate());
+        activeObjectives.ForEach(obj => obj.UnPause());
         paused = false;
     }
 

@@ -12,11 +12,6 @@ public class QuestChain : MonoBehaviour
     [SerializeField] private bool activeInEvening;
     private bool active;
 
-    private void Awake()
-    {
-        TimeManager.OnDayChanged += CheckDay;
-    }
-
     private void OnEnable()
     {
         TimeManager.OnDayChanged += CheckDay;
@@ -41,6 +36,8 @@ public class QuestChain : MonoBehaviour
 
     void CheckDay(int day)
     {
+        print("Checking Day");
+
         if (IsDayActive(day))
         {
             active = true;

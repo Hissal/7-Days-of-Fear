@@ -1410,6 +1410,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1427703791624186903}
+  - {fileID: 1868826860742439907}
   - {fileID: 8642424887548623077}
   - {fileID: 2086583669178302480}
   m_Father: {fileID: 6353573064705088923}
@@ -2871,6 +2872,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec52ff55151832c49b8dedce7b2693a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <isPartOfQuest>k__BackingField: 0
   <attatchedEmail>k__BackingField: {fileID: 2669967174246901261}
   <appearanceDay>k__BackingField: 1
   <emailType>k__BackingField: 1
@@ -4059,6 +4061,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec52ff55151832c49b8dedce7b2693a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <isPartOfQuest>k__BackingField: 0
   <attatchedEmail>k__BackingField: {fileID: 69929385997491639}
   <appearanceDay>k__BackingField: 2
   <emailType>k__BackingField: 1
@@ -4088,17 +4091,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3520687834046460595}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6779199837948287071}
-  m_Father: {fileID: 6353573064705088923}
+  m_Father: {fileID: 5838654432899731485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -120, y: -110}
+  m_AnchoredPosition: {x: -19.999939, y: -9.9999695}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &3639271525471933346
@@ -4804,7 +4807,6 @@ RectTransform:
   - {fileID: 2671962829493909877}
   - {fileID: 888793759293750247}
   - {fileID: 5838654432899731485}
-  - {fileID: 1868826860742439907}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

@@ -11,6 +11,8 @@ public class QuestSystem : MonoBehaviour
 
     private Vector2 questHelperPosition;
 
+    public bool paused { get; private set; }
+
     private void Start()
     {
         questHelperPosition = questTMP.rectTransform.position;
@@ -40,6 +42,8 @@ public class QuestSystem : MonoBehaviour
 
     private void UpdateQuestText(string newText)
     {
+        if (paused) return;
+
         StopAllCoroutines();
 
         StartCoroutine(FadeOutAndMoveText(() =>
@@ -127,6 +131,7 @@ public class QuestSystem : MonoBehaviour
         if (currentQuest == null) return;
 
         currentQuest.PauseQuest();
+        paused = true;
     }
     public void ResumeCurrentQuest()
     {
@@ -137,6 +142,7 @@ public class QuestSystem : MonoBehaviour
         }
 
         currentQuest.ResumeQuest();
+        paused = false;
         UpdateQuestText(currentQuest.Description);
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TimeManager : MonoBehaviour
@@ -36,10 +37,15 @@ public class TimeManager : MonoBehaviour
 
     private void Start()
     {
-        SetTime(1, 0, 0);
+        SetTime(1, 0, 0, true);
     }
 
-    public static void SetTime(int day, int hour, int minute)
+    public static void SetDayDirty(int day)
+    {
+        TimeManager.day = day;
+    }
+
+    public static void SetTime(int day, int hour, int minute, bool callMorning)
     {
         //if (IsMorning() && hour > 15) OnEvening?.Invoke();
         //else if (!IsMorning() && hour < 16) OnMorning?.Invoke();
@@ -53,7 +59,7 @@ public class TimeManager : MonoBehaviour
         TimeManager.minute = minute;
         instance.timer = instance.realTimeSecondsToInGameMinute;
 
-        if (day == 1 && hour < 12) OnMorning?.Invoke();
+        if (callMorning) OnMorning?.Invoke();
     }
 
     public static void OnMorningInvoke()
@@ -72,33 +78,32 @@ public class TimeManager : MonoBehaviour
         // For Debugging purposes
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            SetTime(1, 0, 0);
+            SetTime(1, 0, 0, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            SetTime(2, 0, 0);
+            SetTime(2, 0, 0, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            SetTime(3, 0, 0);
+            SetTime(3, 0, 0, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            SetTime(4, 0, 0);
+            SetTime(4, 0, 0, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            SetTime(5, 0, 0);
+            SetTime(5, 0, 0, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha6))
         {
-            SetTime(6, 0, 0);
+            SetTime(6, 0, 0, false);
         }
         if (Input.GetKeyDown(KeyCode.Alpha7))
         {
-            SetTime(7, 0, 0);
+            SetTime(7, 0, 0, false);
         }
-
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
             OnEveningInvoke();

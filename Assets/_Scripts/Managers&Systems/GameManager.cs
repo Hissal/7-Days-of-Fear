@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -21,6 +22,17 @@ public class GameManager : MonoBehaviour
 
     [field: Header("Other")]
     [SerializeField] private GameObject pauseScreen;
+    [SerializeField] private GameObject[] disableOnGameOver;
+
+    [Header("MentalHealthGainedOnEnemyDisable")]
+    [SerializeField] private float mentalHealthGainedDay1 = 25f;
+    [SerializeField] private float mentalHealthGainedDay2 = 25f;
+    [SerializeField] private float mentalHealthGainedDay3 = 25f;
+    [SerializeField] private float mentalHealthGainedDay4 = 20f;
+    [SerializeField] private float mentalHealthGainedDay5 = 10f;
+    [SerializeField] private float mentalHealthGainedDay6 = -10f;
+    [SerializeField] private float mentalHealthGainedDay7 = -20f;
+    private float mentalHealthGained = 0f;
 
     public bool paused { get; private set; }
     private float timeScaleBeforePause;
@@ -32,10 +44,49 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private PlayableDirector director;
 
-    private int currentDay;
-    public int GetCurrentDay()
+    private bool enemyFirstAppearance = true;
+
+    public bool enemyActive { get; private set; }
+
+    [SerializeField] private LightFlicker[] lightFlickers;
+
+    private void OnEnable()
     {
-        return currentDay;
+        TimeManager.OnDayChanged += SetMentalHealthGained;
+    }
+    private void OnDisable()
+    {
+        TimeManager.OnDayChanged -= SetMentalHealthGained;
+    }
+
+    private void SetMentalHealthGained(int day)
+    {
+        switch (day)
+        {
+            case 1:
+                mentalHealthGained = mentalHealthGainedDay1;
+                break;
+            case 2:
+                mentalHealthGained = mentalHealthGainedDay2;
+                break;
+            case 3:
+                mentalHealthGained = mentalHealthGainedDay3;
+                break;
+            case 4:
+                mentalHealthGained = mentalHealthGainedDay4;
+                break;
+            case 5:
+                mentalHealthGained = mentalHealthGainedDay5;
+                break;
+            case 6:
+                mentalHealthGained = mentalHealthGainedDay6;
+                break;
+            case 7:
+                mentalHealthGained = mentalHealthGainedDay7;
+                break;
+            default:
+                break;
+        }
     }
 
     private void Start()
@@ -103,6 +154,13 @@ public class GameManager : MonoBehaviour
 
     public void KillPlayer()
     {
+        if (isPlayerDead) return;
+
+        foreach (GameObject GM in disableOnGameOver)
+        {
+            GM.SetActive(false);
+        }
+
         isPlayerDead = true;
         TakeAwayPlayerControl();
         StunEnemy(-1);
@@ -136,7 +194,7 @@ public class GameManager : MonoBehaviour
     }
     public void UnStunEnemy()
     {
-        enemyAI.UnStun();
+        enemyAI.UnStun(true);
     }
 
     public void ShowCursor()
@@ -150,22 +208,103 @@ public class GameManager : MonoBehaviour
         Cursor.visible = false;
     }
 
+    private IEnumerator FlickerAllLights()
+    {
+        List<float> lightIntensities = new List<float>();
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightIntensities.Add(lightFlicker.light.intensity);
+        }
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightFlicker.flicker = true;
+        }
+
+        yield return new WaitForSeconds(1f);
+
+        for (int i = 0; i < lightFlickers.Length; i++)
+        {
+            lightFlickers[i].light.intensity = lightIntensities[i];
+        }
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightFlicker.flicker = false;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightFlicker.flicker = true;
+        }
+
+        yield return new WaitForSeconds(1f);
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightFlicker.flicker = false;
+            int coinFlip = Random.Range(0, 2);
+            if (coinFlip == 0)
+            {
+                lightFlicker.TurnOnLight();
+            }
+            else
+            {
+                lightFlicker.TurnOffLight();
+            }
+        }
+    }
+
     private void EnableEnemy()
     {
         if (enemyAI == null) throw new System.Exception("EnemyAI is null");
 
         if (enemyAI.active) return;
 
-        MentalHealth.Instance.PauseDrainage();
-        QuestSystem.Instance.PauseCurrentQuest("HIDE!");
+        if (enemyFirstAppearance)
+        {
+            QuestSystem.Instance.PauseCurrentQuest("HIDE!");
+            enemyFirstAppearance = false;
+        }
 
-        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation);
+        StartCoroutine(FlickerAllLights());
+        MentalHealth.Instance.PauseDrainage();
+        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false);
+
+        enemyActive = true;
     }
+
     public void DisableEnemy()
     {
+        if (enemyAI == null) throw new System.Exception("EnemyAI is null");
+        if (enemyAI.cantDeactivate) return;
+
+        if (QuestSystem.Instance.paused) QuestSystem.Instance.ResumeCurrentQuest();
+
+        if (mentalHealthGained > 0)
+        {
+            MentalHealth.Instance.IncreaseMentalHealth(mentalHealthGained);
+        }
+        else
+        {
+            MentalHealth.Instance.ReduceMentalHealth(-mentalHealthGained);
+        }
+
         MentalHealth.Instance.ResumeDrainage();
         enemyAI.Disable(enemyDisabledPosition.position);
-        QuestSystem.Instance.ResumeCurrentQuest();
+
+        enemyActive = false;
+    }
+
+    public void GameWin()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        TimeManager.SetDayDirty(0);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 
     public static GameManager Instance;

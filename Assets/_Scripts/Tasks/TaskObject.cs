@@ -9,6 +9,7 @@ public class TaskObject : Interactable
     private TaskSystem taskSystem;
 
     private bool active = false;
+    private bool paused = false;
 
     //[SerializeField] private bool morningTask;
     //[SerializeField] private bool eveningTask;
@@ -21,6 +22,7 @@ public class TaskObject : Interactable
         {
             questObjective.OnObjectiveActivated += SetActive;
             questObjective.OnObjectiveHighlight += Highlight;
+            questObjective.OnObjectivePaused += Pause;
         }
 
         task.OnSuccess += SucceedTask;
@@ -35,6 +37,11 @@ public class TaskObject : Interactable
         //if (eveningTask) TimeManager.OnMorning += ActivateTask;
     }
 
+    private void Pause(bool pause)
+    {
+        paused = pause;
+        base.OnLoseFocus();
+    }
     private void SetActive(bool active)
     {
         this.active = active;
@@ -51,35 +58,39 @@ public class TaskObject : Interactable
 
     private void SucceedTask(Task task)
     {
+        base.OnLoseFocus();
+        if (!active || paused) return;
+
         questObjective.OnComplete();
         SetActive(false);
-        base.OnLoseFocus();
     }
 
     private void FailTask(Task task)
     {
+        base.OnLoseFocus();
+        if (!active || paused) return;
+
         questObjective.OnComplete();
         SetActive(false);
-        base.OnLoseFocus();
     }
 
     public override void OnFocus()
     {
-        if (!active) return;
+        if (!active || paused) return;
 
         base.OnFocus();
     }
 
     public override void OnLoseFocus()
     {
-        if (!active) return;
+        if (!active || paused) return;
 
         base.OnLoseFocus();
     }
 
     public override void OnInteract()
     {
-        if (!active) return;
+        if (!active || paused) return;
 
         BeginTask();
     }
@@ -93,6 +104,7 @@ public class TaskObject : Interactable
         {
             questObjective.OnObjectiveActivated -= SetActive;
             questObjective.OnObjectiveHighlight -= Highlight;
+            questObjective.OnObjectivePaused -= Pause;
         }
 
         //if (morningTask) TimeManager.OnMorning -= ActivateTask;

@@ -7,6 +7,7 @@ using UnityEngine.Playables;
 public class Cinematic : MonoBehaviour
 {
     [field: SerializeField] public bool isFirstCinematicOfChain;
+    [field: SerializeField] private bool isGameEndingCinematic = false;
     [field: SerializeField] public PlayableDirector director { get; private set; }
     [SerializeField] private bool playOnStart;
     private bool played;
@@ -76,7 +77,7 @@ public class Cinematic : MonoBehaviour
         director.stopped -= EndCinematic;
 
         if (nextCinematic != null) CinematicManager.Instance.PlayCinematic(nextCinematic);
-        else
+        else if (!isGameEndingCinematic)
         {
             gameManager.playerTransform.position = playerEndPosition;
             gameManager.playerTransform.rotation = Quaternion.Euler(playerEndRotation);
@@ -92,6 +93,11 @@ public class Cinematic : MonoBehaviour
 
             gameManager.UnStunEnemy();
             gameManager.GivePlayerControlBack();
+        }
+        else
+        {
+            GameManager.Instance.GameWin();
+            return;
         }
         
         gameObject.SetActive(false);

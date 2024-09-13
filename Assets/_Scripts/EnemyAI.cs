@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,7 +26,8 @@ public class EnemyAI : MonoBehaviour
     public EnemyState State { get; private set; }
 
     [Header("Mental Health")]
-    [SerializeField] private float mentalHealthToGoAway = 25f;
+    [SerializeField] private float[] mentalHealthToGoAwayArray;
+    private float mentalHealthToGoAway = 25f;
     [SerializeField] private float mentalHealthIncreaseOnSuccesfulHide = 25f;
     [SerializeField] private float mentalHealthIncreasePerSecondWhenPlayerNotInSight = 0.1f;
 
@@ -54,14 +56,48 @@ public class EnemyAI : MonoBehaviour
 
     private bool moving;
 
+    public bool cantDeactivate { get; private set; } = false;
+
     private void OnEnable()
     {
         MentalHealth.Instance.OnMentalHealthIncrease += MentalHealthIncreased;
+        TimeManager.OnDayChanged += SetMentalHealthRequiredToGoAway;
+    }
+
+    private void SetMentalHealthRequiredToGoAway(int day)
+    {
+        switch (day)
+        {
+            case 1:
+                mentalHealthToGoAway = mentalHealthToGoAwayArray[0];
+                break;
+            case 2:
+                mentalHealthToGoAway = mentalHealthToGoAwayArray[1];
+                break;
+            case 3:
+                mentalHealthToGoAway = mentalHealthToGoAwayArray[2];
+                break;
+            case 4:
+                mentalHealthToGoAway = mentalHealthToGoAwayArray[3];
+                break;
+            case 5:
+                mentalHealthToGoAway = mentalHealthToGoAwayArray[4];
+                break;
+            case 6:
+                mentalHealthToGoAway = mentalHealthToGoAwayArray[5];
+                break;
+            case 7:
+                mentalHealthToGoAway = mentalHealthToGoAwayArray[6];
+                break;
+            default:
+                break;
+        }
     }
 
     private void MentalHealthIncreased(float currentMentalHealth)
     {
         if (!active) return;
+        if (cantDeactivate) return;
 
         if (currentMentalHealth >= mentalHealthToGoAway)
         {
@@ -75,16 +111,25 @@ public class EnemyAI : MonoBehaviour
         playerT = GameManager.Instance.playerTransform;
         if (agent == null) agent = GetComponent<NavMeshAgent>();
     }
-    public void Activate(Vector3 position, Quaternion rotation)
+    public void Activate(Vector3 position, Quaternion rotation, bool cantDeactivate)
     {
         if (active) return;
+        this.cantDeactivate = cantDeactivate;
         agent.enabled = true;
-        UnStun();
+        UnStun(false);
         SetPosition(position);
+
         active = true;
+
+        SnapshotPlayerPosition();
+        StopAllCoroutines();
+        State = EnemyState.ChasingPlayer;
+        StartCoroutine(MoveToPlayerSnapshot());
     }
     public void Disable(Vector3 position)
     {
+        if (cantDeactivate) return;
+
         Stun(-1);
         SetPosition(position);
         agent.enabled = false;
@@ -143,7 +188,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (footstepTimer >= footstepFrequency && moving)
         {
-            footstepTimer = 0f + Random.Range(-footstepRandomization, footstepRandomization);
+            footstepTimer = 0f + UnityEngine.Random.Range(-footstepRandomization, footstepRandomization);
             PlayRandomFootstep();
         }
         else
@@ -210,7 +255,7 @@ public class EnemyAI : MonoBehaviour
             {
                 SlamDoorOpen(door);
             }
-            else if (door.isMovableByEnemy && !door.isCloset && !door.moving) door.MoveDoor(Random.Range(200f, 500f), Random.Range(-10f, 10f), true);
+            else if (door.isMovableByEnemy && !door.isCloset && !door.moving) door.MoveDoor(UnityEngine.Random.Range(200f, 500f), UnityEngine.Random.Range(-10f, 10f), true);
         }
     }
 
@@ -220,6 +265,7 @@ public class EnemyAI : MonoBehaviour
 
         agent.SetDestination(playerPositionSnapshot);
 
+        yield return null;
         yield return new WaitUntil(() => AgentReachedDestiantion() || PlayerInSight());
 
         if (!PlayerInSight())
@@ -248,7 +294,7 @@ public class EnemyAI : MonoBehaviour
 
         yield return new WaitUntil(() => AgentReachedDestiantion() || State != EnemyState.Wandering);
 
-        float secondsToWait = Random.Range(0f, 5f);
+        float secondsToWait = UnityEngine.Random.Range(0f, 5f);
         float timeElapsed = 0f;
 
         while (State == EnemyState.Wandering && timeElapsed < secondsToWait)
@@ -308,12 +354,15 @@ public class EnemyAI : MonoBehaviour
     private IEnumerator StunRoutine(float time)
     {
         yield return new WaitForSeconds(time);
-        UnStun();
+        UnStun(true);
     }
-    public void UnStun()
+    public void UnStun(bool wander)
     {
-        StopAllCoroutines();
         if (agent.enabled == true) agent.isStopped = false;
+
+        if (!wander) return;
+
+        StopAllCoroutines();
         StartCoroutine(WanderRandomly(1f));
     }
 
@@ -339,7 +388,7 @@ public class EnemyAI : MonoBehaviour
         hidingSpot.onPlayerExit += PlayerLeftHidingSpot;
 
         float range = hidingSpot.enemyRange;
-        Vector3 locationToWalkTo = closetFront.position + closetFront.right * Random.Range(-range, range);
+        Vector3 locationToWalkTo = closetFront.position + closetFront.right * UnityEngine.Random.Range(-range, range);
 
         // Calculates a rotation to face between straight at closet and playerposition randomly
         //Vector3 targetPoint = playerT.position;
@@ -354,19 +403,19 @@ public class EnemyAI : MonoBehaviour
         // TODO Kill Player Upon Reaching The Hiding Spot
         if (distanceToPlayer <= nearSightRange && State == EnemyState.ChasingPlayer)
         {
-            WalkToHidingSpot(locationToWalkTo, desiredRotation);
+            WalkToHidingSpot(locationToWalkTo, desiredRotation, true);
             print("Kill PLayer Upon Reaching The Hiding Spot");
         } 
-        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(locationToWalkTo, desiredRotation);
+        else if (distanceToPlayer <= sightRange && State == EnemyState.ChasingPlayer) WalkToHidingSpot(locationToWalkTo, desiredRotation, false);
     }
-    private void WalkToHidingSpot(Vector3 locationToWalkTo, Quaternion desiredRotation)
+    private void WalkToHidingSpot(Vector3 locationToWalkTo, Quaternion desiredRotation, bool killPlayer)
     {
         print("Walking to hiding spot");
 
         StopAllCoroutines();
-        StartCoroutine(WalkToHidingSpotSequence(locationToWalkTo, desiredRotation));
+        StartCoroutine(WalkToHidingSpotSequence(locationToWalkTo, desiredRotation, killPlayer));
     }
-    private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo, Quaternion desiredRotation)
+    private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo, Quaternion desiredRotation, bool killPlayer)
     {
         State = EnemyState.PlayerHidingSequence;
 
@@ -383,24 +432,31 @@ public class EnemyAI : MonoBehaviour
         }
 
         // TODO Stare into closet
+
+        if (killPlayer)
+        {
+            KillPlayerInCloset();
+            yield break;
+        }
+
         print("Reached Hiding Spot... STARING");
         animator.SetTrigger("Stare");
         float timeStaring = 0f;
 
-        int coinFlip = Random.Range(0, 2);
-        int coinFlip2 = Random.Range(0, 2);
+        int coinFlip = UnityEngine.Random.Range(0, 2);
+        int coinFlip2 = UnityEngine.Random.Range(0, 2);
         bool stare2 = coinFlip == 1;
         bool stare3 = coinFlip2 == 1;
         bool doneRotating = false;
         Quaternion startRotation = transform.rotation;
 
-        float timeToMoveDoor = Random.Range(1f, 15f);
+        float timeToMoveDoor = UnityEngine.Random.Range(1f, 15f);
         bool movedDoor = false;
-        float timeToMoveDoor2 = Random.Range(1f, 15f);
+        float timeToMoveDoor2 = UnityEngine.Random.Range(1f, 15f);
         bool movedDoor2 = false;
 
-        float stareSpeed1 = Random.Range(0.66f, 1f);
-        float stareSpeed2 = Random.Range(0.66f, 1f);
+        float stareSpeed1 = UnityEngine.Random.Range(0.66f, 1f);
+        float stareSpeed2 = UnityEngine.Random.Range(0.66f, 1f);
 
         stareSpeed1 = 0.66f;
 
@@ -453,6 +509,7 @@ public class EnemyAI : MonoBehaviour
             {
                 KillPlayerInCloset();
                 print("Player failed to hold breath... Kill Player");
+                yield break;
             }
 
             if (playersCurrentHidingSpot == null)
@@ -466,6 +523,7 @@ public class EnemyAI : MonoBehaviour
                 {
                     KillPlayerInCloset();
                     print("DOOR WAY TOO OPEN KILL PLAYER");
+                    yield break;
                 }
             }
             yield return null;
@@ -529,7 +587,7 @@ public class EnemyAI : MonoBehaviour
     public void RandomChanceOpenHidingSpotDoors(int chance)
     {
         int openDoorChance = chance;
-        int openDoorRoll = Random.Range(0, 100);
+        int openDoorRoll = UnityEngine.Random.Range(0, 100);
         bool openDoorSligtly = openDoorRoll < openDoorChance;
 
         if (!openDoorSligtly) return;
@@ -544,7 +602,7 @@ public class EnemyAI : MonoBehaviour
 
         foreach (var door in playersCurrentHidingSpot.hidingSpotDoors)
         {
-            door.MoveDoor(Random.Range(100f, 300f), Random.Range(5f, 20f), true);
+            door.MoveDoor(UnityEngine.Random.Range(100f, 300f), UnityEngine.Random.Range(5f, 20f), true);
         }
     }
 
@@ -554,7 +612,7 @@ public class EnemyAI : MonoBehaviour
 
         if (footstepSounds.Length > 0)
         {
-            footstep = footstepSounds[Random.Range(0, footstepSounds.Length)];
+            footstep = footstepSounds[UnityEngine.Random.Range(0, footstepSounds.Length)];
         }
 
         if (footstep != null)
@@ -589,7 +647,7 @@ public class EnemyAI : MonoBehaviour
 
     public Vector3 RandomNavmeshLocation(float radius, float minDistance, int maxAttempts)
     {
-        Vector3 randomDirection = Random.insideUnitSphere * radius;
+        Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
         randomDirection += transform.position;
         NavMeshHit hit;
         Vector3 finalPosition = Vector3.zero;
@@ -611,7 +669,7 @@ public class EnemyAI : MonoBehaviour
                     highestDistance = distance;
                 }
             }
-            randomDirection = Random.insideUnitSphere * radius;
+            randomDirection = UnityEngine.Random.insideUnitSphere * radius;
             randomDirection += transform.position;
         }
 
@@ -655,5 +713,6 @@ public class EnemyAI : MonoBehaviour
             playersCurrentHidingSpot.onPlayerExit -= PlayerLeftHidingSpot;
         }
         MentalHealth.Instance.OnMentalHealthIncrease -= MentalHealthIncreased;
+        TimeManager.OnDayChanged -= SetMentalHealthRequiredToGoAway;
     }
 }

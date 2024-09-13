@@ -139,7 +139,7 @@ public class FirstPersonController : MonoBehaviour
     public void SetCameraaRotationToZero()
     {
         rotationX = 0;
-        playerCamera.transform.rotation = Quaternion.Euler(Vector3.zero);
+        playerCamera.transform.localRotation = Quaternion.Euler(Vector3.zero);
     }
 
     private void HandleSprinting()

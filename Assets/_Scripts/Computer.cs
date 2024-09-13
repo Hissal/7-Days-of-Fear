@@ -41,6 +41,7 @@ public class Computer : Interactable
 
     private void OnTaskComplete()
     {
+        computerUI.OnTaskSuccesful -= OnTaskComplete;
         questObjective.OnComplete();
     }
 
