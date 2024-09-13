@@ -1,6 +1,8 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class BreathHoldingMinigame : MonoBehaviour
@@ -34,16 +36,27 @@ public class BreathHoldingMinigame : MonoBehaviour
     [SerializeField] private Color highBreathColor;
     [SerializeField] private Color lowBreathColor;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip inhaleSound;
+    [SerializeField] private AudioClip exhaleSound;
+
+    private Transform playerTransform;
+
     public bool active { get; private set; }
 
     private void Awake()
     {
         TimeManager.OnDayChanged += SetBreathDrainSpeed;
-        gameObject.SetActive(false);
     }
     private void OnDestroy()
     {
         TimeManager.OnDayChanged -= SetBreathDrainSpeed;
+    }
+
+    private void Start()
+    {
+        playerTransform = GameManager.Instance.playerTransform;
+        gameObject.SetActive(false);
     }
 
     private void OnEnable()
@@ -101,6 +114,8 @@ public class BreathHoldingMinigame : MonoBehaviour
 
         if (Input.GetKey(breathHoldingKey) && breathLeft > 0 && releasedBreathKey)
         {
+            if (holdingBreath == false) AudioManager.Instance.PlayAudioClip(inhaleSound, playerTransform.position, 0.2f);
+
             DrainBreath();
             holdingBreath = true;
             breathRechargeTimer = timeBeforeBreathRecharge;
@@ -114,6 +129,12 @@ public class BreathHoldingMinigame : MonoBehaviour
         else if (breathRechargeTimer > 0)
         {
             breathRechargeTimer -= Time.deltaTime;
+        }
+
+        if (holdingBreath)
+        {
+            AudioManager.Instance.PlayAudioClip(exhaleSound, playerTransform.position, 0.2f);
+            holdingBreath = false;
         }
 
         holdingBreath = false;

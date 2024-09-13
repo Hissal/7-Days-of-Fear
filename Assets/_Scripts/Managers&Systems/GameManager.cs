@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -56,6 +57,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LightSwitch entranceSwitch;
     [SerializeField] private LightSwitch bedroomSwitch;
 
+    [SerializeField] private AudioClip uiButtonPressSound;
+
     private void OnEnable()
     {
         TimeManager.OnDayChanged += SetMentalHealthGained;
@@ -112,14 +115,21 @@ public class GameManager : MonoBehaviour
         StartGame();
     }
 
+    public void UiButtonPressed()
+    {
+        AudioManager.Instance.PlayAudioClip(uiButtonPressSound, playerTransform.position, 0.4f);
+    }
+
     public void RestartDay()
     {
+        UiButtonPressed();
         PlayerPrefs.SetInt("Retry", 1);
         PlayerPrefs.SetInt("DayToLoad", TimeManager.day);
         UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
     }
     public void LoadMainMenu()
     {
+        UiButtonPressed();
         TimeManager.SetDayDirty(0);
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }

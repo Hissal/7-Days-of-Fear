@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,11 +15,31 @@ public class DoorHandler : MonoBehaviour
     private int leftDoor = 0;
     [SerializeField] private LayerMask doorLayer;
 
+    private bool openingDoor = false;
+    private bool closingDoor = false;
+
     private void Start()
     {
         doorToBeSelected = null;
         selectedDoor = null;
         joint = null;
+    }
+
+    private void PlayOpenSound()
+    {
+        if (selectedDoor)
+        {
+            AudioClip audioClip = selectedDoor.GetComponent<DoorOpener>().doorOpenSound;
+            AudioManager.Instance.PlayAudioClip(audioClip, selectedDoor.position, 0.2f);
+        }
+    }
+    private void PlayCloseSound()
+    {
+        if (selectedDoor)
+        {
+            AudioClip audioClip = selectedDoor.GetComponent<DoorOpener>().doorCloseSound;
+            AudioManager.Instance.PlayAudioClip(audioClip, selectedDoor.position, 0.2f);
+        }
     }
 
     void Update()
@@ -58,7 +79,20 @@ public class DoorHandler : MonoBehaviour
         {
             Reticle.Grab_Static();
             selectedDoor = doorToBeSelected;
-            selectedDoor.GetComponent<DoorOpener>().PlayerMovingDoor();
+            DoorOpener doorOpener = selectedDoor.GetComponent<DoorOpener>();
+
+            doorOpener.PlayerMovingDoor();
+
+            //print(Mathf.Approximately(doorOpener.GetOpenPrecentage(), 0f));
+
+            if (Mathf.Approximately(doorOpener.GetOpenPrecentage(), 0f))
+            {
+                openingDoor = true;
+            }
+            else
+            {
+                closingDoor = true;
+            }
         }
 
         if (selectedDoor != null)
@@ -101,13 +135,37 @@ public class DoorHandler : MonoBehaviour
 
             //print($"DistX: {xDist} DistZ: {zDist} forward: {selectedDoor.parent.forward} DotProduct: {Vector2.Dot(doorFacing, playerDirectionFromDoor)}");
 
-            if (Mathf.Abs(dotProductOfPlayerPositionAndDoor) > 0.65f)
+            if (playerDistanceToDoor < 0.2f)
             {
                 UseXAxis();
             }
             else
             {
-                UseZAxis();
+                if (Mathf.Abs(dotProductOfPlayerPositionAndDoor) > 0.65f)
+                {
+                    UseXAxis();
+                }
+                else
+                {
+                    UseZAxis();
+                }
+            }
+
+            DoorOpener doorOpener = selectedDoor.GetComponent<DoorOpener>();
+            if (doorOpener != null)
+            {
+                if (Mathf.Approximately(doorOpener.GetOpenPrecentage(), 0f) && closingDoor)
+                {
+                    PlayCloseSound();
+                    closingDoor = false;
+                    openingDoor = true;
+                }
+                else if (!Mathf.Approximately(doorOpener.GetOpenPrecentage(), 0f) && openingDoor)
+                {
+                    PlayOpenSound();
+                    openingDoor = false;
+                    closingDoor = true;
+                }
             }
 
             joint.motor = motor;
@@ -189,7 +247,8 @@ public class DoorHandler : MonoBehaviour
 
     private void ReleaseDoor(JointMotor motor)
     {
-        selectedDoor.GetComponent<DoorOpener>().PlayerNoLongerMovingDoor();
+        DoorOpener doorOpener = selectedDoor.GetComponent<DoorOpener>();
+        doorOpener.PlayerNoLongerMovingDoor();
 
         doorToBeSelected = null;
         selectedDoor = null;

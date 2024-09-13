@@ -84,6 +84,7 @@ public class Bed : Interactable
 
             questObjective.OnComplete();
             GameManager.Instance.TakeAwayPlayerControl();
+            MentalHealth.Instance.mentalHealthDrainagePauseManual = true;
             MentalHealth.Instance.PauseDrainage();
             StartCoroutine(SleepRoutine());
             Reticle.HideReticle_Static();
@@ -320,6 +321,7 @@ public class Bed : Interactable
         Reticle.ShowReticle_Static();
         GameManager.Instance.GivePlayerControlBack();
         MentalHealth.Instance.ResumeDrainage();
+        MentalHealth.Instance.mentalHealthDrainagePauseManual = false;
         TimeManager.SetTime(TimeManager.day + 1, 6, 30, false, false);
         TimeManager.OnMorningInvoke();
     }

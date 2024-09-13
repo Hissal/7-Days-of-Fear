@@ -6,7 +6,6 @@ using UnityEngine;
 public class FirstPersonController : MonoBehaviour
 {
     public Camera playerCamera;
-    [SerializeField] private AudioSource audioSource;
 
     [Header("Movement")]
     [SerializeField] private float walkSpeed = 1f;
@@ -35,13 +34,16 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float gravity = 10f;
 
     [Header("Footsteps")]
+    [SerializeField] private AudioSource footStepsAudioSource;
     [SerializeField] private AudioClip[] footstepSounds;
     [SerializeField] private float FootstepFrequency = 0.5f;
     [SerializeField] private float footstepRandomization = 0.1f;
     [SerializeField] private float footstepVolume = 0.5f;
     [SerializeField] private float footstepPitch = 1f;
-
     private float footstepTimer;
+
+    [Header("Heartbeat")]
+    [SerializeField] private AudioSource heartBeatAudioSource;
 
     //[SerializeField] private float jumpPower = 7f;
 
@@ -52,12 +54,16 @@ public class FirstPersonController : MonoBehaviour
 
     CharacterController characterController;
 
+    private Transform enemyTransform;
+
     void Start()
     {
         if (playerCamera == null)
         {
             playerCamera = Camera.main;
         }
+
+        enemyTransform = GameManager.Instance.enemyAI.transform;
 
         currentStamina = maxStamina;
         characterController = GetComponent<CharacterController>();
@@ -66,6 +72,20 @@ public class FirstPersonController : MonoBehaviour
     void Update()
     {
         if (GameManager.Instance.paused) return;
+
+        float distanceToEnemy = Vector3.Distance(transform.position, enemyTransform.position);
+        float maxDistance = 3f;
+        float minDistance = 1f;
+
+        if (distanceToEnemy < maxDistance)
+        {
+            float volume = Mathf.Lerp(0f, 0.5f, (distanceToEnemy - minDistance) / (maxDistance - minDistance));
+            heartBeatAudioSource.volume = volume;
+        }
+        else
+        {
+            heartBeatAudioSource.volume = 0f;
+        }
 
         #region Handles Movment
 
@@ -181,9 +201,9 @@ public class FirstPersonController : MonoBehaviour
 
         if (footstep != null)
         {
-            audioSource.volume = footstepVolume;
-            audioSource.pitch = footstepPitch;
-            audioSource.PlayOneShot(footstep);
+            footStepsAudioSource.volume = footstepVolume;
+            footStepsAudioSource.pitch = footstepPitch;
+            footStepsAudioSource.PlayOneShot(footstep);
         }
     }
 

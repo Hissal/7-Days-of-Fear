@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,24 +14,22 @@ public class DoorOpener : MonoBehaviour
 
     private bool playerMovingDoor;
 
-    private void Update()
+    [field: SerializeField] public AudioClip doorOpenSound { get; private set; }
+    [field: SerializeField] public AudioClip doorCloseSound { get; private set; }
+    [SerializeField] private AudioClip[] creakSounds;
+    [SerializeField] private AudioClip[] slamSounds;
+
+    float creakedTimer = 0f;
+    float creakCooldown = 10f;
+    float creakCooldownRandom = 1f;
+
+    float slamCooldown = 1f;
+    float slamTimer = 0f;
+
+    private void FixedUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            MoveDoor(1000f, 60f, false);
-        }
-        else if (Input.GetKeyDown(KeyCode.Y))
-        {
-            MoveDoor(1000f, 20f, false);
-        }
-        else if (Input.GetKeyDown(KeyCode.U))
-        {
-            MoveDoor(1000f, 20f, true); ;
-        }
-        else if (Input.GetKeyDown(KeyCode.I))
-        {
-            MoveDoor(1000f, -20f, true); ;
-        }
+        if (creakedTimer > 0f) creakedTimer -= Time.fixedDeltaTime;
+        if (slamTimer > 0f) slamTimer -= Time.fixedDeltaTime;
     }
 
     public float GetOpenPrecentage()
@@ -43,12 +42,36 @@ public class DoorOpener : MonoBehaviour
         if (angleMinAbs > angleMaxAbs) maxAngleAbs = angleMinAbs;
         else maxAngleAbs = angleMaxAbs;
 
-        return Mathf.Abs(joint.angle) / maxAngleAbs;
+        float precentage = Mathf.Clamp(joint.angle / maxAngleAbs, 0f, 1f);
+
+        if (precentage < 0.02f)
+        {
+            precentage = 0f;
+        }
+
+        if (precentage > 0.98f)
+        {
+            precentage = 1f;
+        }
+        return precentage;
     }
 
     public void MoveDoor(float speed, float targetAngle, bool addTargetAngleToCurrent)
     {
         if (playerMovingDoor && speed < 10000f) return;
+
+        if (creakedTimer <= 0f && speed < 500f)
+        {
+            AudioClip randomCreak = creakSounds[Random.Range(0, creakSounds.Length)];
+            if (randomCreak) AudioManager.Instance.PlayAudioClip(randomCreak, transform.position, 0.2f);
+            creakedTimer = creakCooldown + Random.Range(-creakCooldownRandom, creakCooldownRandom);
+        }
+        if (slamTimer <= 0f && speed > 10000f)
+        {
+            AudioClip randomSlam = slamSounds[Random.Range(0, slamSounds.Length)];
+            if (randomSlam) AudioManager.Instance.PlayAudioClip(randomSlam, transform.position, 0.4f);
+            slamTimer = slamCooldown;
+        }
 
         playerMovingDoor = false;
 

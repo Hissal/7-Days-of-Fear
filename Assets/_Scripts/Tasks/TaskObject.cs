@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,7 +15,17 @@ public class TaskObject : Interactable
     //[SerializeField] private bool morningTask;
     //[SerializeField] private bool eveningTask;
 
+    [SerializeField] private float volume = 0.2f;
+    [SerializeField] private AudioClip startSound;
+    [SerializeField] private AudioClip loopSound;
+    [SerializeField] private AudioClip successSound;
+    [SerializeField] private AudioClip failSound;
+
     [SerializeField] private QuestObjective questObjective;
+
+    private AudioManager audioManager;
+
+    private AudioSource loopingAudioSource;
 
     private void OnEnable()
     {
@@ -32,6 +43,7 @@ public class TaskObject : Interactable
     private void Start()
     {
         taskSystem = TaskSystem.Instance;
+        audioManager = AudioManager.Instance;
 
         //if (morningTask) TimeManager.OnMorning += ActivateTask;
         //if (eveningTask) TimeManager.OnMorning += ActivateTask;
@@ -54,12 +66,22 @@ public class TaskObject : Interactable
     private void BeginTask()
     {
         taskSystem.StartTask(task, Vector2.zero);
+        if (startSound != null) audioManager.PlayAudioClip(startSound, transform.position, volume);
+        if (loopSound != null) loopingAudioSource = audioManager.PlayAudioClip(loopSound, transform.position, volume, true);
     }
 
     private void SucceedTask(Task task)
     {
         base.OnLoseFocus();
         if (!active || paused) return;
+
+        if (successSound != null) audioManager.PlayAudioClip(successSound, transform.position, volume);
+
+        if (loopingAudioSource != null)
+        {
+            loopingAudioSource.Stop();
+            loopingAudioSource = null;
+        }
 
         questObjective.OnComplete();
         SetActive(false);
@@ -69,6 +91,14 @@ public class TaskObject : Interactable
     {
         base.OnLoseFocus();
         if (!active || paused) return;
+
+        if (failSound != null) audioManager.PlayAudioClip(failSound, transform.position, volume);
+
+        if (loopingAudioSource != null)
+        {
+            loopingAudioSource.Stop();
+            loopingAudioSource = null;
+        }
 
         questObjective.OnComplete();
         SetActive(false);

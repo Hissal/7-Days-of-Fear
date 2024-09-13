@@ -26,10 +26,6 @@ public class AmbienceController : MonoBehaviour
 
     private void OnEnable()
     {
-        SwitchAmbience(1);
-        SetVolume(defaultVolume);
-        PlayAmbience();
-
         TimeManager.OnDayChanged += SwitchAmbience;
     }
 
@@ -102,6 +98,9 @@ public class AmbienceController : MonoBehaviour
                     break;
             }
         }
+
+        SetVolume(defaultVolume);
+        PlayAmbience();
     }
 
     /// <summary>

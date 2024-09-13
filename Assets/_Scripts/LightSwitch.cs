@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +10,9 @@ public class LightSwitch : Interactable
     private List<LightFlicker> lightFlickers = new List<LightFlicker>();
     public bool LightsOn => attatchedLights.TrueForAll(light => light.intensity != 0f);
     public event Action OnLightSwitch = delegate { };
+
+    [SerializeField] private AudioClip switchOnSound;
+    [SerializeField] private AudioClip switchOffSound;
 
     public override void OnInteract()
     {
@@ -69,6 +73,10 @@ public class LightSwitch : Interactable
 
         if (!LightsOn)
         {
+            if (switchOnSound != null)
+            {
+                AudioManager.Instance.PlayAudioClip(switchOnSound, transform.position, 0.2f);
+            }
             foreach (var light in lightFlickers)
             {
                 light.TurnOnLight();
@@ -85,6 +93,8 @@ public class LightSwitch : Interactable
                 lightFlickers.Add(light.GetComponent<LightFlicker>());
             }
         }
+
+        AudioManager.Instance.PlayAudioClip(switchOffSound, transform.position, 0.2f);
 
         foreach (var light in lightFlickers)
         {

@@ -38,13 +38,14 @@ public class MentalHealth : MonoBehaviour
     [SerializeField] private float mentalHealthOnDay6 = 50f;
     [SerializeField] private float mentalHealthOnDay7 = 40f;
 
+    public bool mentalHealthDrainagePauseManual;
 
     IEnumerator FailureCheckerLoop()
     {
         while (true)
         {
             yield return new WaitForSeconds(5f);
-            if (GameManager.Instance.enemyActive)
+            if (GameManager.Instance.enemyActive || mentalHealthDrainagePauseManual)
             {
                 PauseDrainage();
             }

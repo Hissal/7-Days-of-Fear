@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -39,6 +40,7 @@ public class EnemyAI : MonoBehaviour
 
     private List<LightFlicker> flickeringLights = new List<LightFlicker>();
 
+    private bool staring;
     private bool listening;
     private HidingSpot playersCurrentHidingSpot;
 
@@ -180,7 +182,7 @@ public class EnemyAI : MonoBehaviour
 
         FlickerNearbyLights();
 
-        OpenNearbyDoors();
+        if (!staring) OpenNearbyDoors();
 
         if (State != EnemyState.ChasingPlayer) MentalHealth.Instance.IncreaseMentalHealth(mentalHealthIncreasePerSecondWhenPlayerNotInSight * Time.deltaTime);
 
@@ -456,8 +458,6 @@ public class EnemyAI : MonoBehaviour
             yield break;
         }
 
-        // TODO Stare into closet
-
         if (killPlayer)
         {
             KillPlayerInCloset();
@@ -465,6 +465,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         print("Reached Hiding Spot... STARING");
+        staring = true;
         animator.SetTrigger("Stare");
         float timeStaring = 0f;
 
@@ -556,6 +557,7 @@ public class EnemyAI : MonoBehaviour
 
         print("Finished Staring... Walking Away");
 
+        staring = false;
         animator.speed = 1f;
         Vector3 randomLocation = RandomNavmeshLocation(10f, 5f, 10);
         agent.SetDestination(randomLocation);

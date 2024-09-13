@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,9 @@ public class Work : Interactable
     private bool active = false;
 
     [SerializeField] private LightSwitch lightSwitch;
+
+    [SerializeField] private AudioClip goToWorkSound;
+    [SerializeField] private AudioClip backHomeSound;
 
     private void Start()
     {
@@ -71,8 +75,11 @@ public class Work : Interactable
 
     private void GoToWork()
     {
+        AudioManager.Instance.PlayAudioClip(goToWorkSound, transform.position, 0.2f);
+
         questObjective.OnComplete();
         MentalHealth.Instance.PauseDrainage();
+        MentalHealth.Instance.mentalHealthDrainagePauseManual = true;
         MentalHealth.Instance.IncreaseMentalHealth(10f);
 
         if (TimeManager.hour >= WORKSTART)
@@ -93,9 +100,11 @@ public class Work : Interactable
 
     private void BackHome(PlayableDirector director)
     {
+        AudioManager.Instance.PlayAudioClip(backHomeSound, transform.position, 0.2f);
         TimeManager.SetTime(TimeManager.day, WORKEND, 0, false, false);
         TimeManager.OnEveningInvoke();
         MentalHealth.Instance.ResumeDrainage();
+        MentalHealth.Instance.mentalHealthDrainagePauseManual = false;
         director.stopped -= BackHome;
     }
 
