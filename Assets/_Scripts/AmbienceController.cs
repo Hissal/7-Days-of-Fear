@@ -24,11 +24,18 @@ public class AmbienceController : MonoBehaviour
             Destroy(gameObject);
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        SetVolume(defaultVolume);
         SwitchAmbience(1);
+        SetVolume(defaultVolume);
         PlayAmbience();
+
+        TimeManager.OnDayChanged += SwitchAmbience;
+    }
+
+    private void OnDisable()
+    {
+        TimeManager.OnDayChanged -= SwitchAmbience;
     }
 
     private void PlayAmbience()

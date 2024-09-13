@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EmailButton : MonoBehaviour
 {
+    [field: SerializeField] public bool diseappearAfterRead { get; private set; }
     [field: SerializeField] public bool isPartOfQuest { get; private set; }
     [field: SerializeField] public GameObject attatchedEmail { get; private set; }
     [field: SerializeField] public int appearanceDay { get; private set; }
@@ -19,6 +20,10 @@ public class EmailButton : MonoBehaviour
         attatchedEmail.SetActive(true);
         OnEmailOpened?.Invoke(this);
         read = true;
+        if (diseappearAfterRead)
+        {
+            gameObject.SetActive(false);
+        }
     }
     public void CloseEmail()
     {

@@ -19,6 +19,8 @@ public class Work : Interactable
     [SerializeField] private QuestObjective questObjective;
     private bool active = false;
 
+    [SerializeField] private LightSwitch lightSwitch;
+
     private void Start()
     {
         if (questObjective != null)
@@ -71,7 +73,7 @@ public class Work : Interactable
     {
         questObjective.OnComplete();
         MentalHealth.Instance.PauseDrainage();
-        MentalHealth.Instance.IncreaseMentalHealth(25f);
+        MentalHealth.Instance.IncreaseMentalHealth(10f);
 
         if (TimeManager.hour >= WORKSTART)
         {
@@ -95,6 +97,11 @@ public class Work : Interactable
         TimeManager.OnEveningInvoke();
         MentalHealth.Instance.ResumeDrainage();
         director.stopped -= BackHome;
+    }
+
+    public void TurnOnLights()
+    {
+        lightSwitch.TurnOnLights();
     }
 
     private void GetFired()

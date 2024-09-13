@@ -10,11 +10,13 @@ public class QuestSystem : MonoBehaviour
     private List<Quest> nextQuests = new List<Quest>();
 
     private Vector2 questHelperPosition;
+    private Color questHelperColor;
 
     public bool paused { get; private set; }
 
     private void Start()
     {
+        questHelperColor = questTMP.color;
         questHelperPosition = questTMP.rectTransform.position;
     }
 
@@ -58,7 +60,7 @@ public class QuestSystem : MonoBehaviour
         float fadeDuration = 0.5f;
         float elapsedTime = 0f;
         Vector3 originalPosition = questHelperPosition;
-        Color originalColor = questTMP.color;
+        Color originalColor = questHelperColor;
 
         while (elapsedTime < fadeDuration)
         {
@@ -84,7 +86,7 @@ public class QuestSystem : MonoBehaviour
     {
         float fadeDuration = 0.3f;
         float elapsedTime = 0f;
-        Color originalColor = questTMP.color;
+        Color originalColor = questHelperColor;
         Vector3 originalPosition = questHelperPosition;
 
         while (elapsedTime < fadeDuration)

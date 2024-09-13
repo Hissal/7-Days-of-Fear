@@ -271,8 +271,21 @@ public class GameManager : MonoBehaviour
         }
 
         StartCoroutine(FlickerAllLights());
-        MentalHealth.Instance.PauseDrainage();
         enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false);
+
+        MentalHealth.Instance.PauseDrainage();
+
+        enemyActive = true;
+    }
+    public void EnableEnemyLastEscape()
+    {
+        if (enemyAI == null) throw new System.Exception("EnemyAI is null");
+
+        if (enemyAI.active) return;
+
+        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, true);
+
+        MentalHealth.Instance.PauseDrainage();
 
         enemyActive = true;
     }

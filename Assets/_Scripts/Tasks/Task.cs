@@ -19,20 +19,20 @@ public class Task
     [Header("Mental Health Gained")]
     [SerializeField] private float mentalHealthGainedOnDay1 = 20f;
     [SerializeField] private float mentalHealthGainedOnDay2 = 20f;
-    [SerializeField] private float mentalHealthGainedOnDay3 = 20f;
-    [SerializeField] private float mentalHealthGainedOnDay4 = 15f;
-    [SerializeField] private float mentalHealthGainedOnDay5 = 12.5f;
-    [SerializeField] private float mentalHealthGainedOnDay6 = 10f;
-    [SerializeField] private float mentalHealthGainedOnDay7 = 7.5f;
+    [SerializeField] private float mentalHealthGainedOnDay3 = 5f;
+    [SerializeField] private float mentalHealthGainedOnDay4 = 4.5f;
+    [SerializeField] private float mentalHealthGainedOnDay5 = 4f;
+    [SerializeField] private float mentalHealthGainedOnDay6 = 3.5f;
+    [SerializeField] private float mentalHealthGainedOnDay7 = 3f;
 
     [Header("Mental Health Lost")]
     [SerializeField] private float mentalHealthLostOnDay1 = 1f;
     [SerializeField] private float mentalHealthLostOnDay2 = 1f;
-    [SerializeField] private float mentalHealthLostOnDay3 = 1f;
-    [SerializeField] private float mentalHealthLostOnDay4 = 2.5f;
-    [SerializeField] private float mentalHealthLostOnDay5 = 5f;
-    [SerializeField] private float mentalHealthLostOnDay6 = 7.5f;
-    [SerializeField] private float mentalHealthLostOnDay7 = 10f;
+    [SerializeField] private float mentalHealthLostOnDay3 = 5f;
+    [SerializeField] private float mentalHealthLostOnDay4 = 10f;
+    [SerializeField] private float mentalHealthLostOnDay5 = 15f;
+    [SerializeField] private float mentalHealthLostOnDay6 = 20f;
+    [SerializeField] private float mentalHealthLostOnDay7 = 25f;
 
     private float mentalHealthGainedOnSuccess = 10f;
     private float mentalHealthLostOnFail = 10f;

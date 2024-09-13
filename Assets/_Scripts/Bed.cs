@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Events;
 
 public class Bed : Interactable
 {
@@ -24,6 +25,14 @@ public class Bed : Interactable
     [SerializeField] private float mentalHealthOnDay5;
     [SerializeField] private float mentalHealthOnDay6;
     [SerializeField] private float mentalHealthOnDay7;
+
+    [SerializeField] private Transform playerOnBedTransform;
+    [SerializeField] private Image blackFader;
+    [SerializeField] private LightFlicker[] lightFlickers;
+
+    [SerializeField] private LightSwitch lightSwitch;
+
+    public UnityEvent OnSleepDay7;
 
     bool active = false;
 
@@ -61,7 +70,7 @@ public class Bed : Interactable
 
     public override void OnInteract()
     {
-        if (active)
+        if (active && !GameManager.Instance.enemyActive)
         {
             base.OnInteract();
             GoToSleep();
@@ -71,12 +80,127 @@ public class Bed : Interactable
 
     private void GoToSleep()
     {
-        questObjective.OnComplete();
+        if (TimeManager.day == 7)
+        {
+            OnSleepDay7.Invoke();
+            StartCoroutine(SpawnEnemyRoutine());
+        }
+        else
+        {
+            questObjective.OnComplete();
+            GameManager.Instance.TakeAwayPlayerControl();
+            MentalHealth.Instance.PauseDrainage();
+            StartCoroutine(SleepRoutine());
+            Reticle.HideReticle_Static();
+            HUD.SetActive(false);
+        }
+    }
+
+    private IEnumerator SpawnEnemyRoutine()
+    {
         GameManager.Instance.TakeAwayPlayerControl();
-        MentalHealth.Instance.PauseDrainage();
-        StartCoroutine(SleepRoutine());
-        Reticle.HideReticle_Static();
+
+        // Set the initial alpha value of the fade image and text to 0
+        blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, 0f);
+
+        Transform playerTransform = GameManager.Instance.playerTransform;
+
+        // Fade in & out the fade image
+        float fadeDuration = 2f;
+        float fadeTimer = 0f;
+        while (fadeTimer < fadeDuration)
+        {
+            fadeTimer += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, fadeTimer / fadeDuration);
+            blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+            yield return null;
+        }
+
         HUD.SetActive(false);
+
+        playerTransform.position = playerOnBedTransform.position;
+        playerTransform.rotation = playerOnBedTransform.rotation;
+        GameManager.Instance.playerController.SetCameraaRotationToZero();
+
+        yield return new WaitForSeconds(3f);
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightFlicker.flicker = true;
+        }
+
+        fadeDuration = 0.25f;
+        fadeTimer = 0f;
+        while (fadeTimer < fadeDuration)
+        {
+            fadeTimer += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, fadeTimer / fadeDuration);
+            blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+            yield return null;
+        }
+        blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, 0f);
+
+        yield return new WaitForSeconds(0.25f);
+
+        // Fade in & out the fade image
+        fadeDuration = 2f;
+        fadeTimer = 0f;
+        while (fadeTimer < fadeDuration)
+        {
+            fadeTimer += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, fadeTimer / fadeDuration);
+            blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(2f);
+
+        fadeDuration = 0.25f;
+        fadeTimer = 0f;
+        while (fadeTimer < fadeDuration)
+        {
+            fadeTimer += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, fadeTimer / fadeDuration);
+            blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+            yield return null;
+        }
+        blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, 0f);
+
+        yield return new WaitForSeconds(0.25f);
+
+        fadeDuration = 1f;
+        fadeTimer = 0f;
+        while (fadeTimer < fadeDuration)
+        {
+            fadeTimer += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, fadeTimer / fadeDuration);
+            blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+            yield return null;
+        }
+
+        HUD.SetActive(true);
+
+        yield return new WaitForSeconds(0.2f);
+
+        playerTransform.position = playerSpawnPoint.position;
+        playerTransform.rotation = playerSpawnPoint.rotation;
+        GameManager.Instance.playerController.SetCameraaRotationToZero();
+        GameManager.Instance.GivePlayerControlBack();
+
+        GameManager.Instance.EnableEnemyLastEscape();
+
+        questObjective.OnComplete();
+
+        fadeDuration = 0.5f;
+        fadeTimer = 0f;
+        while (fadeTimer < fadeDuration)
+        {
+            fadeTimer += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, fadeTimer / fadeDuration);
+            blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+            yield return null;
+        }
+        blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, 0f);
     }
 
     private IEnumerator SleepRoutine()
@@ -172,6 +296,8 @@ public class Bed : Interactable
         }
 
         yield return new WaitForSeconds(0.5f);
+
+        lightSwitch.TurnOnLights();
 
         // Fade out the fade image
         float fadeOutDuration = 2f;

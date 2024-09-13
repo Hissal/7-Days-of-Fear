@@ -12,6 +12,14 @@ public class LightSwitch : Interactable
 
     public override void OnInteract()
     {
+        ToggleLights();
+        OnLightSwitch?.Invoke();
+
+        base.OnInteract();
+    }
+
+    public void ToggleLights()
+    {
         if (lightFlickers.Count == 0)
         {
             foreach (var light in attatchedLights)
@@ -30,20 +38,48 @@ public class LightSwitch : Interactable
             }
         }
 
-        foreach (var light in lightFlickers)
+        if (turnOn)
         {
-            if (turnOn)
+            TurnOnLights();
+        }
+        else
+        {
+            TurnOffLights();
+        }
+    }
+
+    public void TurnOnLights()
+    {
+        if (lightFlickers.Count == 0)
+        {
+            foreach (var light in attatchedLights)
             {
-                light.TurnOnLight();
-            }
-            else
-            {
-                light.TurnOffLight();
+                lightFlickers.Add(light.GetComponent<LightFlicker>());
             }
         }
 
-        OnLightSwitch?.Invoke();
+        if (!LightsOn)
+        {
+            foreach (var light in lightFlickers)
+            {
+                light.TurnOnLight();
+            }
+        }
+    }
 
-        base.OnInteract();
+    public void TurnOffLights()
+    {
+        if (lightFlickers.Count == 0)
+        {
+            foreach (var light in attatchedLights)
+            {
+                lightFlickers.Add(light.GetComponent<LightFlicker>());
+            }
+        }
+
+        foreach (var light in lightFlickers)
+        {
+            light.TurnOffLight();
+        }
     }
 }

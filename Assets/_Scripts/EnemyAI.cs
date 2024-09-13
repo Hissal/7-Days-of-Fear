@@ -113,8 +113,8 @@ public class EnemyAI : MonoBehaviour
     }
     public void Activate(Vector3 position, Quaternion rotation, bool cantDeactivate)
     {
-        if (active) return;
         this.cantDeactivate = cantDeactivate;
+        if (active) return;
         agent.enabled = true;
         UnStun(false);
         SetPosition(position);
@@ -135,6 +135,11 @@ public class EnemyAI : MonoBehaviour
         agent.enabled = false;
         active = false;
         StopAllCoroutines();
+
+        foreach (LightFlicker lightFlicker in flickeringLights)
+        {
+            UnFlickerLight(lightFlicker);
+        }
     }
     public void SetPosition(Vector3 position)
     {
@@ -239,11 +244,16 @@ public class EnemyAI : MonoBehaviour
 
             if (flickerToRemove != null)
             {
-                flickerToRemove.flicker = false;
-                flickerToRemove.light.intensity = 0f;
-                flickeringLights.Remove(flickerToRemove);
+                UnFlickerLight(flickerToRemove);
             }
         }
+    }
+
+    private void UnFlickerLight(LightFlicker lightFlicker)
+    {
+        lightFlicker.flicker = false;
+        lightFlicker.light.intensity = 0f;
+        flickeringLights.Remove(lightFlicker);
     }
 
     private void OpenNearbyDoors()
@@ -315,12 +325,12 @@ public class EnemyAI : MonoBehaviour
         {
             if (hit.collider.gameObject.layer == playerLayer)
             {
-                print("Player In Sight");
+                //print("Player In Sight");
                 playerWasInSight = true;
                 return true;
             }else if (hit.transform == playerT)
             {
-                print("Player In Sight");
+                //print("Player In Sight");
                 playerWasInSight = true;
                 return true;
             }
@@ -498,8 +508,8 @@ public class EnemyAI : MonoBehaviour
             if (!doneRotating)
             {
                 // Rotate to toward closet
-                print("Rotating to: " + desiredRotation.eulerAngles);
-                float precentageDone = Mathf.Clamp(timeStaring / 0.69f, 0f, 1f);
+                //print("Rotating to: " + desiredRotation.eulerAngles);
+                float precentageDone = Mathf.Clamp(timeStaring, 0f, 1f);
                 
                 transform.rotation = Quaternion.Lerp(startRotation, desiredRotation, precentageDone);
                 if (transform.rotation == desiredRotation) doneRotating = true;
@@ -581,7 +591,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (door.GetOpenPrecentage() > 0.95f) return;
         door.MoveDoor(50000f, 180f, false);
-        animator.SetTrigger("Attack");
+        //animator.SetTrigger("Attack");
     }
 
     public void RandomChanceOpenHidingSpotDoors(int chance)

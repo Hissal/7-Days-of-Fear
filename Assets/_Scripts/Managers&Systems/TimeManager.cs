@@ -37,7 +37,7 @@ public class TimeManager : MonoBehaviour
 
     private void Start()
     {
-        SetTime(1, 0, 0, true);
+        SetTime(1, 0, 0, false);
     }
 
     public static void SetDayDirty(int day)
@@ -59,6 +59,7 @@ public class TimeManager : MonoBehaviour
         TimeManager.minute = minute;
         instance.timer = instance.realTimeSecondsToInGameMinute;
 
+        if (day == 1) OnEvening?.Invoke();
         if (callMorning) OnMorning?.Invoke();
     }
 

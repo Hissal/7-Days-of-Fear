@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,21 +36,27 @@ public class ComputerUI : MonoBehaviour
         CheckEmails(EmailButton.EmailType.Evening);
     }
 
-    public void SetTask()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns>The EnmailButton if email has been read otherwise returns null</returns>
+    public EmailButton SetTask()
     {
-        if (ongoingTask) return;
+        if (ongoingTask) return null;
         ongoingTask = true;
 
         bool emailFound = false;
+        EmailButton readEmail = null;
 
         foreach (var emailButton in emailButtons)
         {
             if (emailButton.appearanceDay == TimeManager.day && emailButton.isPartOfQuest)
             {
                 emailFound = true;
-                if (emailButton.read) StartCoroutine(OnTaskCompleteWithDelay(emailButton));
+                if (emailButton.read) readEmail = emailButton;
                 else
                 {
+                    readEmail = null;
                     taskDone = false;
                     emailButton.OnEmailOpened += OnTaskComplete;
                 }
@@ -57,12 +64,8 @@ public class ComputerUI : MonoBehaviour
         }
 
         this.emailFound = emailFound;
-    }
 
-    private IEnumerator OnTaskCompleteWithDelay(EmailButton emailButton)
-    {
-        yield return new WaitForSeconds(1f);
-        OnTaskComplete(emailButton);
+        return readEmail;
     }
 
     private void CheckEmails(EmailButton.EmailType emailType)
@@ -70,6 +73,8 @@ public class ComputerUI : MonoBehaviour
         print("Checking Emails: " + emailType);
         foreach (EmailButton emailButton in emailButtons)
         {
+            if (emailButton.diseappearAfterRead && emailButton.read) continue;
+
             if (emailButton.appearanceDay == TimeManager.day && emailButton.emailType == emailType)
             {
                 emailButton.gameObject.SetActive(true);

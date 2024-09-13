@@ -31,9 +31,16 @@ public class Computer : Interactable
     private void ObjectiveActivated(bool active)
     {
         questActive = active;
-        computerUI.SetTask();
+        EmailButton emailButton = computerUI.SetTask();
+        if (emailButton != null) StartCoroutine(CompleteWithDelay(emailButton));
         computerUI.OnTaskSuccesful += OnTaskComplete;
     }
+    private IEnumerator CompleteWithDelay(EmailButton emailButton)
+    {
+        yield return new WaitForSeconds(1f);
+        computerUI.OnTaskComplete(emailButton);
+    }
+
     private void Highlight()
     {
         OnFocus();
