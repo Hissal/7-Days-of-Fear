@@ -17,7 +17,8 @@ public class EmailButton : MonoBehaviour
 
     public void OpenEmail()
     {
-        attatchedEmail.SetActive(true);
+        if (attatchedEmail != null) attatchedEmail.SetActive(true);
+
         OnEmailOpened?.Invoke(this);
         read = true;
         if (diseappearAfterRead)
@@ -27,6 +28,6 @@ public class EmailButton : MonoBehaviour
     }
     public void CloseEmail()
     {
-        attatchedEmail.SetActive(false);
+        if (attatchedEmail != null) attatchedEmail.SetActive(false);
     }
 }
