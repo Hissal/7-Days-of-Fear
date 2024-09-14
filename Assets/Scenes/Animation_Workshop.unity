@@ -7208,7 +7208,7 @@ MonoBehaviour:
   isFirstCinematicOfChain: 1
   isGameEndingCinematic: 0
   <director>k__BackingField: {fileID: 344245530}
-  playOnStart: 1
+  playOnStart: 0
   repeatable: 0
   <requireStartpositions>k__BackingField: 1
   <playerStartPosition>k__BackingField: {x: 0.47399974, y: 0.8299999, z: -1.911}
