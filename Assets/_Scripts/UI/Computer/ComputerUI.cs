@@ -75,6 +75,18 @@ public class ComputerUI : MonoBehaviour
         {
             if (emailButton.diseappearAfterRead && emailButton.read) continue;
 
+            if (emailButton.appearanceDay == TimeManager.day && emailButton.emailType == emailType)
+            {
+                emailButton.gameObject.SetActive(true);
+            }
+            if (emailButton.appearanceDay > TimeManager.day ||
+                    (emailButton.appearanceDay == TimeManager.day &&
+                    emailType == EmailButton.EmailType.Morning &&
+                    emailButton.emailType == EmailButton.EmailType.Evening))
+            {
+                emailButton.gameObject.SetActive(false);
+            }
+
             if (PlayerPrefs.GetInt("HiJohn") == 1 && emailButton.hiJohn && PlayerPrefs.GetInt("Retry") == 1)
             {
                 if (TimeManager.day == emailButton.appearanceDay && emailButton.emailType == emailType)
@@ -96,18 +108,6 @@ public class ComputerUI : MonoBehaviour
                 {
                     emailButton.gameObject.SetActive(false);
                 }
-            }
-
-            if (emailButton.appearanceDay == TimeManager.day && emailButton.emailType == emailType)
-            {
-                emailButton.gameObject.SetActive(true);
-            }
-            if (emailButton.appearanceDay > TimeManager.day ||
-                    (emailButton.appearanceDay == TimeManager.day &&
-                    emailType == EmailButton.EmailType.Morning &&
-                    emailButton.emailType == EmailButton.EmailType.Evening))
-            {
-                emailButton.gameObject.SetActive(false);
             }
         }
     }

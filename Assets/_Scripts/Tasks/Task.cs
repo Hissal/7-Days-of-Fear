@@ -91,6 +91,9 @@ public class Task
 
     public void TaskFail()
     {
+        PlayerPrefs.SetInt("Star3", 0);
+        PlayerPrefs.SetInt("Star5", 0);
+
         active = false;
         OnFail.Invoke(this);
         MentalHealth.Instance.ReduceMentalHealth(mentalHealthLostOnFail, false);

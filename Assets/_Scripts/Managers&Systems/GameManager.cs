@@ -1,7 +1,6 @@
 using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Playables;
@@ -125,6 +124,8 @@ public class GameManager : MonoBehaviour
             hidingSpot.onPlayerEnter += enemyAI.PlayerEnteredHidingSpot;
         }
 
+
+
         StartGame();
     }
 
@@ -236,6 +237,9 @@ public class GameManager : MonoBehaviour
 
     public void KillPlayer()
     {
+        PlayerPrefs.SetInt("Star2", 0);
+        PlayerPrefs.SetInt("Star5", 0);
+
         if (isPlayerDead) return;
 
         foreach (GameObject GM in disableOnGameOver)
@@ -424,6 +428,27 @@ public class GameManager : MonoBehaviour
 
     public void GameWin()
     {
+        if (PlayerPrefs.GetInt("Star1") == 1)
+        {
+            PlayerPrefs.SetInt("Star1Awarderd", 1);
+        }
+        if (PlayerPrefs.GetInt("Star2") == 1)
+        {
+            PlayerPrefs.SetInt("Star2Awarderd", 1);
+        }
+        if (PlayerPrefs.GetInt("Star3") == 1)
+        {
+            PlayerPrefs.SetInt("Star3Awarderd", 1);
+        }
+        if (PlayerPrefs.GetInt("Star4") == 1)
+        {
+            PlayerPrefs.SetInt("Star4Awarderd", 1);
+        }
+        if (PlayerPrefs.GetInt("Star5") == 1)
+        {
+            PlayerPrefs.SetInt("Star5Awarderd", 1);
+        }
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         LoadMainMenu();
@@ -441,5 +466,67 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
         }
+    }
+
+    Coroutine slowTimeRoutine = null;
+    Coroutine returnTimeRoutine = null;
+
+    public void SlowTimeForQTE(float duration)
+    {
+        print("SlowingDownTime");
+        if (slowTimeRoutine != null) StopCoroutine(slowTimeRoutine);
+        if (returnTimeRoutine != null) { StopCoroutine(returnTimeRoutine); returnTimeRoutine = null; }
+        slowTimeRoutine = StartCoroutine(SlowTime(duration));
+    }
+    public void ReturnTimeFromQTE()
+    {
+        print("ReturningTimeFromQTE");
+        if (returnTimeRoutine != null) StopCoroutine(returnTimeRoutine);
+        if (slowTimeRoutine != null) { StopCoroutine(slowTimeRoutine); slowTimeRoutine = null; }
+        returnTimeRoutine = StartCoroutine(ReturnTime());
+    }
+
+    private IEnumerator SlowTime(float duration)
+    {
+        float timeElapsed = 0;
+
+        print("SlowingDownTimeRoutine");
+
+        while (Time.timeScale != 0.33f)
+        {
+            timeElapsed += Time.unscaledDeltaTime;
+            Time.timeScale = Mathf.Lerp(1, 0.2f, timeElapsed / 0.1f);
+            if (Time.timeScale < 0.2f) Time.timeScale = 0.2f;
+            yield return null;
+        }
+
+        timeElapsed = 0;
+        while (Time.timeScale != 0f)
+        {
+            timeElapsed += Time.unscaledDeltaTime;
+            Time.timeScale = Mathf.Lerp(1, 0f, timeElapsed / duration - 0.1f);
+            if (Time.timeScale < 0f) Time.timeScale = 0f;
+            yield return null;
+        }
+
+        slowTimeRoutine = null;
+    }
+    private IEnumerator ReturnTime()
+    {
+        print("ReturningTIme");
+
+        float timeElapsed = 0;
+        float currentTimeScale = Time.timeScale;
+
+        while (Time.timeScale < 1f)
+        {
+            print("ReturningTImeRoutineLOOOP TimeElapsed: " + timeElapsed);
+            timeElapsed += Time.unscaledDeltaTime;
+            Time.timeScale = Mathf.Lerp(currentTimeScale, 1f, timeElapsed / 0.25f);
+            if (Time.timeScale > 1f) Time.timeScale = 1f;
+            yield return null;
+        }
+
+        returnTimeRoutine = null;
     }
 }

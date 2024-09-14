@@ -76,6 +76,7 @@ namespace Assets._Scripts.Managers_Systems
         public void StopAudioClip(AudioSource audioSource)
         {
             audioSource.Stop();
+            audioSource.loop = false;
 
             if (audioSourceCoroutines.ContainsKey(audioSource))
             {
@@ -89,17 +90,14 @@ namespace Assets._Scripts.Managers_Systems
 
         private IEnumerator LoopAudioSource(AudioSource audioSource)
         {
-            while (true)
+            while (audioSource.isPlaying == true)
             {
-                yield return new WaitForSeconds(audioSource.clip.length);
-
                 if (!audioSource.loop)
                 {
                     StopAudioClip(audioSource);
                     yield break; // Exit the coroutine
                 }
-
-                audioSource.Play();
+                yield return null;
             }
         }
 

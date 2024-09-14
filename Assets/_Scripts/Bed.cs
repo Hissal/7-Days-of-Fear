@@ -72,6 +72,8 @@ public class Bed : Interactable
 
     private void GoToSleep()
     {
+        GameManager gameManager = GameManager.Instance;
+
         if (TimeManager.day == 7)
         {
             OnSleepDay7.Invoke();
@@ -83,7 +85,7 @@ public class Bed : Interactable
             dayNumbersParent.anchoredPosition = new Vector2(dayNumbersParent.anchoredPosition.x, newDaynumberParentPositionY);
 
             questObjective.OnComplete();
-            GameManager.Instance.TakeAwayPlayerControl();
+            gameManager.TakeAwayPlayerControl();
             MentalHealth.Instance.mentalHealthDrainagePauseManual = true;
             MentalHealth.Instance.PauseDrainage();
             StartCoroutine(SleepRoutine());
@@ -94,12 +96,13 @@ public class Bed : Interactable
 
     private IEnumerator SpawnEnemyRoutine()
     {
-        GameManager.Instance.TakeAwayPlayerControl();
+        GameManager gameManager = GameManager.Instance;
+        gameManager.TakeAwayPlayerControl();
 
         // Set the initial alpha value of the fade image and text to 0
         blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, 0f);
 
-        Transform playerTransform = GameManager.Instance.playerTransform;
+        Transform playerTransform = gameManager.playerTransform;
 
         // Fade in & out the fade image
         float fadeDuration = 2f;
@@ -114,9 +117,10 @@ public class Bed : Interactable
 
         HUD.SetActive(false);
 
-        playerTransform.position = playerOnBedTransform.position;
-        playerTransform.rotation = playerOnBedTransform.rotation;
-        GameManager.Instance.playerController.SetCameraaRotationToZero();
+        //playerTransform.position = playerOnBedTransform.position;
+        //playerTransform.rotation = playerOnBedTransform.rotation;
+        //gameManager.playerController.SetCameraaRotationToZero();
+        gameManager.playerController.SetCameraPositionAndRotation(playerOnBedTransform.position, playerOnBedTransform.rotation);
 
         yield return new WaitForSeconds(3f);
 
@@ -178,12 +182,12 @@ public class Bed : Interactable
 
         yield return new WaitForSeconds(0.2f);
 
-        playerTransform.position = playerSpawnPoint.position;
-        playerTransform.rotation = playerSpawnPoint.rotation;
-        GameManager.Instance.playerController.SetCameraaRotationToZero();
-        GameManager.Instance.GivePlayerControlBack();
+        //playerTransform.position = playerSpawnPoint.position;
+        //playerTransform.rotation = playerSpawnPoint.rotation;
+        gameManager.playerController.ResetCamera();
+        gameManager.GivePlayerControlBack();
 
-        GameManager.Instance.EnableEnemyLastEscape();
+        gameManager.EnableEnemyLastEscape();
 
         questObjective.OnComplete();
 

@@ -107,7 +107,8 @@ public class Cinematic : MonoBehaviour
     {
         QTE newQTE = QTEManager.Instance.GenerateQTE(qtePosition, qteDuration);
 
-        StartCoroutine(SlowTime());
+        GameManager.Instance.SlowTimeForQTE(qteDuration);
+        //StartCoroutine(SlowTime());
 
         newQTE.OnSuccess += OnQTESuccess;
         newQTE.OnFail += OnQTEFail;
@@ -117,14 +118,16 @@ public class Cinematic : MonoBehaviour
     {
         StopAllCoroutines();
         nextCinematic = qteSuccessCinematic;
-        StartCoroutine(ReturnTime());
+        GameManager.Instance.ReturnTimeFromQTE();
+        //StartCoroutine(ReturnTime());
         UnSubscribeQTE(qte);
     }
     private void OnQTEFail(QTE qte)
     {
         StopAllCoroutines();
         nextCinematic = qteFailCinematic;
-        StartCoroutine(ReturnTime());
+        GameManager.Instance.ReturnTimeFromQTE();
+        //StartCoroutine(ReturnTime());
         UnSubscribeQTE(qte);
     }
     private void UnSubscribeQTE(QTE qte)

@@ -435,6 +435,9 @@ public class EnemyAI : MonoBehaviour
 
     public void PlayerEnteredHidingSpot(Transform closetFront, HidingSpot hidingSpot)
     {
+        PlayerPrefs.SetInt("Star4", 0);
+        PlayerPrefs.SetInt("Star5", 0);
+
         playersCurrentHidingSpot = hidingSpot;
 
         float distanceToPlayer = Vector3.Distance(playerT.position, transform.position);

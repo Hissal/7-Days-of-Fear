@@ -50,7 +50,7 @@ public class AmbienceController : MonoBehaviour
 
     private IEnumerator FadeInScaryAtmosphereRoutine()
     {
-        float fadeTime = 3f;
+        float fadeTime = 10f;
         float timer = 0f;
         while (timer < fadeTime)
         {
@@ -61,7 +61,7 @@ public class AmbienceController : MonoBehaviour
     }
     private IEnumerator FadeOutScaryAtmosphereRoutine()
     {
-        float fadeTime = 3f;
+        float fadeTime = 10f;
         float timer = 0f;
         while (timer < fadeTime)
         {

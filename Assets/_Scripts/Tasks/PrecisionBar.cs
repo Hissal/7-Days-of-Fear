@@ -183,11 +183,22 @@ public class PrecisionBar : TaskAction
 
     private void MovePointer()
     {
-        float moveAmount = Screen.width / referenceResolutionWidth / (10 / pointerSpeed) * Time.deltaTime;
+        // Normalize the move amount based on screen width and reference resolution width
+        float normalizedSpeed = pointerSpeed * (Screen.width / referenceResolutionWidth);
+        float moveAmount = normalizedSpeed * Time.deltaTime * pointerDirection;
 
-        pointer.position = new Vector2(pointer.position.x + moveAmount * pointerDirection, pointer.position.y);
-        if (pointer.localPosition.x > barWidth * 0.5f || pointer.localPosition.x < -barWidth * 0.5f)
+        // Update the pointer position
+        pointer.localPosition = new Vector2(pointer.localPosition.x + moveAmount, pointer.localPosition.y);
+
+        // Check if the pointer has reached the edges of the bar and change direction if necessary
+        if (pointer.localPosition.x > barWidth * 0.5f)
         {
+            pointer.localPosition = new Vector2(barWidth * 0.5f, pointer.localPosition.y);
+            ChangePointerDirection();
+        }
+        else if (pointer.localPosition.x < -barWidth * 0.5f)
+        {
+            pointer.localPosition = new Vector2(-barWidth * 0.5f, pointer.localPosition.y);
             ChangePointerDirection();
         }
     }

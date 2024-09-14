@@ -56,6 +56,9 @@ public class FirstPersonController : MonoBehaviour
 
     private Transform enemyTransform;
 
+
+    private Vector3 defaultCameraLocalPosition;
+
     void Start()
     {
         if (playerCamera == null)
@@ -67,6 +70,8 @@ public class FirstPersonController : MonoBehaviour
 
         currentStamina = maxStamina;
         characterController = GetComponent<CharacterController>();
+
+        defaultCameraLocalPosition = playerCamera.transform.localPosition;
     }
 
     void Update()
@@ -160,6 +165,16 @@ public class FirstPersonController : MonoBehaviour
     {
         rotationX = 0;
         playerCamera.transform.localRotation = Quaternion.Euler(Vector3.zero);
+    }
+    public void SetCameraPositionAndRotation(Vector3 position, Quaternion rotation)
+    {
+        playerCamera.transform.position = position;
+        playerCamera.transform.rotation = rotation;
+    }
+    public void ResetCamera()
+    {
+        playerCamera.transform.localPosition = defaultCameraLocalPosition;
+        SetCameraaRotationToZero();
     }
 
     private void HandleSprinting()

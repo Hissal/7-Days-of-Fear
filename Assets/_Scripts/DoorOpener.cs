@@ -20,7 +20,7 @@ public class DoorOpener : MonoBehaviour
     [SerializeField] private AudioClip[] slamSounds;
 
     float creakedTimer = 0f;
-    float creakCooldown = 10f;
+    float creakCooldown = 20f;
     float creakCooldownRandom = 1f;
 
     float slamCooldown = 1f;
