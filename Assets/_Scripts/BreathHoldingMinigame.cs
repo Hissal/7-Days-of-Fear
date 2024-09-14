@@ -114,7 +114,7 @@ public class BreathHoldingMinigame : MonoBehaviour
 
         if (Input.GetKey(breathHoldingKey) && breathLeft > 0 && releasedBreathKey)
         {
-            if (holdingBreath == false) AudioManager.Instance.PlayAudioClip(inhaleSound, playerTransform.position, 0.2f);
+            if (holdingBreath == false) AudioManager.Instance.PlayAudioClip(inhaleSound, playerTransform.position, 0.1f);
 
             DrainBreath();
             holdingBreath = true;
@@ -133,7 +133,7 @@ public class BreathHoldingMinigame : MonoBehaviour
 
         if (holdingBreath)
         {
-            AudioManager.Instance.PlayAudioClip(exhaleSound, playerTransform.position, 0.2f);
+            AudioManager.Instance.PlayAudioClip(exhaleSound, playerTransform.position, 0.1f);
             holdingBreath = false;
         }
 

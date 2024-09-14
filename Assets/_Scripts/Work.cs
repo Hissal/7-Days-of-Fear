@@ -22,8 +22,7 @@ public class Work : Interactable
 
     [SerializeField] private LightSwitch lightSwitch;
 
-    [SerializeField] private AudioClip goToWorkSound;
-    [SerializeField] private AudioClip backHomeSound;
+    [SerializeField] private AudioClip doorLockedSound;
 
     private void Start()
     {
@@ -58,7 +57,11 @@ public class Work : Interactable
     public override void OnInteract()
     {
         // TODO Play locked sound if enemy is active
-        if (!active || GameManager.Instance.enemyActive) return;
+        if (!active || GameManager.Instance.enemyActive)
+        {
+            AudioManager.Instance.PlayAudioClip(doorLockedSound, transform.position, 0.2f);
+            return;
+        }
 
         GoToWork();
         base.OnInteract();
@@ -75,8 +78,6 @@ public class Work : Interactable
 
     private void GoToWork()
     {
-        AudioManager.Instance.PlayAudioClip(goToWorkSound, transform.position, 0.2f);
-
         questObjective.OnComplete();
         MentalHealth.Instance.PauseDrainage();
         MentalHealth.Instance.mentalHealthDrainagePauseManual = true;
@@ -100,7 +101,6 @@ public class Work : Interactable
 
     private void BackHome(PlayableDirector director)
     {
-        AudioManager.Instance.PlayAudioClip(backHomeSound, transform.position, 0.2f);
         TimeManager.SetTime(TimeManager.day, WORKEND, 0, false, false);
         TimeManager.OnEveningInvoke();
         MentalHealth.Instance.ResumeDrainage();

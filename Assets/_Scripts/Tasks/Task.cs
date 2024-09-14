@@ -93,7 +93,7 @@ public class Task
     {
         active = false;
         OnFail.Invoke(this);
-        MentalHealth.Instance.ReduceMentalHealth(mentalHealthLostOnFail);
+        MentalHealth.Instance.ReduceMentalHealth(mentalHealthLostOnFail, false);
     }
 
     public void Deactivate()

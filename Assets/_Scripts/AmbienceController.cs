@@ -14,6 +14,11 @@ public class AmbienceController : MonoBehaviour
     [SerializeField] private AudioClip anbienceDay6;
     [SerializeField] private AudioClip anbienceDay7;
 
+    [Header("EnmemyActiveAtmosphere")]
+    [SerializeField] private AudioSource enemyActiveAtmosphereAudioSource;
+    [SerializeField] private AudioClip enemyActiveAtmosphere;
+    [SerializeField] private float enemyActiveAtmosphereVolume = 0.1f;
+
     public static AmbienceController Instance;
 
     private void Awake()
@@ -32,6 +37,38 @@ public class AmbienceController : MonoBehaviour
     private void OnDisable()
     {
         TimeManager.OnDayChanged -= SwitchAmbience;
+    }
+
+    public void FadeInScaryAtmosphere()
+    {
+        StartCoroutine(FadeInScaryAtmosphereRoutine());
+    }
+    public void FadeOutScaryAtmosphere()
+    {
+        StartCoroutine(FadeOutScaryAtmosphereRoutine());
+    }
+
+    private IEnumerator FadeInScaryAtmosphereRoutine()
+    {
+        float fadeTime = 3f;
+        float timer = 0f;
+        while (timer < fadeTime)
+        {
+            timer += Time.deltaTime;
+            enemyActiveAtmosphereAudioSource.volume = Mathf.Lerp(0f, enemyActiveAtmosphereVolume, timer / fadeTime);
+            yield return null;
+        }
+    }
+    private IEnumerator FadeOutScaryAtmosphereRoutine()
+    {
+        float fadeTime = 3f;
+        float timer = 0f;
+        while (timer < fadeTime)
+        {
+            timer += Time.deltaTime;
+            enemyActiveAtmosphereAudioSource.volume = Mathf.Lerp(enemyActiveAtmosphereVolume, 0f, timer / fadeTime);
+            yield return null;
+        }
     }
 
     private void PlayAmbience()

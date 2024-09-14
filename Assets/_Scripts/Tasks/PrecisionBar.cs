@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,6 +28,12 @@ public class PrecisionBar : TaskAction
     [SerializeField] private float speedOnDay6;
     [SerializeField] private float speedOnDay7;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip successSound;
+    [SerializeField] private AudioClip failSound;
+
+    private GameManager gameManager;
+
     private void OnEnable()
     {
         TimeManager.OnDayChanged += SetPointerSpeed;
@@ -39,6 +46,7 @@ public class PrecisionBar : TaskAction
     void Start()
     {
         referenceResolutionWidth = transform.parent.parent.GetComponent<CanvasScaler>().referenceResolution.x;
+        gameManager = GameManager.Instance;
 
         DisableTaskAction();
     }
@@ -131,6 +139,15 @@ public class PrecisionBar : TaskAction
 
     private void EndTask(bool success)
     {
+        if (success)
+        {
+            AudioManager.Instance.PlayAudioClip(successSound, gameManager.playerTransform.position, 0.1f);
+        }
+        else
+        {
+            AudioManager.Instance.PlayAudioClip(failSound, gameManager.playerTransform.position, 0.1f);
+        }
+
         StartCoroutine(EndTaskRoutine(success));
     }
     private IEnumerator EndTaskRoutine(bool success)

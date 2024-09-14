@@ -2,6 +2,7 @@ using Assets._Scripts.Managers_Systems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,6 +13,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private Transform RaycastPosition;
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Animator animator;
+    [SerializeField] private float gracePerioid = 1f;
 
     private Transform playerT;
 
@@ -56,9 +58,21 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float footstepPitch = 1f;
     private float footstepTimer;
 
+    [Header("Other Sounds")]
+    [SerializeField] private AudioClip spawnInSound;
+    [SerializeField] private AudioClip playerFoundSound;
+    [SerializeField] private AudioClip staringInClosetSound;
+    [SerializeField] private AudioClip[] randomSounds;
+
+    private float randomSoundTimer = 0f;
+    private float randomSoundInterval = 15f;
+    private float randomSoundRandomization = 7.5f;
+
     private bool moving;
 
     public bool cantDeactivate { get; private set; } = false;
+
+    private AudioSource staringAudioSource = null;
 
     private void OnEnable()
     {
@@ -125,10 +139,12 @@ public class EnemyAI : MonoBehaviour
         SetPosition(position);
 
         StartCoroutine(ActivateDelay());
+
+        AudioManager.Instance.PlayAudioClip(spawnInSound, transform.position, 0.25f);
     }
     IEnumerator ActivateDelay()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(gracePerioid);
         UnStun(false);
         SnapshotPlayerPosition();
         State = EnemyState.ChasingPlayer;
@@ -162,6 +178,10 @@ public class EnemyAI : MonoBehaviour
     {
         agent.Warp(position);
     }
+    public void SetRotation(Quaternion rotation)
+    {
+        transform.rotation = rotation;
+    }
 
     private void Update()
     {
@@ -182,9 +202,20 @@ public class EnemyAI : MonoBehaviour
 
         FlickerNearbyLights();
 
-        if (!staring) OpenNearbyDoors();
+        if (State == EnemyState.Wandering)
+        {
+            randomSoundTimer += Time.deltaTime;
+            if (randomSoundTimer >= randomSoundInterval)
+            {
+                randomSoundTimer = 0f + UnityEngine.Random.Range(-randomSoundRandomization, randomSoundRandomization);
+                AudioManager.Instance.PlayAudioClip(randomSounds[UnityEngine.Random.Range(0, randomSounds.Length)], transform.position, 0.2f);
+            }
+        }
 
-        if (State != EnemyState.ChasingPlayer) MentalHealth.Instance.IncreaseMentalHealth(mentalHealthIncreasePerSecondWhenPlayerNotInSight * Time.deltaTime);
+        if (!staring && !GameManager.Instance.isPlayerDead) OpenNearbyDoors();
+
+        if (State != EnemyState.ChasingPlayer && State != EnemyState.PlayerHidingSequence && !GameManager.Instance.isPlayerDead)
+            MentalHealth.Instance.IncreaseMentalHealth(mentalHealthIncreasePerSecondWhenPlayerNotInSight * Time.deltaTime);
 
         if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
 
@@ -465,6 +496,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         print("Reached Hiding Spot... STARING");
+        staringAudioSource = AudioManager.Instance.PlayAudioClip(staringInClosetSound, transform.position, 0.2f);
         staring = true;
         animator.SetTrigger("Stare");
         float timeStaring = 0f;
@@ -593,15 +625,16 @@ public class EnemyAI : MonoBehaviour
             SlamDoorOpen(door);
         }
 
+        staringAudioSource.Stop();
         KillPlayer();
     }
 
     private void KillPlayer()
     {
+        if (!active) return;
         killPlayer = true;
+        AudioManager.Instance.PlayAudioClip(playerFoundSound, transform.position, 0.5f);
         GameManager.Instance.KillPlayer();
-
-        // TODO Play Death Sequence
     }
 
     private void SlamDoorOpen(DoorOpener door)
@@ -645,7 +678,7 @@ public class EnemyAI : MonoBehaviour
         if (footstep != null)
         {
             audioSource.volume = footstepVolume;
-            audioSource.pitch = footstepPitch;
+            audioSource.pitch = footstepPitch + UnityEngine.Random.Range(-0.05f, 0.05f);
             audioSource.PlayOneShot(footstep);
         }
     }

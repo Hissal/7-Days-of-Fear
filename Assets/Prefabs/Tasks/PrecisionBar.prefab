@@ -300,8 +300,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   task:
     type: 0
-    mentalHealthGainedOnSuccess: 0
-    mentalHealthLostOnFail: 0
+    mentalHealthGainedOnDay1: 20
+    mentalHealthGainedOnDay2: 20
+    mentalHealthGainedOnDay3: 5
+    mentalHealthGainedOnDay4: 4.5
+    mentalHealthGainedOnDay5: 4
+    mentalHealthGainedOnDay6: 3.5
+    mentalHealthGainedOnDay7: 3
+    mentalHealthLostOnDay1: 1
+    mentalHealthLostOnDay2: 1
+    mentalHealthLostOnDay3: 5
+    mentalHealthLostOnDay4: 10
+    mentalHealthLostOnDay5: 15
+    mentalHealthLostOnDay6: 20
+    mentalHealthLostOnDay7: 25
   barWidth: 380
   pointer: {fileID: 1903839139319822420}
   successPoint: {fileID: 87756934850724956}
@@ -313,6 +325,8 @@ MonoBehaviour:
   speedOnDay5: 3000
   speedOnDay6: 3250
   speedOnDay7: 3500
+  successSound: {fileID: 8300000, guid: c519989ccc1b381498a6a54dadb02a17, type: 3}
+  failSound: {fileID: 8300000, guid: 4d71294d626d8144a9f8a1dde92ac19e, type: 3}
 --- !u!1 &7034040821045442755
 GameObject:
   m_ObjectHideFlags: 0

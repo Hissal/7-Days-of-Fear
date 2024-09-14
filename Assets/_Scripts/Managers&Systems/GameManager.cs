@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.Playables;
 
 public class GameManager : MonoBehaviour
@@ -59,6 +60,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private AudioClip uiButtonPressSound;
 
+    [SerializeField] private AudioSource staticAudioSource;
+
+    [SerializeField] private Transform enemyGameOverPosition;
+
     private void OnEnable()
     {
         TimeManager.OnDayChanged += SetMentalHealthGained;
@@ -66,6 +71,12 @@ public class GameManager : MonoBehaviour
     private void OnDisable()
     {
         TimeManager.OnDayChanged -= SetMentalHealthGained;
+    }
+
+    public void WarpEnemyToGameOverPosition()
+    {
+        enemyAI.SetPosition(enemyGameOverPosition.position);
+        enemyAI.SetRotation(enemyGameOverPosition.rotation);
     }
 
     private void SetMentalHealthGained(int day)
@@ -100,6 +111,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        Time.timeScale = 1f;
+
         HideCursor();
 
         MentalHealth.Instance.OnMentalHealthReachZero += EnableEnemy;
@@ -135,6 +148,8 @@ public class GameManager : MonoBehaviour
     }
     public void ActivateGameOverScreen()
     {
+        WarpEnemyToGameOverPosition();
+        staticAudioSource.volume = 0.1f;
         gameOverScreen.SetActive(true);
         gameOverScreen.transform.SetAsLastSibling();
     }
@@ -143,6 +158,8 @@ public class GameManager : MonoBehaviour
     {
         int dayToLoad = PlayerPrefs.GetInt("DayToLoad");
         print("StartGame, Day: " + dayToLoad);
+
+        dayToLoad = 7;
 
         if (dayToLoad != 1)
         {
@@ -320,13 +337,15 @@ public class GameManager : MonoBehaviour
             {
                 lightFlicker.TurnOffLight();
             }
+
+            lightFlicker.CheckChildLights();
         }
     }
 
 
     public void EnableEnemyIfNotAppearedYet()
     {
-        if (enemyFirstAppearance) MentalHealth.Instance.ReduceMentalHealth(100f);
+        if (enemyFirstAppearance) MentalHealth.Instance.ReduceMentalHealth(100f, true);
     }
     private void EnableEnemy()
     {
@@ -348,7 +367,7 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(FlickerAllLights());
 
-        
+        AmbienceController.Instance.FadeInScaryAtmosphere();
 
         MentalHealth.Instance.PauseDrainage();
 
@@ -391,6 +410,7 @@ public class GameManager : MonoBehaviour
         enemyActive = false;
 
         enemyAI.Disable(enemyDisabledPosition.position);
+        AmbienceController.Instance.FadeOutScaryAtmosphere();
 
         if (mentalHealthGained > 0)
         {
@@ -398,7 +418,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            MentalHealth.Instance.ReduceMentalHealth(-mentalHealthGained);
+            MentalHealth.Instance.ReduceMentalHealth(-mentalHealthGained, true);
         }
     }
 

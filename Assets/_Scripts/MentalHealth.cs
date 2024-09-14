@@ -12,6 +12,7 @@ public class MentalHealth : MonoBehaviour
 
     [SerializeField] private Color highMentalHealthColor;
     [SerializeField] private Color lowMentalHealthColor;
+    [SerializeField] private Color takeDamageColor;
 
     public event Action OnMentalHealthReachZero = delegate { };
     public event Action<float> OnMentalHealthIncrease = delegate { };
@@ -39,6 +40,8 @@ public class MentalHealth : MonoBehaviour
     [SerializeField] private float mentalHealthOnDay7 = 40f;
 
     public bool mentalHealthDrainagePauseManual;
+
+    public bool fading;
 
     IEnumerator FailureCheckerLoop()
     {
@@ -69,7 +72,7 @@ public class MentalHealth : MonoBehaviour
 
     private void Update()
     {
-       if (currentMentalHealth != 0f && !paused) ReduceMentalHealth(mentalHealthDrainPerSecond * Time.deltaTime);
+       if (currentMentalHealth != 0f && !paused) ReduceMentalHealth(mentalHealthDrainPerSecond * Time.deltaTime, true);
     }
 
     public void PauseDrainage()
@@ -119,8 +122,10 @@ public class MentalHealth : MonoBehaviour
         }
     }
 
-    public void ReduceMentalHealth(float amount)
+    public void ReduceMentalHealth(float amount, bool drainage)
     {
+        if (!drainage) StartCoroutine(DamageFadeRoutine());
+
         currentMentalHealth -= amount;
 
         if (currentMentalHealth <= 0)
@@ -179,8 +184,39 @@ public class MentalHealth : MonoBehaviour
 
     private void UpdateVisual()
     {
+        if (fading) return;
+
         float mentalHealthPrecentage = currentMentalHealth / maxMentalhealth;
         bar.color = Color.Lerp(lowMentalHealthColor, highMentalHealthColor, mentalHealthPrecentage);
+    }
+
+    private IEnumerator DamageFadeRoutine()
+    {
+        fading = true;
+
+        Color originalColor = bar.color;
+        float elapsedTime = 0f;
+        float fadeDuration = 0.05f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / fadeDuration;
+            bar.color = Color.Lerp(originalColor, takeDamageColor, t);
+            yield return null;
+        }
+
+        elapsedTime = 0f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / fadeDuration;
+            bar.color = Color.Lerp(takeDamageColor, originalColor, t);
+            yield return null;
+        }
+
+        fading = false;
     }
 
     public static MentalHealth Instance;

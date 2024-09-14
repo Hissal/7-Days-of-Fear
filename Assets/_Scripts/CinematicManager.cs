@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class CinematicManager : MonoBehaviour
 {
@@ -9,8 +10,21 @@ public class CinematicManager : MonoBehaviour
 
     [field: SerializeField] public Camera cinematicCamera { get; private set; }
 
+    [SerializeField] private GameObject cinematicVolume;
+    [SerializeField] private GameObject baseVolume;
+
+    private void OnCinematicEnd(PlayableDirector director)
+    {
+        cinematicVolume.SetActive(false);
+        baseVolume.SetActive(true);
+    }
+
     public void PlayCinematic(Cinematic cinematic)
     {
+        baseVolume.SetActive(false);
+        cinematicVolume.SetActive(true);
+        cinematic.director.stopped += OnCinematicEnd;
+
         GameManager.Instance.StunEnemy(-1);
         GameManager.Instance.TakeAwayPlayerControl();
         if(cinematic.isFirstCinematicOfChain && cinematic.requireStartpositions) MoveAndRotatePlayerToStartOfCinematic(cinematic);

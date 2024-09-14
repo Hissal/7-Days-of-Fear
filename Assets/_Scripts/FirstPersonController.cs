@@ -73,19 +73,19 @@ public class FirstPersonController : MonoBehaviour
     {
         if (GameManager.Instance.paused) return;
 
-        float distanceToEnemy = Vector3.Distance(transform.position, enemyTransform.position);
-        float maxDistance = 3f;
-        float minDistance = 1f;
+        //float distanceToEnemy = Vector3.Distance(transform.position, enemyTransform.position);
+        //float maxDistance = 3f;
+        //float minDistance = 1f;
 
-        if (distanceToEnemy < maxDistance)
-        {
-            float volume = Mathf.Lerp(0f, 0.5f, (distanceToEnemy - minDistance) / (maxDistance - minDistance));
-            heartBeatAudioSource.volume = volume;
-        }
-        else
-        {
-            heartBeatAudioSource.volume = 0f;
-        }
+        //if (distanceToEnemy < maxDistance)
+        //{
+        //    float volume = Mathf.Lerp(0f, 0.5f, (distanceToEnemy - minDistance) / (maxDistance - minDistance));
+        //    heartBeatAudioSource.volume = volume;
+        //}
+        //else
+        //{
+        //    heartBeatAudioSource.volume = 0f;
+        //}
 
         #region Handles Movment
 

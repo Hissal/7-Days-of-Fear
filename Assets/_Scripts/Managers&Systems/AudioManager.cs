@@ -36,7 +36,11 @@ namespace Assets._Scripts.Managers_Systems
             {
                 GameObject obj = new GameObject("AudioSource");
                 obj.transform.SetParent(audioSourceParent);
-                return obj.AddComponent<AudioSource>();
+                AudioSource audioSource = obj.AddComponent<AudioSource>();
+                audioSource.spatialBlend = 1f;
+                audioSource.maxDistance = 5f;
+                //audioSource.outputAudioMixerGroup = GameManager.Instance.audioMixer.outputAudioMixerGroup;
+                return audioSource;
             });
             audioSourceCoroutines = new Dictionary<AudioSource, Coroutine>();
         }
@@ -54,8 +58,6 @@ namespace Assets._Scripts.Managers_Systems
             audioSource.clip = clip;
             audioSource.volume = volume;
             audioSource.loop = loop;
-            audioSource.spatialBlend = 1f;
-            audioSource.maxDistance = 5f;
             audioSource.Play();
 
             if (loop)
@@ -63,7 +65,10 @@ namespace Assets._Scripts.Managers_Systems
                 Coroutine coroutine = StartCoroutine(LoopAudioSource(audioSource));
                 audioSourceCoroutines.Add(audioSource, coroutine);
             }
-            StartCoroutine(ReturnAudioSource(audioSource));
+            else
+            {
+                StartCoroutine(ReturnAudioSource(audioSource));
+            }
 
             return audioSource;
         }
@@ -71,7 +76,6 @@ namespace Assets._Scripts.Managers_Systems
         public void StopAudioClip(AudioSource audioSource)
         {
             audioSource.Stop();
-            audioSourcePool.Return(audioSource);
 
             if (audioSourceCoroutines.ContainsKey(audioSource))
             {
@@ -79,6 +83,8 @@ namespace Assets._Scripts.Managers_Systems
                 StopCoroutine(coroutine);
                 audioSourceCoroutines.Remove(audioSource);
             }
+
+            audioSourcePool.Return(audioSource);
         }
 
         private IEnumerator LoopAudioSource(AudioSource audioSource)
@@ -86,13 +92,14 @@ namespace Assets._Scripts.Managers_Systems
             while (true)
             {
                 yield return new WaitForSeconds(audioSource.clip.length);
-                audioSource.Play();
 
                 if (!audioSource.loop)
                 {
-                    audioSourcePool.Return(audioSource);
+                    StopAudioClip(audioSource);
                     yield break; // Exit the coroutine
                 }
+
+                audioSource.Play();
             }
         }
 
@@ -140,6 +147,18 @@ namespace Assets._Scripts.Managers_Systems
 
         public void Return(T obj)
         {
+            if (obj == null)
+            {
+                Debug.LogWarning("Returning null object to pool");
+                return;
+            }
+
+            if (stack.Contains(obj))
+            {
+                Debug.LogWarning("Object already in pool");
+                return;
+            }
+
             stack.Push(obj);
         }
     }

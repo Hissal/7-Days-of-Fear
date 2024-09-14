@@ -205,6 +205,7 @@ public class Bed : Interactable
         dayChangeScreen.SetActive(true);
 
         AmbienceController.Instance.FadeOutAmbience(3f);
+        Radio.FadeOutRadio_Static(3f);
 
         // Set the initial alpha value of the fade image and text to 0
         fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 0f);
@@ -270,6 +271,7 @@ public class Bed : Interactable
 
         AmbienceController.Instance.SwitchAmbience(TimeManager.day + 1);
         AmbienceController.Instance.FadeInAmbience(3f);
+        Radio.FadeInRadio_Static(3f);
 
         // Fade out the day text and day number texts
         float textFadeOutDuration = 1f;
