@@ -1,3 +1,4 @@
+using Assets._Scripts.Managers_Systems;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,6 +17,8 @@ public class Radio : Interactable
     [SerializeField] private AudioSource radioAudioSource;
     [SerializeField] private AudioClip[] radioClips;
     [SerializeField] private float volume = 0.4f;
+    [SerializeField] private AudioClip turnOnSound;
+    [SerializeField] private AudioClip turnOffSound;
 
     private void OnEnable()
     {
@@ -38,11 +41,13 @@ public class Radio : Interactable
         if (radioAudioSource.volume <= 0f)
         {
             isOn = true;
+            AudioManager.Instance.PlayAudioClip(turnOnSound, transform.position, 0.2f);
             radioAudioSource.volume = volume;
         }
         else
         {
             isOn = false;
+            AudioManager.Instance.PlayAudioClip(turnOffSound, transform.position, 0.2f);
             radioAudioSource.volume = 0f;
         }
 
@@ -53,6 +58,7 @@ public class Radio : Interactable
     {
         radioAudioSource.clip = radioClips[Random.Range(0, radioClips.Length)];
         radioAudioSource.Play();
+        radioAudioSource.loop = true;
     }
 
     public static void FadeOutRadio_Static(float time)
