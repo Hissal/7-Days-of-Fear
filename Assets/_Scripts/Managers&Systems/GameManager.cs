@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Playables;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -64,6 +65,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform enemyGameOverPosition;
     [SerializeField] private LightFlicker bedroomLight;
 
+    [SerializeField] private Slider sensitivitySlider;
     private void OnEnable()
     {
         TimeManager.OnDayChanged += SetMentalHealthGained;
@@ -166,6 +168,7 @@ public class GameManager : MonoBehaviour
         if (dayToLoad != 1)
         {
             TimeManager.SetTime(dayToLoad, 0, 0, true, true);
+            
             bedroomSwitch.TurnOnLights();
         }
         else
@@ -213,6 +216,9 @@ public class GameManager : MonoBehaviour
     {
         if (isPlayerDead) return;
 
+        sensitivitySlider.value = PlayerPrefs.GetFloat("Sensitivity");
+        sensitivitySlider.onValueChanged.Invoke(sensitivitySlider.value);
+
         paused = true;
         timeScaleBeforePause = Time.timeScale;
         Time.timeScale = 0;
@@ -227,6 +233,9 @@ public class GameManager : MonoBehaviour
     }
     public void UnPause()
     {
+        PlayerPrefs.SetFloat("Sensitivity", sensitivitySlider.value);
+        playerController.SetSensitivity(sensitivitySlider.value);
+
         paused = false;
         Time.timeScale = timeScaleBeforePause;
 
@@ -251,6 +260,7 @@ public class GameManager : MonoBehaviour
         bedroomLight.TurnOnLight(true);
         isPlayerDead = true;
         TakeAwayPlayerControl();
+        AmbienceController.Instance.FadeOutScaryAtmosphere();
         StunEnemy(-1);
         director.Play();
     }

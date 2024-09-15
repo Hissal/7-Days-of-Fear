@@ -61,6 +61,8 @@ public class FirstPersonController : MonoBehaviour
 
     void Start()
     {
+        SetSensitivity(PlayerPrefs.GetFloat("Sensitivity"));
+
         if (playerCamera == null)
         {
             playerCamera = Camera.main;
@@ -72,6 +74,11 @@ public class FirstPersonController : MonoBehaviour
         characterController = GetComponent<CharacterController>();
 
         defaultCameraLocalPosition = playerCamera.transform.localPosition;
+    }
+
+    public void SetSensitivity(float sensitivity)
+    {
+        lookSpeed = sensitivity;
     }
 
     void Update()
@@ -102,15 +109,29 @@ public class FirstPersonController : MonoBehaviour
         float curSpeedX = canMove ? (sprinting ? sprintSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
         float curSpeedY = canMove ? (sprinting ? sprintSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
         float movementDirectionY = moveDirection.y;
+
+        // Combine the forward and right movement vectors
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        if (curSpeedX != 0 || curSpeedY != 0)
+        // Normalize the movement vector to ensure consistent speed
+        if (moveDirection.magnitude > 1)
         {
-            moving = true;
+            moveDirection.Normalize();
         }
-        else
+
+        // Apply the movement speed
+        moveDirection *= (sprinting ? sprintSpeed : walkSpeed);
+
+        // Preserve the Y movement direction (gravity)
+        moveDirection.y = movementDirectionY;
+
+        // Update the moving flag
+        moving = curSpeedX != 0 || curSpeedY != 0;
+
+        // If there is no input, reset the moveDirection to zero
+        if (!moving)
         {
-            moving = false;
+            moveDirection = Vector3.zero;
         }
 
         #endregion
@@ -128,10 +149,11 @@ public class FirstPersonController : MonoBehaviour
             moveDirection.y = 0;
         }
 
+        if (canMove) characterController.Move(moveDirection * Time.deltaTime);
+
         #endregion
 
         #region Handles Rotation
-        if (canMove) characterController.Move(moveDirection * Time.deltaTime);
 
         if (canMove)
         {

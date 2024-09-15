@@ -69,5 +69,9 @@ public class InteractionHandler : MonoBehaviour
         {
             currentInteractable.OnInteract();
         }
+        else if (Input.GetKeyDown(KeyCode.Mouse0) && currentInteractable != null)
+        {
+            if (currentInteractable.canUseLeftMouse) currentInteractable.OnInteract();
+        }
     }
 }

@@ -6,6 +6,8 @@ using UnityEngine;
 public abstract class Interactable : MonoBehaviour
 {
     [SerializeField] protected Outline outline;
+    [field: SerializeField] public bool canUseLeftMouse { get; protected set; } = false;
+
 
     private void Awake()
     {

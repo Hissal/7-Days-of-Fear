@@ -47,7 +47,7 @@ public class EnemyAI : MonoBehaviour
     private HidingSpot playersCurrentHidingSpot;
     [SerializeField] private AudioClip[] inspectSounds;
 
-    private bool killPlayer;
+    private bool killedPlayer;
 
     public bool active { get; private set; }
 
@@ -141,6 +141,7 @@ public class EnemyAI : MonoBehaviour
         active = false;
         playerT = GameManager.Instance.playerTransform;
         if (agent == null) agent = GetComponent<NavMeshAgent>();
+        InvokeRepeating("TickDoorClosetOpenChance", 0f, 0.2f);
     }
     public void Activate(Vector3 position, Quaternion rotation, bool cantDeactivate)
     {
@@ -261,11 +262,18 @@ public class EnemyAI : MonoBehaviour
 
             WalkTowardPlayer();
             State = EnemyState.ChasingPlayer;
-            if (Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) < killRange && !killPlayer)
+            float distanceToPlayer = Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position));
+            if (distanceToPlayer < killRange && !killedPlayer)
             {
                 //print("Player In Kill Radius.. KILL PLAYER");
                 KillPlayer();
             }
+            else if (playersCurrentHidingSpot != null && distanceToPlayer < 1f)
+            {
+                KillPlayerInCloset();
+            }
+
+
         }
         else if (playerWasInSight == true)
         {
@@ -414,6 +422,15 @@ public class EnemyAI : MonoBehaviour
         flickeringLights.Remove(lightFlicker);
     }
 
+    List<DoorOpener> doorsInRadius = new List<DoorOpener>();
+    bool slamClosetDoorOpen;
+    private void TickDoorClosetOpenChance()
+    {
+        int randomChance = UnityEngine.Random.Range(0, 100);
+        if (randomChance < 3) slamClosetDoorOpen = true;
+        else slamClosetDoorOpen = false;
+    }
+
     private void OpenNearbyDoors()
     {
         List<DoorOpener> doorOpeners = GetDoorsInRadius(2f);
@@ -424,6 +441,40 @@ public class EnemyAI : MonoBehaviour
                 SlamDoorOpen(door);
             }
             else if (door.isMovableByEnemy && !door.isCloset && !door.moving) door.MoveDoor(UnityEngine.Random.Range(200f, 500f), UnityEngine.Random.Range(-10f, 10f), true);
+
+            if (!doorsInRadius.Contains(door))
+            {
+                doorsInRadius.Add(door);
+
+                if (door.isCloset && State == EnemyState.Wandering)
+                {
+                    int randomChance = UnityEngine.Random.Range(0, 100);
+                    if (randomChance < 25)
+                    {
+                        door.MoveDoor(UnityEngine.Random.Range(200f, 500f), UnityEngine.Random.Range(-10f, 10f), true);
+                    }
+                }
+            }
+            else if (State == EnemyState.Wandering && door.isCloset && slamClosetDoorOpen &&
+                Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(door.transform.position)) < 0.75f)
+            {
+                SlamDoorOpen(door);
+            }  
+        }
+
+        List<DoorOpener> doorsToRemove = new List<DoorOpener>();
+
+        foreach (var door in doorsInRadius)
+        {
+            if (!doorOpeners.Contains(door))
+            {
+                doorsToRemove.Add(door);
+            }
+        }
+
+        foreach (var door in doorsToRemove)
+        {
+            doorsInRadius.Remove(door);
         }
     }
 
@@ -672,7 +723,7 @@ public class EnemyAI : MonoBehaviour
             {
                 // Rotate to toward closet
                 //print("Rotating to: " + desiredRotation.eulerAngles);
-                float precentageDone = Mathf.Clamp(timeStaring, 0f, 1f);
+                float precentageDone = Mathf.Clamp(timeStaring * 2, 0f, 1f);
                 
                 transform.rotation = Quaternion.Lerp(startRotation, desiredRotation, precentageDone);
                 if (transform.rotation == desiredRotation) doneRotating = true;
@@ -747,7 +798,7 @@ public class EnemyAI : MonoBehaviour
     private void KillPlayer()
     {
         if (!active) return;
-        killPlayer = true;
+        killedPlayer = true;
         GameManager.Instance.FadeOffAudioSources(audiSourcesToTurnOffOnKill, 2f);
         AudioManager.Instance.PlayAudioClip(playerFoundSound, transform.position, 0.5f);
         GameManager.Instance.KillPlayer();
