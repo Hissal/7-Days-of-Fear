@@ -163,7 +163,8 @@ public class GameManager : MonoBehaviour
         int dayToLoad = PlayerPrefs.GetInt("DayToLoad");
         print("StartGame, Day: " + dayToLoad);
 
-        //dayToLoad = 7;
+        dayToLoad = 3;
+        PlayerPrefs.SetInt("Retry", 1);
 
         if (dayToLoad != 1)
         {
@@ -216,7 +217,15 @@ public class GameManager : MonoBehaviour
     {
         if (isPlayerDead) return;
 
-        sensitivitySlider.value = PlayerPrefs.GetFloat("Sensitivity");
+        if (PlayerPrefs.HasKey("Sensitivity"))
+        {
+            sensitivitySlider.value = PlayerPrefs.GetFloat("Sensitivity");
+        }
+        else
+        {
+            sensitivitySlider.value = 2f;
+        }
+     
         sensitivitySlider.onValueChanged.Invoke(sensitivitySlider.value);
 
         paused = true;
