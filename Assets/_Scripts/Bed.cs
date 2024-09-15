@@ -362,6 +362,7 @@ public class Bed : Interactable
     private void WakeUp()
     {
         HUD.SetActive(true);
+        GameManager.Instance.GivePlayerControlBack();
         Reticle.ShowReticle_Static();
         MentalHealth.Instance.ResumeDrainage();
         MentalHealth.Instance.mentalHealthDrainagePauseManual = false;

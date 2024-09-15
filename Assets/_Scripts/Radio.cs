@@ -41,13 +41,13 @@ public class Radio : Interactable
         if (radioAudioSource.volume <= 0f)
         {
             isOn = true;
-            AudioManager.Instance.PlayAudioClip(turnOnSound, transform.position, 0.2f);
+            AudioManager.Instance.PlayAudioClip(turnOnSound, transform.position, 0.5f);
             radioAudioSource.volume = volume;
         }
         else
         {
             isOn = false;
-            AudioManager.Instance.PlayAudioClip(turnOffSound, transform.position, 0.2f);
+            AudioManager.Instance.PlayAudioClip(turnOffSound, transform.position, 0.5f);
             radioAudioSource.volume = 0f;
         }
 

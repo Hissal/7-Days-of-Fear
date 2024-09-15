@@ -38709,8 +38709,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 658b6e7fa27672c46aef761658edf41f, type: 3}
   - {fileID: 8300000, guid: 7f03d52a390c5a049bbd08a7dbefb276, type: 3}
   volume: 0.4
-  turnOnSound: {fileID: 0}
-  turnOffSound: {fileID: 0}
+  turnOnSound: {fileID: 8300000, guid: 5a2828887871dd3448dea39f58be5322, type: 3}
+  turnOffSound: {fileID: 8300000, guid: 0823989b2a5e1334c961c6d491e4d42e, type: 3}
 --- !u!114 &1730814577
 MonoBehaviour:
   m_ObjectHideFlags: 0
