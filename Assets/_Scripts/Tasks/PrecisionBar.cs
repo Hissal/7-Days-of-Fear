@@ -141,11 +141,11 @@ public class PrecisionBar : TaskAction
     {
         if (success)
         {
-            AudioManager.Instance.PlayAudioClip(successSound, gameManager.playerTransform.position, 0.1f);
+            AudioManager.Instance.PlayAudioClip(successSound, gameManager.playerTransform.position, 0.05f);
         }
         else
         {
-            AudioManager.Instance.PlayAudioClip(failSound, gameManager.playerTransform.position, 0.1f);
+            AudioManager.Instance.PlayAudioClip(failSound, gameManager.playerTransform.position, 0.05f);
         }
 
         StartCoroutine(EndTaskRoutine(success));

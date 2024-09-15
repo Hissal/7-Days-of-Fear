@@ -62,6 +62,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioSource staticAudioSource;
 
     [SerializeField] private Transform enemyGameOverPosition;
+    [SerializeField] private LightFlicker bedroomLight;
 
     private void OnEnable()
     {
@@ -117,7 +118,7 @@ public class GameManager : MonoBehaviour
         MentalHealth.Instance.OnMentalHealthReachZero += EnableEnemy;
 
         enemyActive = true;
-        DisableEnemy();
+        DisableEnemy(true);
 
         foreach (var hidingSpot in hidingSpots)
         {
@@ -160,7 +161,7 @@ public class GameManager : MonoBehaviour
         int dayToLoad = PlayerPrefs.GetInt("DayToLoad");
         print("StartGame, Day: " + dayToLoad);
 
-        dayToLoad = 7;
+        //dayToLoad = 7;
 
         if (dayToLoad != 1)
         {
@@ -247,6 +248,7 @@ public class GameManager : MonoBehaviour
             GM.SetActive(false);
         }
 
+        bedroomLight.TurnOnLight(true);
         isPlayerDead = true;
         TakeAwayPlayerControl();
         StunEnemy(-1);
@@ -346,6 +348,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void FadeOffAudioSources(AudioSource[] sources, float fadeTime)
+    {
+        StartCoroutine(FadeOffAudioSourcesRoutine(sources, fadeTime));
+    }
+    IEnumerator FadeOffAudioSourcesRoutine(AudioSource[] sources, float fadeTime)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < fadeTime)
+        {
+            print("Fading Off AudioSources");
+            elapsedTime += Time.deltaTime;
+            foreach (var audioSource in sources)
+            {
+                audioSource.volume = Mathf.Lerp(1f, 0f, elapsedTime / fadeTime);
+            }
+            yield return null;
+        }
+    }
+
 
     public void EnableEnemyIfNotAppearedYet()
     {
@@ -396,7 +418,7 @@ public class GameManager : MonoBehaviour
         enemyActive = true;
     }
 
-    public void DisableEnemy()
+    public void DisableEnemy(bool startDisabling = false)
     {
         if (enemyAI == null) throw new System.Exception("EnemyAI is null");
         if (enemyAI.cantDeactivate) return;
@@ -414,7 +436,7 @@ public class GameManager : MonoBehaviour
         enemyActive = false;
 
         enemyAI.Disable(enemyDisabledPosition.position);
-        AmbienceController.Instance.FadeOutScaryAtmosphere();
+        if (!startDisabling) AmbienceController.Instance.FadeOutScaryAtmosphere();
 
         if (mentalHealthGained > 0)
         {

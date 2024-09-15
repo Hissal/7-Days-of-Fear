@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class EscapeDoor : CinematicInteractable
 {
@@ -9,6 +10,8 @@ public class EscapeDoor : CinematicInteractable
 
     public bool active { get; private set; } = false;
     public bool paused { get; private set; } = false;
+
+    public UnityEvent OnEscape = new UnityEvent();
 
     private void OnEnable()
     {
@@ -29,6 +32,12 @@ public class EscapeDoor : CinematicInteractable
         }
     }
 
+    private void Start()
+    {
+        //OnEscape.Invoke();
+        //base.OnInteract();
+    }
+
     private void Pause(bool pause)
     {
         paused = pause;
@@ -47,6 +56,7 @@ public class EscapeDoor : CinematicInteractable
     {
         if (active && !paused)
         {
+            OnEscape.Invoke();
             base.OnInteract();
         }
     }

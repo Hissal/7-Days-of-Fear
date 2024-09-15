@@ -45,7 +45,7 @@ namespace Assets._Scripts.Managers_Systems
             audioSourceCoroutines = new Dictionary<AudioSource, Coroutine>();
         }
 
-        public AudioSource PlayAudioClip(AudioClip clip, Vector3 position, float volume, bool loop = false)
+        public AudioSource PlayAudioClip(AudioClip clip, Vector3 position, float volume, bool loop = false, float pitch = 1f)
         {
             if (clip == null)
             {
@@ -58,6 +58,7 @@ namespace Assets._Scripts.Managers_Systems
             audioSource.clip = clip;
             audioSource.volume = volume;
             audioSource.loop = loop;
+            audioSource.pitch = pitch;
             audioSource.Play();
 
             if (loop)

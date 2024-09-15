@@ -217,7 +217,7 @@ public class FirstPersonController : MonoBehaviour
         if (footstep != null)
         {
             footStepsAudioSource.volume = footstepVolume;
-            footStepsAudioSource.pitch = footstepPitch;
+            footStepsAudioSource.pitch = footstepPitch + Random.Range(-0.1f, 0.1f);
             footStepsAudioSource.PlayOneShot(footstep);
         }
     }

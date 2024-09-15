@@ -100,6 +100,12 @@ public class Cinematic : MonoBehaviour
             return;
         }
         
+        StartCoroutine(DisableWIthDelay(0.1f));
+    }
+
+    IEnumerator DisableWIthDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
         gameObject.SetActive(false);
     }
 

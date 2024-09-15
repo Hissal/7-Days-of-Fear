@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Assets._Scripts.Managers_Systems;
 
 public class QuestSystem : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class QuestSystem : MonoBehaviour
     private Color questHelperColor;
 
     public bool paused { get; private set; }
+
+    [SerializeField] private AudioClip objectiveCompleteSound;
+    [SerializeField] private AudioClip newObjectiveSound;
 
     private void Start()
     {
@@ -62,6 +66,8 @@ public class QuestSystem : MonoBehaviour
         Vector3 originalPosition = questHelperPosition;
         Color originalColor = questHelperColor;
 
+        AudioManager.Instance.PlayAudioClip(objectiveCompleteSound, GameManager.Instance.playerTransform.position, 0.1f);
+
         while (elapsedTime < fadeDuration)
         {
             float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeDuration);
@@ -88,6 +94,8 @@ public class QuestSystem : MonoBehaviour
         float elapsedTime = 0f;
         Color originalColor = questHelperColor;
         Vector3 originalPosition = questHelperPosition;
+
+        AudioManager.Instance.PlayAudioClip(newObjectiveSound, GameManager.Instance.playerTransform.position, 0.1f);
 
         while (elapsedTime < fadeDuration)
         {

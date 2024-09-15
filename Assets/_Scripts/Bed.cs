@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
+using Assets._Scripts.Managers_Systems;
 
 public class Bed : Interactable
 {
@@ -23,6 +24,8 @@ public class Bed : Interactable
     [SerializeField] private LightFlicker[] lightFlickers;
 
     [SerializeField] private LightSwitch lightSwitch;
+
+    [SerializeField] private AudioClip cannotSleepSound;
 
     public UnityEvent OnSleepDay7;
 
@@ -67,6 +70,10 @@ public class Bed : Interactable
             base.OnInteract();
             GoToSleep();
             base.OnLoseFocus();
+        }
+        else if (GameManager.Instance.enemyActive)
+        {
+            AudioManager.Instance.PlayAudioClip(cannotSleepSound, transform.position, 0.1f);
         }
     }
 

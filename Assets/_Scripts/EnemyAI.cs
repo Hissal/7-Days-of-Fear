@@ -45,6 +45,7 @@ public class EnemyAI : MonoBehaviour
     private bool staring;
     private bool listening;
     private HidingSpot playersCurrentHidingSpot;
+    [SerializeField] private AudioClip[] inspectSounds;
 
     private bool killPlayer;
 
@@ -59,20 +60,32 @@ public class EnemyAI : MonoBehaviour
     private float footstepTimer;
 
     [Header("Other Sounds")]
+    [SerializeField] private AudioSource heartbeatAudioSource;
+    private float baseHeartbeatVolume;
     [SerializeField] private AudioClip spawnInSound;
     [SerializeField] private AudioClip playerFoundSound;
     [SerializeField] private AudioClip staringInClosetSound;
     [SerializeField] private AudioClip[] randomSounds;
+    [SerializeField] private AudioClip playerSeenGoingInToClosetSound;
 
     private float randomSoundTimer = 0f;
-    private float randomSoundInterval = 15f;
-    private float randomSoundRandomization = 7.5f;
+    private float randomSoundInterval = 5f;
+    private float randomSoundIntervalRandomAddition = 15f;
 
     private bool moving;
 
     public bool cantDeactivate { get; private set; } = false;
 
     private AudioSource staringAudioSource = null;
+
+    private float movementSpeedMultiplier = 1f;
+    [SerializeField] private float movementSpeedMultiplierScalingSpeed = 0.01f;
+    [SerializeField] private float baseSpeed = 0.75f;
+
+    [SerializeField] private float maxWanderTimeBeforeLeave = 60f;
+    private float timeBeforeLeave = 60f;
+
+    [SerializeField] private AudioSource[] audiSourcesToTurnOffOnKill;
 
     private void OnEnable()
     {
@@ -124,6 +137,7 @@ public class EnemyAI : MonoBehaviour
 
     private void Start()
     {
+        baseHeartbeatVolume = heartbeatAudioSource.volume;
         active = false;
         playerT = GameManager.Instance.playerTransform;
         if (agent == null) agent = GetComponent<NavMeshAgent>();
@@ -133,6 +147,7 @@ public class EnemyAI : MonoBehaviour
         this.cantDeactivate = cantDeactivate;
         if (active) return;
         agent.enabled = true;
+        timeBeforeLeave = maxWanderTimeBeforeLeave;
 
         StopAllCoroutines();
 
@@ -145,6 +160,7 @@ public class EnemyAI : MonoBehaviour
     IEnumerator ActivateDelay()
     {
         yield return new WaitForSeconds(gracePerioid);
+        movementSpeedMultiplier = 1f;
         UnStun(false);
         SnapshotPlayerPosition();
         State = EnemyState.ChasingPlayer;
@@ -172,6 +188,8 @@ public class EnemyAI : MonoBehaviour
         {
             UnFlickerLight(lightFlicker);
         }
+
+        movementSpeedMultiplier = 1f;
     }
 
     public void SetPosition(Vector3 position)
@@ -207,8 +225,10 @@ public class EnemyAI : MonoBehaviour
             randomSoundTimer += Time.deltaTime;
             if (randomSoundTimer >= randomSoundInterval)
             {
-                randomSoundTimer = 0f + UnityEngine.Random.Range(-randomSoundRandomization, randomSoundRandomization);
-                AudioManager.Instance.PlayAudioClip(randomSounds[UnityEngine.Random.Range(0, randomSounds.Length)], transform.position, 0.2f);
+                randomSoundTimer = 0f - UnityEngine.Random.Range(0f, randomSoundIntervalRandomAddition);
+                AudioClip randomSound = randomSounds[UnityEngine.Random.Range(0, randomSounds.Length)];
+                float randomPitch = 1f + UnityEngine.Random.Range(-0.1f, 0.1f);
+                AudioManager.Instance.PlayAudioClip(randomSound, transform.position, 0.2f, false, randomPitch);
             }
         }
 
@@ -217,10 +237,28 @@ public class EnemyAI : MonoBehaviour
         if (State != EnemyState.ChasingPlayer && State != EnemyState.PlayerHidingSequence && !GameManager.Instance.isPlayerDead)
             MentalHealth.Instance.IncreaseMentalHealth(mentalHealthIncreasePerSecondWhenPlayerNotInSight * Time.deltaTime);
 
-        if (State == EnemyState.PlayerHidingSequence || State == EnemyState.Stunned) return;
+        if (State == EnemyState.PlayerHidingSequence) return;
+        else 
+        {
+            timeBeforeLeave -= Time.deltaTime;
+            if (timeBeforeLeave <= 0f)
+            {
+                ForceLeave();
+            }
+
+            if (State == EnemyState.Stunned)
+            {
+                movementSpeedMultiplier -= movementSpeedMultiplierScalingSpeed * 0.5f * Time.deltaTime;
+                if (movementSpeedMultiplier < 1f) movementSpeedMultiplier = 1f;
+                return;
+            }
+        }
+
 
         if (PlayerInSight())
         {
+            movementSpeedMultiplier += movementSpeedMultiplierScalingSpeed * Time.deltaTime;
+
             WalkTowardPlayer();
             State = EnemyState.ChasingPlayer;
             if (Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(playerT.position)) < killRange && !killPlayer)
@@ -235,6 +273,22 @@ public class EnemyAI : MonoBehaviour
             SnapshotPlayerPosition();
             StartCoroutine(MoveToPlayerSnapshot());
         }
+        else
+        {
+            movementSpeedMultiplier -= movementSpeedMultiplierScalingSpeed * 0.5f * Time.deltaTime;
+
+            if (movementSpeedMultiplier < 1f) movementSpeedMultiplier = 1f;
+        }
+
+        agent.speed = baseSpeed * movementSpeedMultiplier;
+        animator.SetFloat("MoveSpeed", agent.speed);
+    }
+
+    private void ForceLeave()
+    {
+        if (cantDeactivate) return;
+
+        MentalHealth.Instance.SetMentalHealth(mentalHealthToGoAway + 5f);
     }
 
     private void HandleFootsteps()
@@ -246,9 +300,11 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            footstepTimer += Time.deltaTime;
+            footstepTimer += Time.deltaTime * agent.speed;
         }
     }
+
+    private List<LightFlicker> nearbyLights = new List<LightFlicker>();
 
     private void FlickerNearbyLights()
     {
@@ -258,11 +314,55 @@ public class EnemyAI : MonoBehaviour
             foreach (var collider in lightColliders)
             {
                 LightFlicker lightFlicker = collider.GetComponent<LightFlicker>();
+
+                if (!nearbyLights.Contains(lightFlicker))
+                {
+                    nearbyLights.Add(lightFlicker);
+                    if (Mathf.Approximately(lightFlicker.light.intensity, 0f))
+                    {
+                        int tenPrecentage = UnityEngine.Random.Range(0, 10);
+                        if (tenPrecentage == 0)
+                        {
+                            lightFlicker.TurnOnLight();
+                        }
+                    }
+                }
+
                 if (!flickeringLights.Contains(lightFlicker) && lightFlicker.light.intensity > 0f)
                 {
                     flickeringLights.Add(lightFlicker);
                     lightFlicker.flicker = true;
                 }
+            }
+        }
+
+        if (nearbyLights.Count != 0)
+        {
+            LightFlicker nearbyLightToRemove = null;
+
+            foreach (var lightFlicker in nearbyLights)
+            {
+                bool lightNearby = false;
+
+                Collider col = lightFlicker.GetComponent<Collider>();
+
+                foreach (var collider in lightColliders)
+                {
+                    if (collider == col)
+                    {
+                        lightNearby = true;
+                    }
+                }
+
+                if (!lightNearby)
+                {
+                    nearbyLightToRemove = lightFlicker;
+                }
+            }
+
+            if (nearbyLightToRemove != null)
+            {
+                nearbyLights.Remove(nearbyLightToRemove);
             }
         }
 
@@ -272,7 +372,7 @@ public class EnemyAI : MonoBehaviour
 
             foreach (var lightFlicker in flickeringLights)
             {
-                bool contains = false;
+                bool lightFLickering = false;
 
                 Collider col = lightFlicker.GetComponent<Collider>();
 
@@ -280,11 +380,11 @@ public class EnemyAI : MonoBehaviour
                 {
                     if (collider == col)
                     {
-                        contains = true;
+                        lightFLickering = true;
                     }
                 }
 
-                if (!contains)
+                if (!lightFLickering)
                 {
                     flickerToRemove = lightFlicker;
                 }
@@ -300,7 +400,17 @@ public class EnemyAI : MonoBehaviour
     private void UnFlickerLight(LightFlicker lightFlicker)
     {
         lightFlicker.flicker = false;
-        lightFlicker.light.intensity = 0f;
+        
+        int random4 = UnityEngine.Random.Range(0, 4);
+        if (random4 == 0)
+        {
+            lightFlicker.TurnOnLight();
+        }
+        else
+        {
+            lightFlicker.TurnOffLight();
+        }
+
         flickeringLights.Remove(lightFlicker);
     }
 
@@ -369,7 +479,7 @@ public class EnemyAI : MonoBehaviour
 
     private bool PlayerInSight()
     {
-        if (Physics.Raycast(RaycastPosition.position, (playerT.position - RaycastPosition.position).normalized, out RaycastHit hit, sightRange, seenLayers))
+        if (Physics.Raycast(RaycastPosition.position, ((playerT.position + Vector3.up * 0.25f) - RaycastPosition.position).normalized, out RaycastHit hit, sightRange, seenLayers))
         {
             if (hit.collider.gameObject.layer == playerLayer)
             {
@@ -478,6 +588,8 @@ public class EnemyAI : MonoBehaviour
     }
     private IEnumerator WalkToHidingSpotSequence(Vector3 locationToWalkTo, Quaternion desiredRotation, bool killPlayer)
     {
+        if (killPlayer) AudioManager.Instance.PlayAudioClip(playerSeenGoingInToClosetSound, transform.position, 0.2f);
+
         State = EnemyState.PlayerHidingSequence;
 
         playerWasInSight = false;
@@ -499,7 +611,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         print("Reached Hiding Spot... STARING");
-        staringAudioSource = AudioManager.Instance.PlayAudioClip(staringInClosetSound, transform.position, 0.2f);
+        //staringAudioSource = AudioManager.Instance.PlayAudioClip(staringInClosetSound, transform.position, 0.2f);
         staring = true;
         animator.SetTrigger("Stare");
         float timeStaring = 0f;
@@ -628,7 +740,7 @@ public class EnemyAI : MonoBehaviour
             SlamDoorOpen(door);
         }
 
-        staringAudioSource.Stop();
+        //if (staringAudioSource) staringAudioSource.Stop();
         KillPlayer();
     }
 
@@ -636,6 +748,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (!active) return;
         killPlayer = true;
+        GameManager.Instance.FadeOffAudioSources(audiSourcesToTurnOffOnKill, 2f);
         AudioManager.Instance.PlayAudioClip(playerFoundSound, transform.position, 0.5f);
         GameManager.Instance.KillPlayer();
     }
@@ -681,7 +794,7 @@ public class EnemyAI : MonoBehaviour
         if (footstep != null)
         {
             audioSource.volume = footstepVolume;
-            audioSource.pitch = footstepPitch + UnityEngine.Random.Range(-0.05f, 0.05f);
+            audioSource.pitch = footstepPitch + UnityEngine.Random.Range(-0.1f, 0.1f);
             audioSource.PlayOneShot(footstep);
         }
     }
@@ -689,11 +802,28 @@ public class EnemyAI : MonoBehaviour
     public void Listen()
     {
         listening = true;
+        float newHeartbeatVolume = baseHeartbeatVolume + 0.2f;
+        if (newHeartbeatVolume >= 1f) newHeartbeatVolume = 1f;
+        heartbeatAudioSource.volume = newHeartbeatVolume;
+        heartbeatAudioSource.pitch = 1.1f;
+    }
+    public void PlayInspectSound()
+    {
+        PlayRandomInspectSound();
+    }
+    private void PlayRandomInspectSound()
+    {
+        AudioClip randomSound = inspectSounds[UnityEngine.Random.Range(0, inspectSounds.Length)];
+        float randomPitch = 1f + UnityEngine.Random.Range(-0.1f, 0.1f);
+        AudioManager.Instance.PlayAudioClip(randomSound, transform.position, 0.1f, false, randomPitch);
     }
     public void StopListen()
     {
+        heartbeatAudioSource.volume = baseHeartbeatVolume;
+        heartbeatAudioSource.pitch = 1f;
         listening = false;
     }
+
 
     private List<DoorOpener> GetDoorsInRadius(float radius)
     {

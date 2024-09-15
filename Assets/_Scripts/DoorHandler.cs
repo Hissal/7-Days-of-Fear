@@ -137,11 +137,12 @@ public class DoorHandler : MonoBehaviour
 
             if (playerDistanceToDoor < 0.2f)
             {
-                UseXAxis();
+                dragPointGameobject.transform.position += transform.forward * 0.25f;
+                UseZAxis();
             }
             else
             {
-                if (Mathf.Abs(dotProductOfPlayerPositionAndDoor) > 0.65f)
+                if (Mathf.Abs(dotProductOfPlayerPositionAndDoor) > 0.6f)
                 {
                     UseXAxis();
                 }

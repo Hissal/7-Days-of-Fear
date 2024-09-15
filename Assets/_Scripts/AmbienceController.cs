@@ -21,12 +21,23 @@ public class AmbienceController : MonoBehaviour
 
     public static AmbienceController Instance;
 
+    private Coroutine ambienceFadingRoutine = null;
+    private Coroutine enemyAtmosphereFadingRoutine = null;
+
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
         else
             Destroy(gameObject);
+    }
+
+    private void Start()
+    {
+        enemyActiveAtmosphereAudioSource.clip = enemyActiveAtmosphere;
+        enemyActiveAtmosphereAudioSource.loop = true;
+        enemyActiveAtmosphereAudioSource.volume = 0f;
+        enemyActiveAtmosphereAudioSource.Play();
     }
 
     private void OnEnable()
@@ -41,11 +52,13 @@ public class AmbienceController : MonoBehaviour
 
     public void FadeInScaryAtmosphere()
     {
-        StartCoroutine(FadeInScaryAtmosphereRoutine());
+        if (enemyAtmosphereFadingRoutine != null) StopCoroutine(enemyAtmosphereFadingRoutine);
+        enemyAtmosphereFadingRoutine = StartCoroutine(FadeInScaryAtmosphereRoutine());
     }
     public void FadeOutScaryAtmosphere()
     {
-        StartCoroutine(FadeOutScaryAtmosphereRoutine());
+        if (enemyAtmosphereFadingRoutine != null) StopCoroutine(enemyAtmosphereFadingRoutine);
+        enemyAtmosphereFadingRoutine = StartCoroutine(FadeOutScaryAtmosphereRoutine());
     }
 
     private IEnumerator FadeInScaryAtmosphereRoutine()
@@ -146,7 +159,8 @@ public class AmbienceController : MonoBehaviour
     /// <param name="fadeEaseLength">The duration of the fade out effect.</param>
     public void FadeOutAmbience(float fadeEaseLength)
     {
-        StartCoroutine(FadeOutAmbienceCoroutine(fadeEaseLength));
+        if (ambienceFadingRoutine != null) StopCoroutine(ambienceFadingRoutine);
+        ambienceFadingRoutine = StartCoroutine(FadeOutAmbienceCoroutine(fadeEaseLength));
     }
 
     /// <summary>
@@ -155,7 +169,8 @@ public class AmbienceController : MonoBehaviour
     /// <param name="fadeEaseLength">The duration of the fade in effect.</param>
     public void FadeInAmbience(float fadeEaseLength)
     {
-        StartCoroutine(FadeInAmbienceCoroutine(fadeEaseLength));
+        if (ambienceFadingRoutine != null) StopCoroutine(ambienceFadingRoutine);
+        ambienceFadingRoutine = StartCoroutine(FadeInAmbienceCoroutine(fadeEaseLength));
     }
 
     private IEnumerator FadeOutAmbienceCoroutine(float fadeEaseLength)
@@ -175,10 +190,11 @@ public class AmbienceController : MonoBehaviour
     private IEnumerator FadeInAmbienceCoroutine(float fadeEaseLength)
     {
         float fadeInTimer = 0f;
+        float currentVolume = audioSources[0].volume;
         while (fadeInTimer < fadeEaseLength)
         {
             fadeInTimer += Time.deltaTime;
-            float volume = Mathf.Lerp(0f, defaultVolume, fadeInTimer / fadeEaseLength);
+            float volume = Mathf.Lerp(currentVolume, defaultVolume, fadeInTimer / fadeEaseLength);
             SetVolume(volume);
             yield return null;
         }
@@ -192,7 +208,8 @@ public class AmbienceController : MonoBehaviour
     /// <param name="desiredVolume">The desired volume to lerp to.</param>
     public void LerpAmbienceVolume(float lerpingDuration, float desiredVolume)
     {
-        StartCoroutine(LerpAmbienceVolumeCoroutine(lerpingDuration, desiredVolume));
+        if (ambienceFadingRoutine != null) StopCoroutine(ambienceFadingRoutine);
+        ambienceFadingRoutine = StartCoroutine(LerpAmbienceVolumeCoroutine(lerpingDuration, desiredVolume));
     }
     /// <summary>
     /// Lerps the volume of the ambience audio over 0.5 seconds to the desired volume.

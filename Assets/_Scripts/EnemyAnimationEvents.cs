@@ -22,4 +22,10 @@ public class EnemyAnimationEvents : MonoBehaviour
         Debug.Log("EnemyStopListen");
         enemyAI.StopListen();
     }
+
+    public void PlayInspectSound()
+    {
+        Debug.Log("PlayInspectSound");
+        enemyAI.PlayInspectSound();
+    }
 }

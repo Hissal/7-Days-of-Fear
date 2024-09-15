@@ -50,6 +50,7 @@ public class LightFlicker : MonoBehaviour
         }
 
         lightIntenisty = light.intensity;
+        flickerMaxIntensity = light.intensity;
         TurnOffLight();
     }
 
@@ -143,8 +144,9 @@ public class LightFlicker : MonoBehaviour
     {
         light.intensity = 0f;
     }
-    public void TurnOnLight()
+    public void TurnOnLight(bool flicker = false)
     {
+        if (flicker) this.flicker = true;
         light.intensity = lightIntenisty;
     }
 }

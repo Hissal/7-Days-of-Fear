@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
 
 public class MentalHealth : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class MentalHealth : MonoBehaviour
     [SerializeField] private Color highMentalHealthColor;
     [SerializeField] private Color lowMentalHealthColor;
     [SerializeField] private Color takeDamageColor;
+    [SerializeField] private Color healColor;
 
     public event Action OnMentalHealthReachZero = delegate { };
     public event Action<float> OnMentalHealthIncrease = delegate { };
@@ -42,6 +44,8 @@ public class MentalHealth : MonoBehaviour
     public bool mentalHealthDrainagePauseManual;
 
     public bool fading;
+
+    [SerializeField] private Volume volume;
 
     IEnumerator FailureCheckerLoop()
     {
@@ -151,8 +155,10 @@ public class MentalHealth : MonoBehaviour
     /// </summary>
     /// <param name="amount">The amount to increase the mental health by.</param>
     /// <returns>The updated value of the current mental health.</returns>
-    public float IncreaseMentalHealth(float amount)
+    public float IncreaseMentalHealth(float amount, bool task = false)
     {
+        if (task) StartCoroutine(HealRoutine());
+
         currentMentalHealth += amount;
         if (currentMentalHealth > maxMentalhealth) currentMentalHealth = maxMentalhealth;
         OnMentalHealthIncrease?.Invoke(currentMentalHealth);
@@ -187,11 +193,18 @@ public class MentalHealth : MonoBehaviour
         if (fading) return;
 
         float mentalHealthPrecentage = currentMentalHealth / maxMentalhealth;
+        if (currentMentalHealth <= 0f)
+        {
+            mentalHealthPrecentage = 0f;
+        }
+
         bar.color = Color.Lerp(lowMentalHealthColor, highMentalHealthColor, mentalHealthPrecentage);
+        volume.weight = Mathf.Lerp(0, 1, mentalHealthPrecentage);
     }
 
     private IEnumerator DamageFadeRoutine()
     {
+        if (fading) yield break;
         fading = true;
 
         Color originalColor = bar.color;
@@ -213,6 +226,35 @@ public class MentalHealth : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / fadeDuration;
             bar.color = Color.Lerp(takeDamageColor, originalColor, t);
+            yield return null;
+        }
+
+        fading = false;
+    }
+    private IEnumerator HealRoutine()
+    {
+        if (fading) yield break;
+        fading = true;
+
+        Color originalColor = bar.color;
+        float elapsedTime = 0f;
+        float fadeDuration = 0.05f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / fadeDuration;
+            bar.color = Color.Lerp(originalColor, healColor, t);
+            yield return null;
+        }
+
+        elapsedTime = 0f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / fadeDuration;
+            bar.color = Color.Lerp(healColor, originalColor, t);
             yield return null;
         }
 
