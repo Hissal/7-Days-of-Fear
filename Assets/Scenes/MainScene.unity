@@ -11479,7 +11479,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.018733226, y: 0.08749473, z: 0.08749473}
+  m_Size: {x: 0.018733226, y: 0.13, z: 0.13}
   m_Center: {x: 0.0093665905, y: 0, z: 0}
 --- !u!23 &582087816
 MeshRenderer:
@@ -17090,7 +17090,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.018986247, y: 0.08749473, z: 0.08749473}
+  m_Size: {x: 0.018986247, y: 0.13, z: 0.13}
   m_Center: {x: 0.009493101, y: 0, z: 0}
 --- !u!23 &787172567
 MeshRenderer:
@@ -20162,6 +20162,21 @@ PrefabInstance:
         type: 3}
       propertyPath: interactionDistance
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2703034439095660748, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
+        type: 3}
+      propertyPath: interactionRayPoint.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2703034439095660748, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
+        type: 3}
+      propertyPath: interactionRayPoint.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2703034439095660748, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
+        type: 3}
+      propertyPath: interactionLayer.m_Bits
+      value: 1655
       objectReference: {fileID: 0}
     - target: {fileID: 2742297059435724067, guid: 572ff5f8a3a42437b8f5fcc4a06a5503,
         type: 3}
@@ -23856,7 +23871,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.08749474, y: 0.08749473, z: 0.019581819}
+  m_Size: {x: 0.08749474, y: 0.13, z: 0.13}
   m_Center: {x: 0, y: 0, z: -0.009790885}
 --- !u!23 &1080754420
 MeshRenderer:
@@ -39842,7 +39857,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.08749474, y: 0.08749473, z: 0.019581819}
+  m_Size: {x: 0.08749474, y: 0.13, z: 0.13}
   m_Center: {x: 0, y: 0, z: -0.009790885}
 --- !u!23 &1755502221
 MeshRenderer:
@@ -45998,7 +46013,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.018733226, y: 0.08749473, z: 0.08749473}
+  m_Size: {x: 0.018733226, y: 0.13, z: 0.13}
   m_Center: {x: 0.0093665905, y: 0, z: 0}
 --- !u!23 &2022223210
 MeshRenderer:
@@ -48484,6 +48499,11 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 3cfb9cb358228da439a17d3bbf966cd6, type: 3}
     - target: {fileID: 7042858721923107371, guid: 71f86cc49a75bca49b12bc5546897ea9,
         type: 3}
+      propertyPath: m_Radius
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7042858721923107371, guid: 71f86cc49a75bca49b12bc5546897ea9,
+        type: 3}
       propertyPath: m_IsTrigger
       value: 1
       objectReference: {fileID: 0}
@@ -49724,6 +49744,21 @@ PrefabInstance:
       propertyPath: m_ColorTemperature
       value: 4178
       objectReference: {fileID: 0}
+    - target: {fileID: 9187828089641176211, guid: ded0528ffe0eb4e54a3d61f1ac882ce3,
+        type: 3}
+      propertyPath: m_Size.z
+      value: 0.4067429
+      objectReference: {fileID: 0}
+    - target: {fileID: 9187828089641176211, guid: ded0528ffe0eb4e54a3d61f1ac882ce3,
+        type: 3}
+      propertyPath: m_Center.y
+      value: -0.000000014901163
+      objectReference: {fileID: 0}
+    - target: {fileID: 9187828089641176211, guid: ded0528ffe0eb4e54a3d61f1ac882ce3,
+        type: 3}
+      propertyPath: m_Center.z
+      value: -0.20405585
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -50002,6 +50037,11 @@ PrefabInstance:
       propertyPath: audiSourcesToTurnOffOnKill.Array.data[1]
       value: 
       objectReference: {fileID: 68394849}
+    - target: {fileID: 5838895406554261807, guid: c47431bf4d9e2461796c620d960afaee,
+        type: 3}
+      propertyPath: mentalHealthIncreasePerSecondWhenPlayerNotInSight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6417743520833474577, guid: c47431bf4d9e2461796c620d960afaee,
         type: 3}
       propertyPath: m_Name

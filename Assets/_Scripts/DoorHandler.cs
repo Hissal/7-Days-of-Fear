@@ -130,19 +130,21 @@ public class DoorHandler : MonoBehaviour
             Vector2 playerDirectionFromDoor = (Vector2XZFromVector3(transform.position) - Vector2XZFromVector3(selectedDoor.position)).normalized;
             float dotProductOfPlayerPositionAndDoor = Vector2.Dot(doorFacing, playerDirectionFromDoor);
 
-            float playerDistanceToDoor = Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(selectedDoor.parent.transform.position));
+            float playerDistanceToDoorParent = Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(selectedDoor.parent.transform.position));
             float dragPointDistanceToDoor = Vector2.Distance(Vector2XZFromVector3(dragPointGameobject.transform.position), Vector2XZFromVector3(selectedDoor.parent.transform.position));
+            float playerDistanceToDoorCenter = Vector2.Distance(Vector2XZFromVector3(transform.position), Vector2XZFromVector3(doorCenter));
 
             //print($"DistX: {xDist} DistZ: {zDist} forward: {selectedDoor.parent.forward} DotProduct: {Vector2.Dot(doorFacing, playerDirectionFromDoor)}");
 
-            if (playerDistanceToDoor < 0.2f)
+            if (playerDistanceToDoorCenter < 0.4f)
             {
-                dragPointGameobject.transform.position += transform.forward * 0.25f;
+                dragPointGameobject.transform.position += transform.forward * 0.41f;
                 UseZAxis();
+                print("CloseToDoor");
             }
             else
             {
-                if (Mathf.Abs(dotProductOfPlayerPositionAndDoor) > 0.6f)
+                if (Mathf.Abs(dotProductOfPlayerPositionAndDoor) > 0.69f)
                 {
                     UseXAxis();
                 }
@@ -171,13 +173,14 @@ public class DoorHandler : MonoBehaviour
 
             joint.motor = motor;
 
-            if (Input.GetMouseButtonUp(0) || playerDistanceToDoor > 4f || dragPointDistanceToDoor > 4)
+            if (Input.GetMouseButtonUp(0) || playerDistanceToDoorParent > 3f || dragPointDistanceToDoor > 4f)
             {
                 ReleaseDoor(motor);
             }
 
             void UseXAxis()
             {
+                print("UsingXAxis");
                 Vector3 dragPointDoorPosition = selectedDoor.parent.InverseTransformPoint(dragPointGameobject.transform.position);
                 Vector3 doorCenterPosition = selectedDoor.parent.InverseTransformPoint(doorCenter);
 
@@ -223,6 +226,7 @@ public class DoorHandler : MonoBehaviour
 
             void UseZAxis()
             {
+                print("UsingZAxis");
                 Vector3 dragPointDoorPosition = selectedDoor.parent.InverseTransformPoint(dragPointGameobject.transform.position);
                 Vector3 doorCenterPosition = selectedDoor.parent.InverseTransformPoint(doorCenter);
 
