@@ -152,15 +152,31 @@ public class Bed : Interactable
         // Fade in & out the fade image
         fadeDuration = 2f;
         fadeTimer = 0f;
+        bool flickerSet = false;
         while (fadeTimer < fadeDuration)
         {
             fadeTimer += Time.deltaTime;
             float alpha = Mathf.Lerp(0f, 1f, fadeTimer / fadeDuration);
             blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+
+            if (flickerSet == false && fadeTimer > 1.5f)
+            {
+                flickerSet = true;
+                foreach (var lightFlicker in lightFlickers)
+                {
+                    lightFlicker.flicker = false;
+                }
+            }
+
             yield return null;
         }
 
         yield return new WaitForSeconds(2f);
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightFlicker.flicker = true;
+        }
 
         fadeDuration = 0.25f;
         fadeTimer = 0f;
@@ -177,11 +193,22 @@ public class Bed : Interactable
 
         fadeDuration = 1f;
         fadeTimer = 0f;
+        flickerSet = false;
         while (fadeTimer < fadeDuration)
         {
             fadeTimer += Time.deltaTime;
             float alpha = Mathf.Lerp(0f, 1f, fadeTimer / fadeDuration);
             blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, alpha);
+
+            if (flickerSet == false && fadeTimer > 0.75f)
+            {
+                flickerSet = true;
+                foreach (var lightFlicker in lightFlickers)
+                {
+                    lightFlicker.flicker = false;
+                }
+            }
+
             yield return null;
         }
 
@@ -197,6 +224,11 @@ public class Bed : Interactable
         gameManager.EnableEnemyLastEscape();
 
         questObjective.OnComplete();
+
+        foreach (var lightFlicker in lightFlickers)
+        {
+            lightFlicker.flicker = true;
+        }
 
         fadeDuration = 0.5f;
         fadeTimer = 0f;
@@ -306,10 +338,11 @@ public class Bed : Interactable
 
         yield return new WaitForSeconds(0.5f);
 
+        WakeUp();
         lightSwitch.TurnOnLights();
 
         // Fade out the fade image
-        float fadeOutDuration = 2f;
+        float fadeOutDuration = 0.5f;
         float fadeOutTimer = 0f;
         while (fadeOutTimer < fadeOutDuration)
         {
@@ -322,17 +355,14 @@ public class Bed : Interactable
 
         // Disable the day change screen
         dayChangeScreen.SetActive(false);
-        HUD.SetActive(true);
 
         yield return null;
-
-        WakeUp();
     }
 
     private void WakeUp()
     {
+        HUD.SetActive(true);
         Reticle.ShowReticle_Static();
-        GameManager.Instance.GivePlayerControlBack();
         MentalHealth.Instance.ResumeDrainage();
         MentalHealth.Instance.mentalHealthDrainagePauseManual = false;
         TimeManager.SetTime(TimeManager.day + 1, 6, 30, false, false);

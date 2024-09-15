@@ -86,7 +86,7 @@ public class Task
     {
         active = false;
         OnSuccess.Invoke(this);
-        MentalHealth.Instance.IncreaseMentalHealth(mentalHealthGainedOnSuccess);
+        MentalHealth.Instance.IncreaseMentalHealth(mentalHealthGainedOnSuccess, true);
     }
 
     public void TaskFail()

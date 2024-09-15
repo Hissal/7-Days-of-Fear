@@ -203,12 +203,7 @@ MonoBehaviour:
   - {fileID: 2043683802}
   - {fileID: 431846576}
   - {fileID: 1816512036}
-  - {fileID: 1294567005}
-  - {fileID: 1708325831}
-  - {fileID: 1893410781}
-  - {fileID: 1771880512}
-  - {fileID: 1898055351}
-  - {fileID: 1854446842}
+  - {fileID: 1958758120}
   lightSwitch: {fileID: 997306881}
   cannotSleepSound: {fileID: 8300000, guid: 4d71294d626d8144a9f8a1dde92ac19e, type: 3}
   OnSleepDay7:
@@ -1661,12 +1656,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightSwitches:
   - {fileID: 1080754422}
+  - {fileID: 1755502218}
   - {fileID: 2022223212}
   - {fileID: 787172569}
   - {fileID: 1917864685}
   - {fileID: 1838879737}
   - {fileID: 1623789900}
   - {fileID: 997306881}
+  - {fileID: 582087813}
   questObjective: {fileID: 66036467}
 --- !u!114 &66036467
 MonoBehaviour:
@@ -30383,18 +30380,6 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!114 &1294567005 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 500643008223871917, guid: 2a45a4edc05af4578b29e6e08c29b89d,
-    type: 3}
-  m_PrefabInstance: {fileID: 4721737034888158718}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b72bf22aa83b64aac89d61250b124406, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1297618142
 GameObject:
   m_ObjectHideFlags: 0
@@ -39909,18 +39894,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755502216}
   m_Mesh: {fileID: -8138758123470655829, guid: 20c6a3afc6b604b67ae5e569d47b0e60, type: 3}
---- !u!114 &1771880512 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5538556191221394997, guid: 71f86cc49a75bca49b12bc5546897ea9,
-    type: 3}
-  m_PrefabInstance: {fileID: 1440722241667319143}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b72bf22aa83b64aac89d61250b124406, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!43 &1772447194
 Mesh:
   m_ObjectHideFlags: 0

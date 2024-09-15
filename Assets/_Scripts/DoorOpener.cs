@@ -42,7 +42,7 @@ public class DoorOpener : MonoBehaviour
         if (angleMinAbs > angleMaxAbs) maxAngleAbs = angleMinAbs;
         else maxAngleAbs = angleMaxAbs;
 
-        float precentage = Mathf.Clamp(joint.angle / maxAngleAbs, 0f, 1f);
+        float precentage = Mathf.Clamp(Mathf.Abs(joint.angle) / maxAngleAbs, 0f, 1f);
 
         if (precentage < 0.02f)
         {

@@ -802,7 +802,7 @@ public class EnemyAI : MonoBehaviour
     public void Listen()
     {
         listening = true;
-        float newHeartbeatVolume = baseHeartbeatVolume + 0.2f;
+        float newHeartbeatVolume = baseHeartbeatVolume + 0.25f;
         if (newHeartbeatVolume >= 1f) newHeartbeatVolume = 1f;
         heartbeatAudioSource.volume = newHeartbeatVolume;
         heartbeatAudioSource.pitch = 1.1f;

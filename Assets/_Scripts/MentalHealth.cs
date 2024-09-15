@@ -157,7 +157,7 @@ public class MentalHealth : MonoBehaviour
     /// <returns>The updated value of the current mental health.</returns>
     public float IncreaseMentalHealth(float amount, bool task = false)
     {
-        if (task) StartCoroutine(HealRoutine());
+        if (task) StartCoroutine(HealFadeRoutine());
 
         currentMentalHealth += amount;
         if (currentMentalHealth > maxMentalhealth) currentMentalHealth = maxMentalhealth;
@@ -231,7 +231,7 @@ public class MentalHealth : MonoBehaviour
 
         fading = false;
     }
-    private IEnumerator HealRoutine()
+    private IEnumerator HealFadeRoutine()
     {
         if (fading) yield break;
         fading = true;
