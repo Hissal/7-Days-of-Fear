@@ -199,7 +199,7 @@ public class MentalHealth : MonoBehaviour
         }
 
         bar.color = Color.Lerp(lowMentalHealthColor, highMentalHealthColor, mentalHealthPrecentage);
-        volume.weight = Mathf.Lerp(0, 1, mentalHealthPrecentage);
+        volume.weight = Mathf.Lerp(1f, 0f, mentalHealthPrecentage);
     }
 
     private IEnumerator DamageFadeRoutine()

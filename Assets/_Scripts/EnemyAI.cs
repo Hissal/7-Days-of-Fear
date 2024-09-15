@@ -76,7 +76,7 @@ public class EnemyAI : MonoBehaviour
 
     public bool cantDeactivate { get; private set; } = false;
 
-    private AudioSource staringAudioSource = null;
+    //private AudioSource staringAudioSource = null;
 
     private float movementSpeedMultiplier = 1f;
     [SerializeField] private float movementSpeedMultiplierScalingSpeed = 0.01f;

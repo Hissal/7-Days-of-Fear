@@ -18130,8 +18130,8 @@ MonoBehaviour:
   - {fileID: 1743953935}
   mentalHealthGainedDay1: 0
   mentalHealthGainedDay2: 0
-  mentalHealthGainedDay3: 10
-  mentalHealthGainedDay4: 10
+  mentalHealthGainedDay3: 50
+  mentalHealthGainedDay4: 25
   mentalHealthGainedDay5: 10
   mentalHealthGainedDay6: 0
   mentalHealthGainedDay7: -10
@@ -47013,6 +47013,14 @@ PlayableDirector:
     value: {fileID: 0}
   - key: {fileID: -1550104324590679261, guid: b7c6c3549fe5bcc44bfbf311b8d241d5, type: 2}
     value: {fileID: 0}
+  - key: {fileID: -8193065219200986348, guid: b7c6c3549fe5bcc44bfbf311b8d241d5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -522401871900379083, guid: b7c6c3549fe5bcc44bfbf311b8d241d5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -6864923071012721960, guid: b7c6c3549fe5bcc44bfbf311b8d241d5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -3507277549889230857, guid: b7c6c3549fe5bcc44bfbf311b8d241d5, type: 2}
+    value: {fileID: 0}
   m_ExposedReferences:
     m_References:
     - 6ebc8f019d56590469857e36eca58f09: {fileID: 2082891078}
@@ -47441,6 +47449,41 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2062322667}
     m_Modifications:
+    - target: {fileID: 6444884970314718507, guid: c2169791a698d46b7bd3be65e50f83e4,
+        type: 3}
+      propertyPath: speedOnDay1
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 6444884970314718507, guid: c2169791a698d46b7bd3be65e50f83e4,
+        type: 3}
+      propertyPath: speedOnDay2
+      value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 6444884970314718507, guid: c2169791a698d46b7bd3be65e50f83e4,
+        type: 3}
+      propertyPath: speedOnDay3
+      value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 6444884970314718507, guid: c2169791a698d46b7bd3be65e50f83e4,
+        type: 3}
+      propertyPath: speedOnDay4
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 6444884970314718507, guid: c2169791a698d46b7bd3be65e50f83e4,
+        type: 3}
+      propertyPath: speedOnDay5
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6444884970314718507, guid: c2169791a698d46b7bd3be65e50f83e4,
+        type: 3}
+      propertyPath: speedOnDay6
+      value: 550
+      objectReference: {fileID: 0}
+    - target: {fileID: 6444884970314718507, guid: c2169791a698d46b7bd3be65e50f83e4,
+        type: 3}
+      propertyPath: speedOnDay7
+      value: 600
+      objectReference: {fileID: 0}
     - target: {fileID: 6892960802587610672, guid: c2169791a698d46b7bd3be65e50f83e4,
         type: 3}
       propertyPath: m_Name

@@ -32,6 +32,9 @@ public class PrecisionBar : TaskAction
     [SerializeField] private AudioClip successSound;
     [SerializeField] private AudioClip failSound;
 
+    private CanvasScaler canvasScaler;
+
+
     private GameManager gameManager;
 
     private void OnEnable()
@@ -46,6 +49,7 @@ public class PrecisionBar : TaskAction
     void Start()
     {
         referenceResolutionWidth = transform.parent.parent.GetComponent<CanvasScaler>().referenceResolution.x;
+        canvasScaler = transform.parent.parent.GetComponent<CanvasScaler>();
         gameManager = GameManager.Instance;
 
         DisableTaskAction();
@@ -183,8 +187,8 @@ public class PrecisionBar : TaskAction
 
     private void MovePointer()
     {
-        // Normalize the move amount based on screen width and reference resolution width
-        float normalizedSpeed = pointerSpeed * (Screen.width / referenceResolutionWidth);
+        // Use the scaleFactor to normalize the speed
+        float normalizedSpeed = pointerSpeed / canvasScaler.scaleFactor;
         float moveAmount = normalizedSpeed * Time.deltaTime * pointerDirection;
 
         // Update the pointer position
