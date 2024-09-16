@@ -105,6 +105,8 @@ public class Bed : Interactable
     {
         GameManager gameManager = GameManager.Instance;
         gameManager.TakeAwayPlayerControl();
+        MentalHealth.Instance.mentalHealthDrainagePauseManual = true;
+        MentalHealth.Instance.PauseDrainage();
 
         // Set the initial alpha value of the fade image and text to 0
         blackFader.color = new Color(blackFader.color.r, blackFader.color.g, blackFader.color.b, 0f);
@@ -220,6 +222,8 @@ public class Bed : Interactable
         //playerTransform.rotation = playerSpawnPoint.rotation;
         gameManager.playerController.ResetCamera();
         gameManager.GivePlayerControlBack();
+        MentalHealth.Instance.mentalHealthDrainagePauseManual = false;
+        MentalHealth.Instance.ResumeDrainage();
 
         gameManager.EnableEnemyLastEscape();
 

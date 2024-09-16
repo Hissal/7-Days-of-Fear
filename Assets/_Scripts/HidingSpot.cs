@@ -37,4 +37,18 @@ public class HidingSpot : MonoBehaviour
             onPlayerExit?.Invoke(this);
         }
     }
+
+    public Transform GetFront()
+    {
+        return front;
+    }
+
+    public Vector3 GetFrontPosition()
+    {
+        return front.position;
+    }
+    public Quaternion GetFrontRotation()
+    {
+        return front.rotation;
+    }
 }

@@ -140,7 +140,7 @@ public class DoorHandler : MonoBehaviour
             {
                 dragPointGameobject.transform.position += transform.forward * 0.41f;
                 UseZAxis();
-                print("CloseToDoor");
+                //print("CloseToDoor");
             }
             else
             {
@@ -180,7 +180,7 @@ public class DoorHandler : MonoBehaviour
 
             void UseXAxis()
             {
-                print("UsingXAxis");
+                //print("UsingXAxis");
                 Vector3 dragPointDoorPosition = selectedDoor.parent.InverseTransformPoint(dragPointGameobject.transform.position);
                 Vector3 doorCenterPosition = selectedDoor.parent.InverseTransformPoint(doorCenter);
 
@@ -226,7 +226,7 @@ public class DoorHandler : MonoBehaviour
 
             void UseZAxis()
             {
-                print("UsingZAxis");
+                //print("UsingZAxis");
                 Vector3 dragPointDoorPosition = selectedDoor.parent.InverseTransformPoint(dragPointGameobject.transform.position);
                 Vector3 doorCenterPosition = selectedDoor.parent.InverseTransformPoint(doorCenter);
 

@@ -163,8 +163,8 @@ public class GameManager : MonoBehaviour
         int dayToLoad = PlayerPrefs.GetInt("DayToLoad");
         print("StartGame, Day: " + dayToLoad);
 
-        dayToLoad = 3;
-        PlayerPrefs.SetInt("Retry", 1);
+        //dayToLoad = 3;
+        //PlayerPrefs.SetInt("Retry", 1);
 
         if (dayToLoad != 1)
         {
@@ -398,17 +398,17 @@ public class GameManager : MonoBehaviour
 
         if (enemyAI.active) return;
 
+        float extraGracePerioid = 0f;
+
         if (enemyFirstAppearance && PlayerPrefs.GetInt("Hidden") == 0)
         {
             PlayerPrefs.SetInt("Hidden", 1);
-            StartCoroutine(EnableEnemyWithDelay());
             QuestSystem.Instance.PauseCurrentQuest("HIDE!");
             enemyFirstAppearance = false;
+            extraGracePerioid = 1f;
         }
-        else
-        {
-            enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false);
-        }
+
+        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false, extraGracePerioid);
 
         StartCoroutine(FlickerAllLights());
 
@@ -418,11 +418,6 @@ public class GameManager : MonoBehaviour
 
         enemyActive = true;
     }
-    IEnumerator EnableEnemyWithDelay()
-    {
-        yield return new WaitForSeconds(1f);
-        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, false);
-    }
 
     public void EnableEnemyLastEscape()
     {
@@ -430,7 +425,7 @@ public class GameManager : MonoBehaviour
 
         if (enemyAI.active) return;
 
-        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, true);
+        enemyAI.Activate(enemySpawnPosition.position, enemySpawnPosition.rotation, true, 0.5f);
 
         MentalHealth.Instance.PauseDrainage();
 

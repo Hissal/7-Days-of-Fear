@@ -7,6 +7,7 @@ public class TimeManager : MonoBehaviour
     private static TimeManager instance;
     void Awake()
     {
+        Debug.Log("Creating TimeManager Instance");
         instance = this;
     }
 

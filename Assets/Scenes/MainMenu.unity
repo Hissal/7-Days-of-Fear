@@ -3979,6 +3979,13 @@ MonoBehaviour:
   star3: {fileID: 437653261}
   star4: {fileID: 974838354}
   star5: {fileID: 467204025}
+  backGround: {fileID: 1710169510}
+  bg1: {fileID: 21300000, guid: be683090b9f950d4aa38262594f04c1a, type: 3}
+  bg2: {fileID: 21300000, guid: 4ff9ab34e5162874a905fa94d502b14b, type: 3}
+  bg3: {fileID: 21300000, guid: c500d3c8f700df44daf9d216eacf351f, type: 3}
+  bgNoiseSource: {fileID: 2140312783}
+  bgNoise1: {fileID: 8300000, guid: 3f313ade6ed41db46944b8210e2dc385, type: 3}
+  bgNoise2: {fileID: 8300000, guid: a5be1e25e8e11564fa80336905aa739d, type: 3}
 --- !u!4 &2140312782
 Transform:
   m_ObjectHideFlags: 0

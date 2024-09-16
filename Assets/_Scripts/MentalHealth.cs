@@ -7,6 +7,23 @@ using UnityEngine.Rendering;
 
 public class MentalHealth : MonoBehaviour
 {
+    public static MentalHealth Instance;
+    private void Awake()
+    {
+        currentMentalHealth = maxMentalhealth;
+        UpdateVisual();
+
+        if (Instance != null)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            Debug.Log("Creating MentalHealth Instance");
+            Instance = this;
+        }
+    }
+
     [SerializeField] private Image bar;
     [field: SerializeField] public float maxMentalhealth { get; private set; }
     public float currentMentalHealth { get; private set;}
@@ -54,12 +71,16 @@ public class MentalHealth : MonoBehaviour
             yield return new WaitForSeconds(5f);
             if (GameManager.Instance.enemyActive || mentalHealthDrainagePauseManual)
             {
+                Debug.Log("Pausing Drainage In FailureCheckerLoop");
                 PauseDrainage();
             }
             else
             {
+                Debug.Log("Resuming Drainage In FailureCheckerLoop");
                 ResumeDrainage();
             }
+
+            Debug.Log("MentalHealth Drainage Paused = " + paused + "Drainage is set to: " + mentalHealthDrainPerSecond);
         }
     }
 
@@ -259,22 +280,5 @@ public class MentalHealth : MonoBehaviour
         }
 
         fading = false;
-    }
-
-    public static MentalHealth Instance;
-
-    private void Awake()
-    {
-        currentMentalHealth = maxMentalhealth;
-        UpdateVisual();
-
-        if (Instance != null)
-        {
-            Destroy(this.gameObject);
-        }
-        else
-        {
-            Instance = this;
-        }
     }
 }

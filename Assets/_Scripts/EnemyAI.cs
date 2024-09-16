@@ -89,12 +89,16 @@ public class EnemyAI : MonoBehaviour
 
     private void OnEnable()
     {
+        if (MentalHealth.Instance == null) Debug.Log("MentalHealht.Instance is null");
+        Debug.Log("MentalHealth Instance = " + MentalHealth.Instance);
         MentalHealth.Instance.OnMentalHealthIncrease += MentalHealthIncreased;
         TimeManager.OnDayChanged += SetMentalHealthRequiredToGoAway;
     }
 
     private void SetMentalHealthRequiredToGoAway(int day)
     {
+        Debug.Log("SettingMentalHealthToGoAway with Day: " + day);
+
         switch (day)
         {
             case 1:
@@ -121,6 +125,8 @@ public class EnemyAI : MonoBehaviour
             default:
                 break;
         }
+
+        Debug.Log("Set MentalHealthToGoAway to: " + mentalHealthToGoAway);
     }
 
     private void MentalHealthIncreased(float currentMentalHealth)
@@ -143,35 +149,47 @@ public class EnemyAI : MonoBehaviour
         if (agent == null) agent = GetComponent<NavMeshAgent>();
         InvokeRepeating("TickDoorClosetOpenChance", 0f, 0.2f);
     }
-    public void Activate(Vector3 position, Quaternion rotation, bool cantDeactivate)
+    public void Activate(Vector3 position, Quaternion rotation, bool cantDeactivate, float extraGracePerioid = 0f)
     {
+        Debug.Log("EnemyAI.Activate");
         this.cantDeactivate = cantDeactivate;
         if (active) return;
+        float gracePerioid = this.gracePerioid + extraGracePerioid;
+        Debug.Log("Activate EnemyAI with gracePerioid of: " + gracePerioid + " seconds");
         agent.enabled = true;
         timeBeforeLeave = maxWanderTimeBeforeLeave;
 
         StopAllCoroutines();
-
         SetPosition(position);
-
-        StartCoroutine(ActivateDelay());
+        SnapshotPlayerPosition();
 
         AudioManager.Instance.PlayAudioClip(spawnInSound, transform.position, 0.25f);
+        StartCoroutine(ActivateDelay(gracePerioid));
     }
-    IEnumerator ActivateDelay()
+    IEnumerator ActivateDelay(float delay)
     {
-        yield return new WaitForSeconds(gracePerioid);
+        yield return new WaitForSeconds(delay);
         movementSpeedMultiplier = 1f;
         UnStun(false);
-        SnapshotPlayerPosition();
-        State = EnemyState.ChasingPlayer;
-        StartCoroutine(MoveToPlayerSnapshot());
+
+        if (playersCurrentHidingSpot != null)
+        {
+            PlayerEnteredHidingSpot(playersCurrentHidingSpot.GetFront(), playersCurrentHidingSpot);
+        }
+        else
+        {
+            State = EnemyState.ChasingPlayer;
+            StartCoroutine(MoveToPlayerSnapshot());
+        }
+
         active = true;
     }
 
     public void Disable(Vector3 position)
     {
+        Debug.Log("EnemyAI.Disable()");
         if (cantDeactivate) return;
+        Debug.Log("Disabling Enemy");
 
         StopAllCoroutines();
         State = EnemyState.Stunned;
@@ -427,7 +445,7 @@ public class EnemyAI : MonoBehaviour
     private void TickDoorClosetOpenChance()
     {
         int randomChance = UnityEngine.Random.Range(0, 100);
-        if (randomChance < 3) slamClosetDoorOpen = true;
+        if (randomChance < 4) slamClosetDoorOpen = true;
         else slamClosetDoorOpen = false;
     }
 
@@ -723,7 +741,7 @@ public class EnemyAI : MonoBehaviour
             {
                 // Rotate to toward closet
                 //print("Rotating to: " + desiredRotation.eulerAngles);
-                float precentageDone = Mathf.Clamp(timeStaring * 2, 0f, 1f);
+                float precentageDone = Mathf.Clamp(timeStaring * 1.33f, 0f, 1f);
                 
                 transform.rotation = Quaternion.Lerp(startRotation, desiredRotation, precentageDone);
                 if (transform.rotation == desiredRotation) doneRotating = true;
@@ -866,7 +884,7 @@ public class EnemyAI : MonoBehaviour
     {
         AudioClip randomSound = inspectSounds[UnityEngine.Random.Range(0, inspectSounds.Length)];
         float randomPitch = 1f + UnityEngine.Random.Range(-0.1f, 0.1f);
-        AudioManager.Instance.PlayAudioClip(randomSound, transform.position, 0.1f, false, randomPitch);
+        AudioManager.Instance.PlayAudioClip(randomSound, transform.position, 0.075f, false, randomPitch);
     }
     public void StopListen()
     {
